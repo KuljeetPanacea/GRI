@@ -337,7 +337,7 @@ async allAssesmentStakeholders(id: string) {
       assessment = (await this.AssessmentTaskDAO.findById(assesmentId))
         .questionnaire;
       questionnaire = assessment;
-    } else if (roles.includes("AEPoC")) {
+    } else if (roles.includes("ClientPoC")) {
       assessment = (await this.projectService.getProjectById(projectId))
         .scopingQSTRNRData;
       questionnaire = assessment.find((q) => q.id === questionnaireId);

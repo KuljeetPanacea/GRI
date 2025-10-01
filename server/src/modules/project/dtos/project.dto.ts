@@ -35,7 +35,7 @@ import { cdeDocument } from "./cdeDocx";
 
   @IsString()
   @IsOptional()
-  QSA?: string;
+  Auditor?: string;
 
   @IsString()
   @IsOptional()

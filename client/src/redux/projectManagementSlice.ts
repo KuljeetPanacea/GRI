@@ -515,7 +515,7 @@ export const selectFilteredProjects = (state: {
       projectStage === "All" || project.currentAuditStage === projectStage;
     const matchesQsa =
       qsa === "All" ||
-      project.assignedTo?.find((entity) => entity.role === "QSA")?.id === qsa;
+      project.assignedTo?.find((entity) => entity.role === "Auditor")?.id === qsa;
     
     // Filter by compliance type
     const matchesComplianceType = complianceType

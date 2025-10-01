@@ -108,7 +108,7 @@ const ProjectManagementGridView: React.FC<{ showSnackbar: (msg: string, severity
               <Divider />
               <Box className={styles.data}>
                 <Typography variant="body2">
-                  QSA: {project.assignedTo?.find((entity) => entity.role === "QSA")?.name}
+                  Auditor: {project.assignedTo?.find((entity) => entity.role === "Auditor")?.name}
                 </Typography>
               </Box>
               <Box className={styles.data}>

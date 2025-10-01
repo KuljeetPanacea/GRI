@@ -4,11 +4,11 @@ export interface AuthenticatedRequest extends Request {
 
 export enum RolesEnum {
   SuperAdmin = "SuperAdmin",
-  Admin = "Admin",
-  QSA = "QSA",
+  ProjectManager = "ProjectManager",
+  Auditor = "Auditor",
   QA = "QA",
   AELeadership = "AELeadership",
-  AEPoC = "AEPoC",
+  ClientPoC = "ClientPoC",
   AEStakeholder = "AEStakeholder",
 }
   

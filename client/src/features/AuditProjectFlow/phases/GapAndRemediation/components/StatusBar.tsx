@@ -96,7 +96,7 @@ const StatusBar = ({ totalNoOfGaps, PendingClient, PendingQsa }: { totalNoOfGaps
         
         <div className={styles.qsaLabel}>
           <div className={styles.percentageQsa}>{qsaPercentage}%</div>
-          <div className={styles.labelText}>pending QSA</div>
+          <div className={styles.labelText}>pending Auditor</div>
         </div>
       </div>
       
@@ -111,7 +111,7 @@ const StatusBar = ({ totalNoOfGaps, PendingClient, PendingQsa }: { totalNoOfGaps
         <div className={styles.legendItem}>
           <div className={styles.legendColorQsa}></div>
           <span className={styles.legendText}>
-            {pendingQSA} pending QSA ({qsaPercentage}%)
+            {pendingQSA} pending Auditor ({qsaPercentage}%)
           </span>
         </div>
       </div>

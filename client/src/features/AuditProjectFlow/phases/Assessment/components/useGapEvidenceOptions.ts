@@ -19,7 +19,7 @@ export const useGapEvidenceOptions = () => {
     "Yet to send",
     "Resolved",
     "Pending Client",
-    "Pending QSA",
+    "Pending Auditor",
   ]);
 
   const fetchEvidenceOptions = async () => {

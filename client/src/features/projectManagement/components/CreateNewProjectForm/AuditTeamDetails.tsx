@@ -20,12 +20,12 @@ const AuditTeamDetails: React.FC<ProjectDetailsProps> = ({
   handleChange,
 }) => {
   const axiosInstance = useAxios();
-  const [QSA, setQSA] = useState<DropdownOption[]>([]);
+  const [Auditor, setAuditor] = useState<DropdownOption[]>([]);
   const [QA, setQA] = useState<DropdownOption[]>([]);
   useEffect(() => {
     const fetchQSA = async () => {
       try {
-        const responseOfQSA = await getUserByRole(axiosInstance, "QSA");
+        const responseOfQSA = await getUserByRole(axiosInstance, "Auditor");
         const responseofQA = await getUserByRole(axiosInstance, "QA");
         const responseAELeadership = await getUserByRole(axiosInstance, "AELeadership");
 
@@ -64,10 +64,10 @@ const AuditTeamDetails: React.FC<ProjectDetailsProps> = ({
       }
     }
 
-        setQSA(QSAvalues);
+        setAuditor(QSAvalues);
         setQA(QAvalues);
       } catch (error) {
-        console.error("Error fetching QSA:", error);
+        console.error("Error fetching Auditor:", error);
       }
     };
     fetchQSA();
@@ -88,13 +88,13 @@ const AuditTeamDetails: React.FC<ProjectDetailsProps> = ({
   return (
     <div className={styles.teamDetails}>
       <SelectDropdown
-        options={QSA}
+        options={Auditor}
         value={
-          formData.assignedTo?.find((entity) => entity.role === "QSA")?.id || ""
+          formData.assignedTo?.find((entity) => entity.role === "Auditor")?.id || ""
         }
-        title="QSA (Qualified Security Assessor)"
+        title="Auditor (Qualified Security Assessor)"
         onChange={(event) => {
-          handleAssignChange("QSA", event.target.value, QSA);
+          handleAssignChange("Auditor", event.target.value, Auditor);
         }}
       />
       <SelectDropdown
