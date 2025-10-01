@@ -1,0 +1,78 @@
+.dialogHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 14px 20px;
+  }
+  
+  .dialogTitle {
+    font-weight: bold;
+  }
+  
+  .dialogContent {
+    padding: 22px;
+  }
+  
+  .formRow {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+  }
+  
+  .formField {
+    width: calc(50% - 12px);
+  }
+  
+  .formFieldLabel {
+    margin-bottom: 8px;
+  }
+  
+  .selectDropdown {
+    border-radius: 8px;
+    width: 70%;
+  }
+  
+  .addButtonWrapper {
+    margin-top: 32px;
+  }
+  
+  .addButton {
+    background-color: #e4244c;
+    color: white;
+    border: none;
+    border-radius: 32px;
+    padding: 10px 40px;
+    font-weight: bold;
+    font-size: 16px;
+    cursor: pointer;
+  }
+  
+  .addButton:hover {
+    background-color: #c71c40;
+  }
+  
+
+
+/* Add these to your AddNewClient.module.css */
+.uploadContainer {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  
+  .logoInput {
+    flex: 1;
+    
+  }
+  
+  /* .uploadButton {
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    padding: 8px;
+    color: #1976d2;
+    float: right;
+  } */
+  
+  /* .uploadButton:hover {
+    background-color: rgba(25, 118, 210, 0.04);
+  } */

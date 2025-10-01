@@ -1,0 +1,235 @@
+.QstnrHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.titleSection {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.headerActions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.settingsIcon {
+  font-size: 30px;
+  color: gray;
+}
+
+.playIcon {
+  font-size: 40px !important;
+  cursor: pointer;
+}
+
+.publishQstnbutton {
+  min-height: 40px !important;
+}
+.published {
+  background-color: green !important;
+  color: white;
+}
+.buttonContainer {
+  width: 100%;
+  margin-top: 16px;
+  
+}
+
+.buttonGroup {
+  display: flex;
+  border-radius: 50px !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+  background-color: #fff;
+}
+
+.StyleButtonGroup {
+  background: transparent !important;
+  color: black !important;
+  font-size: 12px !important;
+  min-width: 100px !important;
+  padding:  10px 0px 5px 0px !important;
+  border: none;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+
+.StyleButtonGroup:hover {
+  background-color: transparent !important;
+  color: black !important;
+  border: none !important;
+}
+
+.questionCard {
+  padding: 24px !important;
+  border-radius: 20px !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+  margin-top: 32px !important;
+  max-width: 600px;
+}
+
+.questionInput {
+  font-size: 20px !important;
+  font-weight: bold;
+  margin-bottom: 8px !important;
+  border: 1px solid #eee !important;
+  padding: 12px !important;
+  border-radius: 12px;
+}
+
+.description {
+  margin-bottom: 16px !important;
+  color: #6c757d;
+}
+
+.optionContainer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border: 1px solid #eee;
+  border-radius: 30px;
+  padding: 8px;
+  margin-bottom: 8px;
+}
+
+.optionInput {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-grow: 1;
+}
+
+.addOtherButton {
+  color: red !important;
+  font-size: 12px !important;
+  text-transform: none;
+  margin-top: 8px !important;
+}
+
+.addSaveUpdateButton{
+  min-height: 40px !important;
+  background-color: hsl(6, 78%, 57%) !important;
+  color: white !important;
+  border-radius: 50px !important;
+}
+.buildQstnrContainer {
+  display: flex;
+  gap: 20px;
+}
+
+.addQstnMenu {
+  flex: 0 0 20%;
+}
+
+.buildQstnrContent {
+  flex: 1;
+}
+
+.listCard {
+  padding: 16px;
+  border-radius: 12px;
+  background-color: transparent !important   ;
+  border: none !important;
+  width: 100%;
+  margin: 15px auto;
+}
+
+.listContainer {
+  padding: 0;
+}
+
+.listItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 16px;
+  border: 1px solid #f0f0f0;
+  border-radius: 8px;
+  margin-bottom: 8px;
+  background: #fff;
+  transition: box-shadow 0.2s ease;
+  cursor: pointer;
+}
+
+.listItem:hover {
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.previewContainer {
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+  height: 100vh !important;
+}
+
+.previewCard {
+  padding: 25px;
+  max-width: 600px;
+  border-radius: 20px !important;
+  background-color: white !important;
+  border: none !important;
+  width: 100%;
+  margin: 15px auto;
+}
+
+.previewOption {
+  margin-bottom: 8px !important;
+  border: 1px solid #f0f0f0 !important;
+  border-radius: 20px !important;
+}
+
+.previewSubmitButton {
+  background-color: transparent !important;
+  border: 1px solid rgb(22, 203, 209) !important;
+  color: black !important;
+  padding: 8px !important;
+}
+
+.previewNextButton {
+  padding: 8px !important;
+}
+
+.previewButtonContainer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+.SaveRulebtn{
+  padding: 8px !important;
+  margin-top: 10px !important;
+}
+.rulePublishbtn{
+  padding: 8px !important;
+  margin-top: 5px !important;
+}
+
+
+/* AddQsrnMenu.module.css */
+
+.AddQstnMenucontainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+.AddQstnMenuaddButton {
+  border-radius: 20px !important;
+  background-color: #DB1F42 !important;
+  font-size: 14px;
+  width: 200px;
+  text-transform: none; 
+}
+
+.AddQstnmenuIcon {
+  margin-right: 8px;
+  color: lightgray !important;
+}

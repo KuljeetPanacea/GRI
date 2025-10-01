@@ -1,0 +1,424 @@
+.PLHeader {
+  display: flex;
+  place-content: space-between;
+}
+
+.PLHeading {
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.clearButton{
+  border:none;
+  background-color: transparent;
+  cursor: pointer;
+}
+
+.filterClear{
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.PLDesc {
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 20px;
+}
+
+.PLSearch {
+  height: 32px;
+}
+
+.PLFilters {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 2rem;
+}
+.container {
+  padding: 20px;
+  background-color: #f5f5f5;
+}
+
+.header {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  margin-bottom: 24px;
+  margin-top: 15px;
+  gap: 1rem;
+}
+
+.headerQstnr {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  margin-top: 15px;
+}
+
+.tabGroup {
+  border-radius: 6px;
+  background-color: #f0f0f0;
+  box-shadow: none;
+  border-radius: 25px !important;
+}
+
+.tabButton {
+  padding: 8px 16px;
+  font-size: 14px;
+  font-weight: 500;
+  text-transform: none;
+  border: none !important;
+  min-width: 80px;
+  border-radius: 25px !important;
+}
+
+.activeTab {
+  background-color: #333333 !important;
+  color: white !important;
+}
+
+.inactiveTab {
+  background-color: transparent !important;
+  color: #666666 !important;
+}
+
+/* Card styling */
+
+.auditCard {
+  max-width: 400px;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e0e0e0;
+  border-radius: 8px !important;
+}
+
+.cardContent {
+  padding: 20px !important;
+}
+
+.cardHeader {
+  margin-bottom: 20px;
+}
+
+.titleSection {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.avatar {
+  width: 40px !important;
+  height: 40px !important;
+  background-color: #4caf50 !important;
+}
+
+.avatarImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.titleInfo {
+  display: flex !important;
+  gap: 3rem !important;
+}
+
+.auditTitle {
+  font-size: 16px !important;
+  font-weight: 600 !important;
+  color: #333333;
+  margin: 0 !important;
+}
+
+.statusChip {
+  background-color: #e8f5e8 !important;
+  color: #2e7d32 !important;
+  font-size: 12px !important;
+  height: 24px !important;
+  border-radius: 12px !important;
+  font-weight: 500 !important;
+}
+
+.detailsSection {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.detailRow {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.detailLabel {
+  font-size: 14px !important;
+  color: #666666 !important;
+  font-weight: 400 !important;
+}
+
+.detailValue {
+  font-size: 14px !important;
+  color: #333333 !important;
+  font-weight: 500 !important;
+}
+
+.actionSection {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.continueButton {
+  background-color: #e91e63 !important;
+  color: white !important;
+  text-transform: none !important;
+  font-weight: 500 !important;
+  padding: 8px 24px !important;
+  border-radius: 6px !important;
+  font-size: 14px !important;
+  box-shadow: none !important;
+}
+
+.continueButton:hover {
+  background-color: #c2185b !important;
+  box-shadow: 0 2px 4px rgba(233, 30, 99, 0.3) !important;
+}
+
+.thumbnailContainer {
+  display: flex;
+  gap: 16px;
+}
+
+.progressIcon {
+  margin-top: 20px !important;
+  color: #2e7d32;
+}
+/* Responsive design */
+@media (max-width: 768px) {
+  .header {
+    flex-direction: column;
+    gap: 16px;
+    align-items: stretch;
+  }
+
+  .auditCard {
+    max-width: 100%;
+  }
+
+  .dropdown {
+    min-width: 100%;
+  }
+}
+
+/* styles.css */
+.questionnaireContainer {
+  display: flex;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  height: 60vh;
+  gap: 16px;
+  padding: 10px;
+}
+
+.questionnaireCard {
+  flex: 0 0 25%;
+  min-width: 250px;
+  max-width: 24%;
+  max-height: 50%;
+  box-sizing: border-box;
+  margin: 0;
+  border-radius: 8px !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e0e0e0;
+}
+
+.cardContentWrapper {
+  padding: 24px;
+}
+
+.cardContentWrapper:last-child {
+  padding-bottom: 24px;
+}
+.assignmentSection {
+  height: 6rem !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 8px !important;
+  justify-content: center !important;
+  margin-top: 1rem !important;
+}
+.titleText {
+  display: flex;
+  justify-content: space-between !important;
+  height: 3rem !important;
+  font-size: 18px;
+  font-weight: 600;
+  color: #333;
+  border-bottom: #e7e7e7 1px solid;
+}
+
+.assignmentInfo {
+  font-size: 14px;
+  color: #666;
+}
+
+.progressSection {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.progressBarWrapper {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.progressBar {
+  flex: 1;
+  height: 6px;
+  border-radius: 3px;
+  background-color: #f5f5f5;
+}
+
+.progressFill {
+  height: 100%;
+  width: 0%;
+  background-color: #e0e0e0;
+  border-radius: 3px;
+}
+
+.percentageText {
+  font-size: 14px;
+  color: #e53e3e;
+  font-weight: 500;
+  min-width: 25px;
+}
+
+.beginButton {
+  background-color: #e53e3e;
+  color: white;
+  text-transform: none;
+  border-radius: 20px;
+  padding: 8px 20px;
+  font-size: 14px;
+  font-weight: 500;
+  box-shadow: none;
+  border: none;
+  cursor: pointer;
+}
+
+.beginButton:hover {
+  background-color: #d32f2f;
+  box-shadow: none;
+}
+
+.myRemediation{
+  padding: 20px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  height: 1px;
+  /* justify-content: center; */
+}
+
+.revisionCardContainer {
+  padding: 20px;
+  font-family: "Roboto", Arial, sans-serif;
+  background-color: #f5f5f5;
+  min-height: 100vh;
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+ 
+}
+
+.myRevision{
+  padding: 20px 0px 0px 20px !important;
+}
+
+.revisionCard {
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  max-width: 400px;
+  transition: box-shadow 0.3s ease;
+}
+
+.revisionCard:hover {
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.revisionCardContent {
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.revisionCardHeader {
+  margin-bottom: 8px;
+}
+
+.revisionCardTitle {
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 1.4;
+  color: #212121;
+  margin: 0;
+}
+
+.revisionCardMeta {
+  display: flex;
+  align-items: center;
+}
+
+.revisionCardChip {
+  background-color: #e0e0e0;
+  color: #616161;
+  padding: 4px 12px;
+  border-radius: 16px;
+  font-size: 12px;
+  font-weight: 500;
+  display: inline-block;
+}
+
+.revisionCardActions {
+  display: flex;
+  justify-content: flex-start;
+  margin-top: 8px;
+}
+
+.revisionCardButton {
+  background-color: #e53e3e;
+  color: white;
+  border: none;
+  padding: 8px 24px;
+  border-radius: 4px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.revisionCardButton:hover {
+  background-color: #c53030;
+}
+
+.revisionCardButton:active {
+  background-color: #9c2626;
+}
+
+.revisionCardButton:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(229, 62, 62, 0.3);
+}

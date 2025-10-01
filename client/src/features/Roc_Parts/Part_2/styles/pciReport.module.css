@@ -1,0 +1,335 @@
+/* components/PCIDSSComplianceReport/pciReport.module.css */
+
+.wrapper {
+  width: 100%;
+  padding: 0;
+  font-family: Arial, sans-serif;
+  margin-top: 1rem;
+  height: 95vh;
+  overflow: scroll;
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* Internet Explorer 10+ */
+}
+
+.card {
+  border: 1px solid #d1d5db;
+  margin-bottom: 2rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.header {
+  background: #0f766e;
+  color: white;
+  text-align: center;
+  padding: 0.75rem 1rem;
+  font-weight: 600;
+}
+
+.header h3 {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.subsectionTitle {
+  color: rgb(0, 0, 0);
+  padding: 10px 16px;
+  margin: 0;
+  font-size: 14px;
+  font-weight: bold;
+  border-radius: 0;
+}
+
+.subHeader {
+  background: #f3f4f6;
+  padding: 1rem;
+  border-bottom: 1px solid #d1d5db;
+}
+
+.formHead {
+  display: flex;
+  justify-content: space-between;
+  padding: 0.2rem;
+  position: sticky;
+  top: 0;
+  background-color: white;
+  z-index: 100;
+}
+
+.subHeader p {
+  margin: 0 0 0.5rem 0;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.subHeader ul {
+  margin: 0.5rem 0 0 1rem;
+  padding-left: 1rem;
+}
+
+.subHeader li {
+  margin: 0.25rem 0;
+  font-size: 0.875rem;
+}
+
+.bold {
+  font-weight: 600;
+}
+.findingHeader {
+  background: #0f766e;
+  color: white;
+  padding: 0rem 0rem;
+  display: flex;
+  align-items: center;
+}
+
+.textarea {
+  width: 100%;
+  padding: 8px;
+  border: none;
+}
+
+input {
+  border: none;
+}
+
+.textarea:focus {
+  outline: none;
+}
+
+.methodLabel {
+  background: #945699;
+  padding: 0.7rem 0rem;
+  border-radius: 0px;
+  font-size: 0.75rem;
+  flex: 1;
+  text-align: center;
+}
+
+.findingHeader h3 {
+  margin: 0;
+  flex: 2;
+  padding-left: 0.4rem;
+}
+
+.findingTable {
+  width: 100%;
+  border-collapse: collapse;
+  border-bottom: 1px solid #d1d5db;
+}
+
+.findingTable th {
+  background: #f3f4f6;
+  border-right: 1px solid #d1d5db;
+  padding: 0.75rem 0.5rem;
+  text-align: center;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #374151;
+  vertical-align: middle;
+  width: 16.66%;
+}
+
+.findingTable th:nth-child(5),
+.findingTable th:nth-child(6) {
+  background: #ecd7e5;
+  color: #000000;
+}
+
+.findingTable th:last-child {
+  border-right: none;
+}
+
+.findingTable td {
+  border-right: 1px solid #d1d5db;
+  padding: 0.75rem 0.5rem;
+  text-align: center;
+  background: white;
+  vertical-align: middle;
+  width: 16.66%;
+}
+
+.findingTable td:nth-child(5),
+.findingTable td:nth-child(6) {
+  background: #ffffff;
+}
+
+.findingTable td:last-child {
+  border-right: none;
+}
+
+.findingTable input[type="radio"],
+.findingTable input[type="checkbox"] {
+  width: 1.1rem;
+  height: 1.1rem;
+  cursor: pointer;
+  accent-color: #0f766e;
+}
+
+.findingTable input[type="radio"]:checked,
+.findingTable input[type="checkbox"]:checked {
+  accent-color: #0f766e;
+}
+
+.descSection {
+  background: #f9fafb;
+  border-bottom: 1px solid #d1d5db;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  display: flex;
+}
+
+.descSection::before {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  color: #374151;
+}
+
+.descNote {
+  font-style: italic;
+  color: #6b7280;
+  margin: 0.5rem 0;
+  font-size: 0.8rem;
+  min-width: 50%;
+  border-right: 1px solid #d1d5db;
+}
+
+.descSection p {
+  padding: 1rem;
+  margin: 0;
+  color: #4b5563;
+}
+
+.expandToggle {
+  background: #0f766e;
+  color: white;
+  padding: 0.75rem 1rem;
+  width: 100%;
+  text-align: left;
+  cursor: pointer;
+  border: none;
+  font-size: 0.875rem;
+  font-weight: 600;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: background-color 0.2s ease;
+}
+
+.expandToggle:hover {
+  background: #115e59;
+}
+
+.expandToggle span {
+  flex: 1;
+}
+
+.tableContainer {
+  overflow-x: auto;
+  font-family: Arial, sans-serif;
+  font-size: 12px;
+}
+
+.testingTable {
+  border-collapse: collapse;
+  background-color: white;
+  border: 1px solid #ddd;
+}
+
+.testingTable th {
+  width: 72vw;
+  background-color: #2d8a8a;
+  color: white;
+  text-align: left;
+  font-weight: bold;
+  border-right: 1px solid #fff;
+}
+
+.testingTable th:last-child {
+  border-right: none;
+}
+
+.headerProcedures {
+  width: 33.3%;
+}
+
+.headerInstructions {
+  width: 33.3%;
+}
+
+.headerResponse {
+  width: 33.3%;
+}
+
+.testingTable td {
+  padding: 8px;
+  border: 1px solid #ddd;
+  vertical-align: top;
+}
+
+.procedureCell {
+  background-color: #f8f9fa;
+  font-size: 11px;
+  line-height: 1.4;
+  border-right: 1px solid #ccc;
+}
+
+.instructionCell {
+  background-color: #f0f4f4;
+  font-size: 11px;
+  line-height: 1.4;
+  border-right: 1px solid #ccc;
+}
+
+.responseCell {
+  background-color: #ffffff;
+  padding: 4px;
+}
+
+.buttonControls {
+  display: flex;
+  gap: 10px;
+  padding-bottom: 10px;
+}
+
+.snackbar {
+  position: fixed;
+  bottom: 20px;
+  left: 20px;
+  color: white;
+  padding: 12px 16px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 300px;
+}
+
+/* Variants */
+.success {
+  background-color: #4caf50;
+}
+
+.error {
+  background-color: #f44336;
+}
+
+.info {
+  background-color: #2196f3;
+}
+
+.closeButton {
+  background: none;
+  border: none;
+  color: white;
+  cursor: pointer;
+  font-size: 18px;
+  font-weight: bold;
+  padding: 0;
+  margin-left: auto;
+}
+
+.marginTop {
+  margin-top: 10px;
+}

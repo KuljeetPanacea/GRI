@@ -1,0 +1,74 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  padding: 24px;
+  background-color: #fafafa;
+  margin-bottom: 100px;
+  border-radius: 30px;
+}
+
+.questionTitle{
+ margin: 50px 0px 20px 0px !important;
+}
+.alertBox {
+  padding: 16px;
+}
+
+.section {
+  padding: 16px 20px;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 0 6px rgba(0, 0, 0, 0.05);
+}
+.myRemediation{
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  height: 1px;
+  margin: 20px 0px 20px 0px !important;
+}
+.fileRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 12px;
+}
+
+.icon {
+  margin-right: 12px;
+}
+
+.fileInfo {
+  flex: 1;
+}
+
+.actionButtons {
+  display: flex;
+  gap: 8px;
+}
+
+.uploadBox {
+  border: 2px dashed #ccc;
+  padding: 32px;
+  text-align: center;
+  cursor: pointer;
+  margin-top: 12px;
+  border-radius: 8px;
+}
+
+.uploadIcon {
+  margin-bottom: 8px;
+  color: #888;
+}
+
+.commentBox {
+  margin-top: 12px;
+}
+
+.userLabel {
+  margin-bottom: 6px;
+  font-size: 0.9rem;
+  color: #444;
+}

@@ -1,0 +1,37 @@
+.roleBoxWrapper {
+    display: flex;
+    margin-top: 24px;  
+    margin-bottom: 32px; 
+}
+  
+.roleBox {
+    border: 1px solid #DB1F42;
+    border-radius: 25px;
+    padding: 10px 15px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 230px;
+    color: #DB1F42;
+    margin-right: 190px;
+}
+.statusBox {
+    border: 1px solid #DB1F42;
+    border-radius: 25px;
+    padding: 10px 15px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 230px;
+    color: #DB1F42;
+}
+
+.phoneErrorText {
+    color: #DB1F42;
+    margin-top: 4px;
+}
+
+.emailErrorText {
+    color: #DB1F42;
+    margin-top: 4px;
+}

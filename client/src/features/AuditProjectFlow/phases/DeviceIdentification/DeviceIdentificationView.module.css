@@ -1,0 +1,119 @@
+.deviceContainer{
+    height: 90vh;
+    overflow-y: auto;
+}
+.ScopingtabContainer {
+    display: flex;
+    border-radius: 8px;
+    overflow: hidden;
+    width: 100%;
+    max-width: 300px;
+    background-color: #f8e1e5;
+    position: relative;
+    margin-top: 1rem;
+   
+}
+
+.headerContainer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 15px;
+}
+
+.activeTab {
+    background-color: #d01a3c;
+    color: white;
+}
+
+.activeTab::after {
+    display: none;
+}
+
+.tab {
+    flex: 1;
+    padding: 10px 8px;
+    border: none;
+    font-size: 16px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    background-color: transparent;
+    color: #d01a3c;
+    position: relative;
+}
+
+.tab:hover {
+    background-color: rgba(208, 26, 60, 0.1);
+}
+
+.activeTab {
+    background-color: #d01a3c;
+    color: white;
+}
+
+.tab:not(:last-child)::after {
+    content: "";
+    position: absolute;
+    right: 0;
+    top: 0%;
+    height: 100%;
+    width: 1px;
+    background-color: #e8c0c7;
+}
+
+.tab:nth-child(4)::after {
+    display: block;
+}
+
+.activeTab + .tab::before {
+    display: none;
+}
+
+/* ---------------------- Right Controls (Add Button & Search Bar) ---------------------- */
+
+ .rightControls {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+} 
+
+/* Add Device Button */
+.addDeviceButton {
+    background: none;
+    border: none;
+    font-size: 16px;
+    color: red;
+    text-decoration: underline;
+    cursor: pointer;
+}
+
+/* Search Bar */
+.searchBarContainer {
+   
+     width: 280px;
+    height: 35px;   
+}
+
+.searchBar {
+    display: flex;
+    align-items: center;
+    flex-grow: 1;
+    width: 15%;
+    height: 10px;
+    
+}
+
+
+
+.blurred {
+    filter: blur(5px);  
+    pointer-events: none; 
+  }
+  
+  .blurred .searchBar,
+  .blurred .deviceCategoryDropdown {
+    filter: blur(5px);  
+  }
+  
+  

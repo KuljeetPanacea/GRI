@@ -1,0 +1,36 @@
+.modalCreateUserbutton {
+    min-height: 40px !important;
+}
+.inputEmailAndPhoneContainer{
+    display: flex;
+    gap: 10px;
+    justify-content: space-between;
+    margin-top: 20px;
+}
+.selectRoleDropdown{
+    min-width: 20%;
+    border-radius: 8px;
+    margin-top: 20px;
+    margin-bottom: 20px;
+}
+.selectedOption {
+    background-color: #007bff !important; /* Highlight color */
+    color: white !important;
+    font-weight: bold;
+}
+
+.roleErrorText {
+    color: #DB1F42;
+    margin-top: -10px;
+    margin-bottom: 10px;
+}
+
+.phoneErrorText {
+    color: #DB1F42;
+    margin-top: 4px;
+}
+
+.emailErrorText {
+    color: #DB1F42;
+    margin-top: 4px;
+}

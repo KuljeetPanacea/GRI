@@ -1,0 +1,111 @@
+.container{
+    /*margin-top: 1rem; */
+    display: flex;
+    align-items:start;
+    justify-content: space-between;
+
+}
+
+.headingContainer{
+  display: flex;
+  align-items: center;
+  gap:1rem;
+  cursor: pointer;
+
+}
+
+.heading{
+    font-size: 18px;
+    font-weight: 600;
+}
+
+.details{
+    margin-top: 1rem;
+    font-size: 12px;
+    font-weight: 400;
+}
+
+.button{
+    height: 35px;
+    width: 120px;
+}
+
+/* ------------------------------Breadcrumbs styles------------------------------- */
+
+.breadcrumbs {
+    display: flex;
+    gap: 10px;
+    padding: 10px;
+    background-color: #f5f5f5;
+    border-radius: 5px;
+  }
+  
+  .phase {
+    cursor: pointer;
+    padding: 5px 10px;
+    border-radius: 5px;
+    transition: 0.3s;
+  }
+  
+  .phase:hover {
+    background-color: #ddd;
+  }
+  
+  .active {
+    font-weight: bold;
+    color: white;
+    background-color: #007bff;
+  }
+
+.aeButton{
+  color: #DB1F42 !important;
+  background-color: white;
+  height: 40px;
+  padding: 5px;
+  width: 40px;
+  border-radius: 10px;
+  cursor: pointer;
+}
+  /* ----------------------------------Phaseview styles------------------------- */
+
+  .phaseView {
+   /* margin-top: 20px; */
+    /* padding: 15px; */
+    /* border: 1px solid #ddd;
+    border-radius: 5px; */
+    /* background-color: #fff; */
+  }
+
+  .customSelect {
+    background-color: #ffffff;
+    border-radius: 24px !important;
+    height: 40px;
+  }
+  
+  .breadcrumb {
+  font-size: 14px;
+  color: #999;
+  display: flex;
+  gap: 6px;
+  font-family: sans-serif;
+  align-items: center;
+  margin-bottom: 25px;
+}
+
+.crumb {
+  color: #999;
+  cursor: pointer;
+}
+
+.crumb:hover {
+  color: #000;
+}
+
+.activeCrumb {
+  color: #000;
+  font-weight: 600;
+}
+
+.separator {
+  color: #ccc;
+}

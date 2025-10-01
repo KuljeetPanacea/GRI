@@ -1,0 +1,290 @@
+.tabContainer {
+    display: flex;
+    border-radius: 8px;
+    overflow: hidden;
+    width: 100%;
+    max-width: 300px;
+    background-color: #f8e1e5;
+    position: relative;
+    margin-top: 1rem;
+  }
+  
+  .tab {
+    flex: 1;
+    padding: 10px 8px;
+    border: none;
+    font-size: 16px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    background-color: transparent;
+    color: #d01a3c;
+    position: relative;
+  }
+  
+  .tab:hover {
+    background-color: rgba(208, 26, 60, 0.1);
+  }
+  
+  .activeTab {
+    background-color: #d01a3c;
+    color: white;
+  }
+  .tab:not(:last-child)::after {
+    content: '';
+    position: absolute;
+    right: 0;
+    top: 0%;
+    height: 100%;
+    width: 1px;
+    background-color: #e8c0c7;
+  }
+  
+  .activeTab::after {
+    display: none;
+  }
+  .tab:nth-child(2)::after {
+    display: block;
+  }
+  
+  .activeTab + .tab::before {
+    display: none;
+  }
+
+
+
+  /* -------------------------- Styles for the SSCreateNew ---------- */
+  .container {
+    display: flex;
+    min-height: 100vh;
+    background-color: #f9f9f9;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+  }
+  
+  .sidebar {
+    width: 200px;
+    background-color: white;
+    border-right: 1px solid #e0e0e0;
+    padding: 20px 0;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .addQuestionBtn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 15px 20px;
+    padding: 10px;
+    background-color: white;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: medium;
+  }
+  
+  .plusIcon {
+    margin-right: 5px;
+    font-weight: bold;
+  }
+  
+  .questionList {
+    flex: 1;
+    overflow-y: auto;
+  }
+  
+  .questionItem {
+    padding: 10px 15px;
+    border-bottom: 1px solid #eee;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 14px;
+  }
+  
+  .questionItem:hover {
+    background-color: #f5f5f5;
+  }
+  
+  .selectedQuestion {
+    background-color: #f0f0f0;
+    border-left: 3px solid #e60000;
+  }
+  
+  .itemActions {
+    color: #666;
+  }
+  
+  .mainContent {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 20px;
+    border-bottom: 1px solid #e0e0e0;
+    background-color: white;
+  }
+  
+  .titleInput {
+    font-size: 18px;
+    font-weight: 600;
+    border: none;
+    outline: none;
+    padding: 5px 0;
+    width: 300px;
+  }
+  
+  .headerControls {
+    display: flex;
+    align-items: center;
+  }
+  
+  .publishBtn {
+    background-color: #333;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 8px 15px;
+    cursor: pointer;
+    margin-right: 20px;
+  }
+  
+  .settingsText {
+    font-size: 14px;
+    color: #333;
+  }
+  
+  .questionEditor {
+    flex: 1;
+    padding: 20px;
+    background-color: #f9f9f9;
+  }
+  
+  .questionPanel {
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+  }
+  
+  .questionActions {
+    padding: 15px;
+    display: flex;
+    align-items: center;
+    border-bottom: 1px solid #eee;
+  }
+  
+  .actionBtn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    margin-right: 15px;
+    display: flex;
+    align-items: center;
+    font-size: 14px;
+    color: #333;
+  }
+  
+  .industrySelectors {
+    margin-left: auto;
+    display: flex;
+  }
+  
+  .selectWrapper {
+    display: flex;
+    align-items: center;
+    margin-left: 15px;
+  }
+  
+  .selectWrapper span {
+    margin-right: 5px;
+    font-size: 14px;
+  }
+  
+  .selectWrapper select {
+    padding: 5px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    background-color: white;
+  }
+  
+  .questionContent {
+    padding: 20px;
+  }
+  
+  .questionNumberAndText {
+    display: flex;
+    align-items: center;
+    margin-bottom: 15px;
+  }
+  
+  .questionNumber {
+    font-weight: 600;
+    margin-right: 10px;
+  }
+  
+  .questionText {
+    flex: 1;
+    font-size: 16px;
+    font-weight: 500;
+    border: none;
+    outline: none;
+    padding: 5px 0;
+  }
+  
+  .questionDescription {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #eee;
+    border-radius: 4px;
+    margin-bottom: 20px;
+    min-height: 40px;
+    resize: vertical;
+    font-size: 14px;
+    color: #666;
+  }
+  
+  .optionsContainer {
+    padding: 10px 0;
+  }
+  
+  .optionItem {
+    background-color: #f5f5f5;
+    border-radius: 20px;
+    padding: 10px 15px;
+    margin-bottom: 10px;
+  }
+  
+  .optionText {
+    width: 100%;
+    border: none;
+    outline: none;
+    background: transparent;
+    font-size: 14px;
+  }
+  
+  .addOptionBtn {
+    background: none;
+    border: none;
+    color: #0066cc;
+    cursor: pointer;
+    font-size: 14px;
+    padding: 10px 0;
+  }
+  
+  .emptyState {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+    color: #999;
+    font-size: 16px;
+    font-style: italic;
+  }

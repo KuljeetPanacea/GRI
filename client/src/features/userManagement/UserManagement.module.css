@@ -1,0 +1,84 @@
+/* main container */
+/* .mainContainer {
+    padding: 1%;
+} */
+
+/* Header container- text, button, searchbar */
+.headerContainer {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 3%;
+    align-items: center;
+    width: 100%;
+}
+
+.headerText {
+    flex: 1;
+    font-size: 24px;
+    font-weight: 700;
+    width: 100%;
+    text-align: left;
+    display: flex;
+    align-items: center;
+}
+
+.buttonContainer {
+    display: flex;
+    gap: 1rem;
+    justify-content: flex-end;
+    align-items: center;    
+    width: 35%;    
+}
+
+.primaryButton {
+    display: flex;
+    align-items: center;
+    flex-grow: 1;
+    width: 20%;
+    height: 35px;
+}
+
+.searchBar {
+    display: flex;
+    align-items: center;
+    flex-grow: 1;
+    width: 15%;
+    height: 35px;
+}
+
+/* body container filters and table */
+.bodyContainer {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.dropdownContainer {
+    display: flex;
+    align-items: center;
+    /* flex-grow: 1; */
+    gap: 1rem;
+}
+
+/* Scrollable component */
+.scrollableArea {
+    max-height: 30rem;
+    overflow-y: auto;
+}
+
+/* List view */
+.activeStatus {
+    display: inline-block;
+    background-color: #eafff3;
+    color: #207d48;
+    border-radius: 25px;
+    padding: 0.4rem 2rem;
+  }
+  
+  .inactiveStatus {
+    display: inline-block;
+    background-color: #f6f6f6;
+    color: #828282;
+    border-radius: 25px;
+    padding: 0.4rem 1.65rem;
+  }

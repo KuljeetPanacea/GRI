@@ -1,0 +1,57 @@
+.ScopingtabContainer {
+  display: flex;
+  border-radius: 8px;
+  overflow: hidden;
+  width: 100%;
+  max-width: 700px;
+  background-color: #f8e1e5;
+  position: relative;
+  margin-top: 1rem;
+}
+
+.activeTab {
+  background-color: #d01a3c;
+  color: white;
+}
+
+.activeTab::after {
+  display: none;
+}
+
+.tab {
+  flex: 1;
+  padding: 10px 8px;
+  border: none;
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  background-color: transparent;
+  color: #d01a3c;
+  position: relative;
+}
+
+.tab:hover {
+  background-color: rgba(208, 26, 60, 0.1);
+}
+
+.activeTab {
+  background-color: #d01a3c;
+  color: white;
+}
+.tab:not(:last-child)::after {
+  content: "";
+  position: absolute;
+  right: 0;
+  top: 0%;
+  height: 100%;
+  width: 1px;
+  background-color: #e8c0c7;
+}
+.tab:nth-child(4)::after {
+  display: block;
+}
+
+.activeTab + .tab::before {
+  display: none;
+}

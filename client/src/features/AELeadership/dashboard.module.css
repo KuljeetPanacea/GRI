@@ -1,0 +1,254 @@
+.container {
+  height: 100vh;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding-bottom: 60px;
+}
+
+.wrapper {
+  margin: 0 auto;
+  width: 95%;
+  padding-bottom: 50px;
+  height: auto;
+  overflow: hidden;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.headerLeft {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.headerIcon {
+  width: 24px;
+  height: 24px;
+  background-color: #14B8A6;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.headerIconText {
+  color: white;
+  font-size: 12px;
+  font-weight: bold;
+}
+
+.headerTitle {
+  font-size: 20px;
+  font-weight: 600;
+  color: #111827;
+  margin: 0;
+}
+
+.headerSubtitle {
+  font-size: 12px;
+  color: #6B7280;
+  margin: 0;
+}
+
+.headerRight {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.searchContainer {
+  width: 216px;
+  height: 38px;
+}
+
+.mainGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 24px;
+  margin-bottom: 24px;
+}
+
+.card {
+  background-color: white;
+  border-radius: 8px;
+  padding: 16px;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+  border: 1px solid #E5E7EB;
+}
+
+.cardHeader {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.cardIcon {
+  width: 16px;
+  height: 16px;
+  color: #6B7280;
+}
+
+.cardTitle {
+  font-weight: 500;
+  color: #111827;
+  margin: 0;
+  font-size: 14px;
+}
+
+.cardContent {
+  margin-left: 22px;
+}
+
+.statusText {
+  font-size: 14px;
+  color: #6B7280;
+  margin: 0 0 8px 0;
+}
+
+.statusBadge {
+  margin-top: 8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 30px;
+  border-radius: 9999px;
+  background-color: #FEF3C7;
+}
+
+
+.statusBadgeGreen {
+  margin-top: 8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 30px;
+  border-radius: 9999px;
+  background-color: #90e77e; /* green-100 */
+}
+
+.statusBadgeText {
+  font-size: 14px;
+  color: #B45309;
+  font-weight: 500;
+}
+
+
+.progressIcon {
+  width: 16px;
+  height: 16px;
+  background-color: #9CA3AF;
+  border-radius: 2px;
+}
+
+.progressHeader {
+  font-size: 14px;
+  color: #3B82F6;
+  font-weight: 500;
+  margin-bottom: 8px;
+  display: flex;
+  justify-content: space-between;
+}
+
+.progressPercentage {
+  font-size: 14px;
+  font-weight: bold;
+  color: #111827;
+  margin-bottom: 4px;
+  float: right;
+}
+
+.progressBar {
+  width: 100%;
+  height: 12px;
+  background-color: #E5E7EB;
+  border-radius: 8px;
+  overflow: hidden;
+  margin-bottom: 12px;
+}
+
+.progressFill {
+  height: 100%;
+  background-color: #3B82F6;
+  border-radius: 4px;
+}
+
+.progressSubtext {
+  font-size: 12px;
+  color: #6B7280;
+}
+
+.assessmentContent {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-left: 22px;
+}
+
+.assessmentRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.assessmentLabel {
+  font-size: 14px;
+  color: #6B7280;
+}
+
+.assessmentValue {
+  font-weight: 600;
+}
+
+.assessmentIconLabel {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.assessmentIcon {
+  width: 12px;
+  height: 12px;
+}
+
+.assessmentIconGreen {
+  color: #10B981;
+}
+
+.assessmentIconYellow {
+  color: #F59E0B;
+}
+
+.assessmentTextGreen {
+  font-size: 14px;
+  color: #10B981;
+}
+
+.assessmentTextYellow {
+  font-size: 14px;
+  color: #F59E0B;
+}
+
+.assessmentValueGreen {
+  font-weight: 600;
+  color: #10B981;
+}
+
+.assessmentValueYellow {
+  font-weight: 600;
+  color: #F59E0B;
+}
+
+.componentCard {
+  background: #fff;
+  padding: 24px;
+  border-radius: 16px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+  margin-bottom: 25px;
+  overflow: hidden;
+}

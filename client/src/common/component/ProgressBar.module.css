@@ -1,0 +1,26 @@
+.css-3hpdci-MuiSvgIcon-root-MuiStepIcon-root{
+    color: rgb(158, 154, 154)!important;
+}
+
+.css-14ncu80-MuiStepConnector-line{
+    display: flex;
+    background-color: rgb(184, 183, 183);
+    border-radius: 5px;
+    height: 0.25rem !important;    
+}
+
+.css-1g86afo-MuiStepIcon-text{
+    display: none;
+}
+
+.MuiStepIcon-root.Mui-active  {
+    color: #4e4e4e !important; 
+  }
+
+  .MuiStepConnector-line.Mui-active {
+    background-color: #414141 !important; /* Darker connector line for active step */
+  }
+
+  .MuiStepIcon-root.Mui-completed {
+    color: #4caf50 !important; /* Green color for completed steps */
+  }

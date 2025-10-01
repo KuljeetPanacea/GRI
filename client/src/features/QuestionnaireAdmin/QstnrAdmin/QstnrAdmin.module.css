@@ -1,0 +1,57 @@
+.headerContainer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.rightSection {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.qstnDetails{
+  display: flex;
+  justify-content: space-between;
+  padding-right: 4rem;
+}
+
+.createQstnrbutton {
+  display: flex !important;
+  align-items: center !important;
+  min-height: 40px !important;  
+  width: 250px !important;
+}
+.createQstnrsearchBar .MuiOutlinedInput-root {
+  height: 10px !important;
+}
+.createQstnrsearchBar .MuiInputBase-input {
+  padding: 12px 14px; 
+}
+
+.qstnrListViewContainer {
+  margin-top: 20px;
+}
+  
+.qstnrCardView{
+  border-radius: 8px !important;
+   box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
+   background-color: #fff !important;
+   height: 100% !important;
+}
+
+.qstnrCardViewContent{
+  display: flex !important;
+  align-items: center !important;
+  gap: 10px !important;
+  margin-bottom: 10px !important;
+}
+
+.qstnrCardComplianceTitle{
+  background-color: #e0f7ff;
+  color: #007bff;
+  border-radius: 16px;
+  padding: 2px 8px;
+  font-size: 0.75rem;
+  font-weight: 500;
+}

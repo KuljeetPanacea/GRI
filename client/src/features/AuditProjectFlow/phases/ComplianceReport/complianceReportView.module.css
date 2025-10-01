@@ -1,0 +1,123 @@
+/* Requirement Buttons */
+.buttonContainer {
+    display: flex;
+    justify-items: center;
+}
+
+.reqButton {
+    display: flex;
+    justify-content: center;
+    padding: 8px;
+    width: 100%;
+    color: #DB1F55;
+    background: #FAE8F0;
+    transition: background 0.3s, color 0.3s;
+    cursor: pointer;
+}
+
+.reqButton:first-child {
+    border-top-left-radius: 6px;
+}
+
+.reqButton:last-child {
+    border-top-right-radius: 6px;
+}
+
+.reqButton:hover {
+    background: #DB1F42;
+    color: white;
+}
+
+.activeButton {
+    background-color: #DB1F42 !important;
+    color: white !important;
+}
+
+/* Sidebar */
+.sidebar {
+    min-width: 200px;
+    height: 100vh;
+    overflow-y: auto;
+    background: #FBFBFB;
+    border-right: 1px solid #ddd;
+    padding-bottom: 4rem;
+}
+
+/* List Items */
+.listItem {
+    padding: 1px;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+
+.listItem:hover {
+    background: #FAE8F0;
+}
+
+.activeListItem {
+    background: #fae8f0 !important;
+    color:#EA98A8 !important;
+}
+
+/* Controls Container */
+.controlsContainer {
+    margin-left: 16px;
+    margin-top: 2px;
+}
+
+/* Document Details */
+.container {
+    flex: 1;
+    height: 100vh;
+}
+
+.detailsHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-radius: 5px;
+}
+
+/* Edit/Save Button */
+
+.editBtn{
+    padding-bottom:0.6rem;
+    display: flex;
+    justify-content: flex-end;
+    gap:4px;
+}
+
+.editButton {
+    background-color: #1976d2;
+}
+
+.saveButton {
+    background-color: #1976d2;
+    color: white;
+}
+
+.changed {
+    background-color: #D00303 !important;
+    color: white !important;
+}
+
+.documentContainer {
+    all: revert;
+    
+}
+
+.documentContainer * {
+    all: revert;
+}
+
+.documentContainer {
+    display: grid;
+    place-items: left;
+    border: 1 px solid #ccc;
+    padding: 1rem;
+    max-height: 60vh;
+    margin-top: 0.5rem;
+    margin-left: 1rem;
+    max-width: 73vw;
+    overflow-y: scroll;
+}

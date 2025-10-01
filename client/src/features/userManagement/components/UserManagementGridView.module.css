@@ -1,0 +1,109 @@
+.gridContainer{
+    margin-top: 1rem !important;
+    max-width: 90%;
+    padding-bottom: 1rem;
+
+}
+
+.gridCard{
+    border-radius: 10px !important;
+    box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
+    background-color: #fff;
+    height: 100%;
+}
+
+.gridCard:hover{
+    transform: scale(1.05);
+}
+
+.contentContainer {
+    display: flex;
+    margin-top: 0.3rem;
+    align-items:center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    margin-bottom: 0.3rem;
+    padding: 0.5rem;
+    margin-right: 4rem;
+    margin-left: 0.5rem;
+  }
+
+  .roleContainer{
+    display: inline;
+    background-color: #f6f6f6;
+    color: #4B4B4B;
+    border-radius: 100px;
+    padding: 0.2rem 1.1rem;
+    font-size: 0.7rem;
+    font-weight: 500;
+  }
+
+  .contentHeader{
+    display: inline-flex;
+    gap: 0.5rem;
+  }
+
+  .dataContainer{
+    display: flex ;
+    flex-direction: row;
+    padding: 1.5rem;
+    gap: 3rem;
+    align-items: center;
+  }
+
+  .gridData{
+    display: flex;
+    flex-direction: column;
+    /* align-items:flex-start; */
+    /* justify-content: center; */
+    /* margin-bottom: 1rem; */
+    /* margin-top: 1rem; */
+    /* padding: 0.3rem; */
+    /* margin-right: 1rem;
+    margin-left: 0.5rem; */
+    /* gap: 0.5rem; */
+  }
+  .leftgridData{
+    display: flex;
+    flex-direction: column;
+    /* align-items:flex-start; */
+    /* justify-content: center; */
+    /* margin-bottom: 1rem; */
+    /* margin-top: 1rem; */
+    /* padding: 0.3rem; */
+    /* margin-right: 1rem;
+    margin-left: 0.5rem; */
+    /* gap: 0.5rem; */
+  }
+
+  .cardActions {
+    display: flex;
+    padding: 0rem !important;
+    justify-content: flex-end;
+    align-items: center;
+    font-size: 0.7rem;
+    font-weight: 500;
+    margin-top: 0.3rem;
+    margin-bottom: 0.3rem;
+    margin-right: 0.65rem;
+  }
+
+  .statusContainer {
+    margin-top: 1rem;
+  }
+  
+  .activeStatusGrid {
+    display: inline-block;
+    background-color: #eafff3;
+    color: #207d48;
+    border-radius: 25px;
+    padding: 0.4rem 1.5rem;
+  }
+  
+  .inactiveStatusGrid {
+    display: inline-block;
+    background-color: #f6f6f6;
+    color: #828282;
+    border-radius: 25px;
+    padding: 0.4rem 1.65rem;
+  }

@@ -1,0 +1,29 @@
+version: '3.8'
+
+services:
+  client:
+    build: ./client
+    container_name: client-PI_AUDIT
+    ports:
+      - "80:80"
+      - "443:443"
+    depends_on:
+      - server
+    networks:
+      - pi_audit_network
+
+  server:
+    build: ./server
+    container_name: server-PI_AUDIT
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    networks:
+      - pi_audit_network
+    # extra_hosts:
+    #   - "host.docker.internal:27017"  # Allows the container to access the host machine
+
+networks:
+  pi_audit_network:
+    driver: bridge

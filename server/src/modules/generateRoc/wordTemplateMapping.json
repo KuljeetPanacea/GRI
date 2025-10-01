@@ -1,0 +1,264 @@
+{
+  "ClientCompany": "partOneData.contactInfoData.company.name",
+  "ClientDBA": "partOneData.contactInfoData.company.dba",
+  "ClientMailing": "partOneData.contactInfoData.company.mailingAddress",
+  "ClientCompanyMainWebsite": "partOneData.contactInfoData.company.website",
+
+  "ClientContactName": "partOneData.contactInfoData.contact.name",
+  "ClientContactTitle": "partOneData.contactInfoData.contact.title",
+  "ClientContactPhoneNumber": "partOneData.contactInfoData.contact.phone",
+  "ClientContactMailAddress": "partOneData.contactInfoData.contact.email",
+  "ClientISA": "partOneData.contactInfoData.internalSecurityAssessor.name",
+
+  "QSA_Company": "partOneData.contactInfoData.qsaCompany.name",
+  "QSA_Mailing": "partOneData.contactInfoData.qsaCompany.mailingAddress",
+  "QSA_CompanyWebsite": "partOneData.contactInfoData.qsaCompany.website",
+
+  "LeadQSA_Name": "partOneData.contactInfoData.leadAssessor.name",
+  "LeadQSA_PhoneNumber": "partOneData.contactInfoData.leadAssessor.phone",
+  "LeadQSA_MailAddress": "partOneData.contactInfoData.leadAssessor.email",
+  "LeadQSA_CertificateNumber": "partOneData.contactInfoData.leadAssessor.certificateId",
+  "AssociateQSA_Name": "partOneData.contactInfoData.associateQSA.name",
+  "AssociateQSA_MentorName": "partOneData.contactInfoData.associateQSA.mentorName",
+  "Assessor_Name": "partOneData.contactInfoData.associateAssessor.name",
+  "Assessor_PCICredentials": "partOneData.contactInfoData.associateAssessor.certificateId",
+
+  "QA_ReviewerName": "partOneData.contactInfoData.qaReviewer.name",
+  "QA_ReviewerPhoneNumber": "partOneData.contactInfoData.qaReviewer.phone",
+  "QA_ReviewerEmail": "partOneData.contactInfoData.qaReviewer.email",
+  "QA_ReviewerPCIcredentials": "partOneData.contactInfoData.qaReviewer.credentials",
+
+  "DateOfReport": "partOneData.contactInfoData.assessmentDates.reportDate",
+  "DateAssessmentBegan": "partOneData.contactInfoData.assessmentDates.startDate",
+  "DateAssessmentEnded": "partOneData.contactInfoData.assessmentDates.endDate",
+  "DatesSpendOnsite": "partOneData.contactInfoData.assessmentDates.onsiteDays",
+
+  "TestingPerformedOnsite_Yes": "partOneData.contactInfoData.remoteAssessment.performedOnsite",
+  "CombinationOnsiteRemote_Yes": "partOneData.contactInfoData.remoteAssessment.combinationRemoteOnsite",
+  "TestingPerformedRemotely_Yes": "partOneData.contactInfoData.remoteAssessment.performedRemotely",
+  "IfRemoteWhy": "partOneData.contactInfoData.remoteAssessment.justificationIfRemote",
+
+  "QSAConsultationOnControls_Yes": "partOneData.contactInfoData.qsaServices.consultationProvided",
+  "QSAConsultationOnControls_No": "partOneData.contactInfoData.qsaServices.consultationNotProvided",
+  "QSAConsultationNature_Description": "partOneData.contactInfoData.qsaServices.consultationDetails",
+  "Additional_Services_Reviewed": "partOneData.contactInfoData.qsaServices.additionalServicesReviewed",
+  "Conflict_Mitigation_Efforts": "partOneData.contactInfoData.qsaServices.conflictMitigation",
+  "Subcontracted_Yes": "partOneData.contactInfoData.subcontracting.used",
+  "Subcontracted_No": "partOneData.contactInfoData.subcontracting.notUsed",
+  "Subcontracted_Desc": "partOneData.contactInfoData.subcontracting.description",
+  "Consecutive_Roc_Years": "partOneData.contactInfoData.history.consecutiveRocYears",
+
+  "FullAssessment_Yes": "partOneData.contactInfoData.assessmentScope.fullAssessment",
+  "PartialAssessment_Yes": "partOneData.contactInfoData.assessmentScope.partialAssessment",
+
+  "Compliant_Yes": "partOneData.contactInfoData.assessmentOutcome.compliant",
+  "Non_Compliant_Yes": "partOneData.contactInfoData.assessmentOutcome.nonCompliant",
+  "Legal_Exception_Compliant_Yes": "partOneData.contactInfoData.assessmentOutcome.legalExceptionCompliant",
+
+  "SubReq_NA": "partOneData.contactInfoData.assessmentSubReq.notApplicable",
+  "SubReq_NotTested": "partOneData.contactInfoData.assessmentSubReq.notTested",
+  "SubReq_Legal": "partOneData.contactInfoData.assessmentSubReq.notInPlaceLegal",
+  "SubReq_Non_Legal": "partOneData.contactInfoData.assessmentSubReq.notInPlaceNotLegal",
+  "SubReq_Compensating": "partOneData.contactInfoData.assessmentSubReq.compensatingControl",
+  "SubReq_Customized": "partOneData.contactInfoData.assessmentSubReq.customizedApproach",
+
+  "AssessmentFindings": {
+    "repeat": true,
+    "source": "partOneData.contactInfoData.assessmentFindings",
+    "fields": {
+      "requirement": "requirement",
+      "finding": "finding",
+      "customizedApproach": "customizedApproach",
+      "compensatingControl": "compensatingControl"
+    }
+  },
+
+  "BusinessNature_Desc": "partOneData.businessOverviewData.businessNatureDescription",
+  "AccountDataHandling_Desc": "partOneData.businessOverviewData.accountDataHandlingDescription",
+  "SecurityImpactingServices": "partOneData.businessOverviewData.securityImpactingServices",
+  "Card_Present_Yes": "partOneData.businessOverviewData.paymentChannels.cardPresent",
+  "Mail_Tele_Order_Yes": "partOneData.businessOverviewData.paymentChannels.moto",
+  "E-com_Yes": "partOneData.businessOverviewData.paymentChannels.ecommerce",
+  "Other_Details": "partOneData.businessOverviewData.otherDetails",
+
+  "ScopeEvaluationDifference_Description": "partOneData.scopeOfWorkData.ScopeEvaluationDifference_Description",
+  "AssessorName_ScopeAttestation": "partOneData.scopeOfWorkData.AssessorName_ScopeAttestation",
+  "ExcludedScopeAreas_Description": "partOneData.scopeOfWorkData.ExcludedScopeAreas_Description",
+  "ScopeReductionFactors_Identification": "partOneData.scopeOfWorkData.ScopeReductionFactors_Identification",
+  "SAQEligibilityCriteria_Description": "partOneData.scopeOfWorkData.SAQEligibilityCriteria_Description",
+  "AssessorsValidation_AddInfo": "partOneData.scopeOfWorkData.AssessorsValidation_AddInfo",
+
+  "ScopeReductionSegmentation_Yes": "partOneData.scopeOfWorkData.ScopeReductionSegmentation_Yes",
+  "ScopeReductionSegmentation_No": "partOneData.scopeOfWorkData.ScopeReductionSegmentation_No",
+  "AssessorNetworkScope": "partOneData.scopeOfWorkData.AssessorNetworkScope",
+  "ImplemetedSeg_Desc": "partOneData.scopeOfWorkData.ImplemetedSeg_Desc",
+  "OutOfScopeEnv_Seg": "partOneData.scopeOfWorkData.OutOfScopeEnv_Seg",
+  "Assessor_SegVerification": "partOneData.scopeOfWorkData.Assessor_SegVerification",
+
+  "UsesValidatedPCIProducts_Yes": "partOneData.scopeOfWorkData.UsesValidatedPCIProducts_Yes",
+  "UsesValidatedPCIProducts_No": "partOneData.scopeOfWorkData.UsesValidatedPCIProducts_No",
+  "AssessorName_SolutionImplementation": "partOneData.scopeOfWorkData.AssessorName_SolutionImplementation",
+  "AdditionalComments_Findings": "partOneData.scopeOfWorkData.AdditionalComments_Findings",
+
+  "ValidatedProducts": {
+    "repeat": true,
+    "source": "partOneData.scopeOfWorkData.ValidatedProducts",
+    "fields": {
+      "ValidatedPCIProductName": "name",
+      "ValidatedProductVersion": "version",
+      "ValidatedProductPCIStandard": "standard",
+      "PCIProductListingReference": "listingReference",
+      "ListingExpiryDate": "expiryDate"
+    }
+  },
+
+  "Auth_Yes": "partOneData.reviewedEnvData.accountFlowOptions.authorization",
+  "Capture_Yes": "partOneData.reviewedEnvData.accountFlowOptions.capture",
+  "Settlement_Yes": "partOneData.reviewedEnvData.accountFlowOptions.settlement",
+  "Chargeback_Dispute_Yes": "partOneData.reviewedEnvData.accountFlowOptions.chargebackDispute",
+  "Refunds_Yes": "partOneData.reviewedEnvData.accountFlowOptions.refunds",
+  "Other_Yes": "partOneData.reviewedEnvData.accountFlowOptions.other",
+
+  "Data_Flows": {
+    "repeat": true,
+    "source": "partOneData.reviewedEnvData.accountFlows",
+    "fields": {
+      "Data_Flow": "flow",
+      "Data_Flow_Desc": "description"
+    }
+  },
+
+  "DataStores": {
+    "repeat": true,
+    "source": "partOneData.reviewedEnvData.dataStorage",
+    "fields": {
+      "DataStore": "dataStore",
+      "FileTableField_Name": "fileTableField",
+      "Stored_Elements": "storedElements",
+      "Security_Method": "securityMethod",
+      "Logging_Desc": "loggingDescription"
+    }
+  },
+
+  "IsSADStoredPostAuth_Yes": "partOneData.reviewedEnvData.sadStoredPostAuth_Yes",
+  "IsSADStoredPostAuth_No": "partOneData.reviewedEnvData.sadStoredPostAuth_No",
+  "issuer_func_SAD_Yes": "partOneData.reviewedEnvData.sadStoredAsIssuer_Yes",
+  "issuer_func_SAD_No": "partOneData.reviewedEnvData.sadStoredAsIssuer_No",
+
+  "ThirdPartyProvider": {
+    "repeat": true,
+    "source": "partOneData.reviewedEnvData.serviceProviders",
+    "fields": {
+      "ServiceProvider_CompanyName": "companyName",
+      "AccountDataSharing_ImpactSecurity": "accountDataImpact",
+      "ServiceProviderPurpose_Desc": "purpose",
+      "ThirdPartyPCIAssessment_Yes": "assessedYes",
+      "ThirdPartyPCIAssessment_No": "assessedNo",
+      "ThirdPartyAOCDate_PCIDSSVersion": "aocDate",
+      "ThirdPartyAOCVersion_PCIDSSVersion": "aocVersion",
+      "ThirdPartyServicesIncludedInAssessment_Yes": "includedInAssessmentYes",
+      "ThirdPartyServicesIncludedInAssessment_No": "includedInAssessmentNo"
+    }
+  },
+
+  "InscopeNetwork": {
+    "repeat": true,
+    "source": "partOneData.reviewedEnvData.inscopeNetwork",
+    "fields": {
+      "InScopeNetwork": "name",
+      "NetworkType": "type",
+      "NetworkPurpose": "purpose"
+    }
+  },
+
+  "OutOfScopeNetwork": {
+    "repeat": true,
+    "source": "partOneData.reviewedEnvData.connectedNonCDENetworks",
+    "fields": {
+      "NonCDEAccountDataNetwork_Description": "name",
+      "NonCDENetworkType": "type",
+      "NonCDENetworkFunction": "purpose"
+    }
+  },
+
+  "PhysicalLocations": {
+    "repeat": true,
+    "source": "partOneData.reviewedEnvData.facilities",
+    "fields": {
+      "InScopeFacilityType_Identification": "type",
+      "InScopeFacilityCount": "count",
+      "FacilityLocation_Identification": "location"
+    }
+  },
+
+  "SystemComponents": {
+    "repeat": true,
+    "source": "partOneData.reviewedEnvData.systemComponents",
+    "fields": {
+      "SystemComponentDetailsType": "type",
+      "SystemComponentCount": "count",
+      "SystemComponentVendor": "vendor",
+      "ProductNameAndVersion": "product",
+      "RoleFunctionDescription": "role"
+    }
+  },
+
+  "QuaterlyScan": {
+    "repeat": true,
+    "source": "partOneData.quarterlyScanFormData.externalScans",
+    "fields": {
+      "QuarterlyASVScanDates": "QuarterlyASVScanDates",
+      "ASVNamePerformingScan": "ASVNamePerformingScan",
+      "VulnerabilitiesFoundFailedInitialScan_Yes": "VulnerabilitiesFoundFailedInitialScan_Yes",
+      "VulnerabilitiesFoundFailedInitialScan_No": "VulnerabilitiesFoundFailedInitialScan_No",
+      "RescanDatesAfterVulnerabilitiesCorrected": "RescanDatesAfterVulnerabilitiesCorrected"
+    }
+  },
+
+  "Initial_Assessment_Yes": "partOneData.quarterlyScanFormData.Initial_Assessment_Yes",
+  "Initial_Assessment_No": "partOneData.quarterlyScanFormData.Initial_Assessment_No",
+  "QuarterlyScanDocName": "partOneData.quarterlyScanFormData.QuarterlyScanDocName",
+  "External_Scan_AssessorComments": "partOneData.quarterlyScanFormData.External_Scan_AssessorComments",
+  "isASVScanCompliant_Yes": "partOneData.quarterlyScanFormData.isASVScanCompliant_Yes",
+  "isASVScanCompliant_No": "partOneData.quarterlyScanFormData.isASVScanCompliant_No",
+
+  "QuaterlyInternalVulnerabilityScan": {
+    "repeat": true,
+    "source": "partOneData.quarterlyScanFormData.internalScans",
+    "fields": {
+      "QuarterlyInternalVulnerabilityScanDates": "QuarterlyInternalVulnerabilityScanDates",
+      "AuthenticatedScanPerformed_Yes": "AuthenticatedScanPerformed_Yes",
+      "AuthenticatedScanPerformed_No": "AuthenticatedScanPerformed_No",
+      "HighRiskCriticalVulnerabilitiesFound_Yes": "HighRiskCriticalVulnerabilitiesFound_Yes",
+      "HighRiskCriticalVulnerabilitiesFound_No": "HighRiskCriticalVulnerabilitiesFound_No",
+      "RescanDates_CorrectedVulnerabilities": "RescanDates_CorrectedVulnerabilities"
+    }
+  },
+  "Internal_InitialCompliant_Yes": "partOneData.quarterlyScanFormData.Internal_InitialCompliant_Yes",
+  "Internal_InitialCompliant_No": "partOneData.quarterlyScanFormData.Internal_InitialCompliant_No",
+  "InternalScanPolicyDocName": "partOneData.quarterlyScanFormData.InternalScanPolicyDocName",
+  "Internal_Scan_AssessorComments": "partOneData.quarterlyScanFormData.Internal_Scan_AssessorComments",
+  "constraints": "appendixData[1].constraints",
+  "compensatingControlsDefinition": "appendixData[1].compensatingControlsDefinition",
+  "originalObjective": "appendixData[1].originalObjective",
+  "compensatingObjective": "appendixData[1].compensatingObjective",
+  "identifiedRisk": "appendixData[1].identifiedRisk",
+  "validationMethod": "appendixData[1].validationMethod",
+  "maintenanceProcess": "appendixData[1].maintenanceProcess",
+  "requirementNumber": "appendixData[1].requirementNumber",
+  "requirementDefinition": "appendixData[1].requirementDefinition",
+  "customizedControlName": "appendixData[2].customizedControlName",
+  "controlDescription": "appendixData[2].controlDescription",
+  "objectiveMeeting": "appendixData[2].objectiveMeeting",
+  "controlsMatrixDocumentation": "appendixData[2].controlsMatrixDocumentation",
+  "targetedRiskAnalysis": "appendixData[2].targetedRiskAnalysis",
+  "assessorNames": "appendixData[2].assessorNames",
+  "testingProcedure1": "appendixData[2].testingProcedure1",
+  "whatTested1": "appendixData[2].whatTested1",
+  "evidenceExamined1": "appendixData[2].evidenceExamined1",
+  "testingResults1": "appendixData[2].testingResults1",
+  "testingProcedure2": "appendixData[2].testingProcedure2",
+  "whatTested2": "appendixData[2].whatTested2",
+  "evidenceExamined2": "appendixData[2].evidenceExamined2",
+  "testingResults2": "appendixData[2].testingResults2"
+}

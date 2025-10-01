@@ -1,0 +1,29 @@
+
+.formRow {
+    display: flex;
+    gap: 50px;
+    margin-top: 2rem;
+  }
+
+  .AEformRow{
+    margin-top: 2rem;
+  }
+  
+  .formField {
+    flex: 1;
+    min-width: 0;
+  }
+  
+  .selectDeviceDropdown {
+    min-width: 20%;
+    border-radius: 8px;
+    margin-top: 0px;
+    margin-bottom: 20px;
+  }
+  
+  .buttonContainer {
+    display: flex;
+    justify-content: flex-start;
+    margin-top: 20px;
+  }
+  
