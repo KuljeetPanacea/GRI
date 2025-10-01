@@ -761,3 +761,86 @@ export const getEvidenceTracker = async (
     throw error;
   }
 };
+
+
+//Assurance 
+export const uploadAssuranceFile = async (
+  axiosInstant: AxiosInstance,
+  file: File
+): Promise<string> => {
+  const { data } = await axiosInstant.post(
+    "/api/additionalInfo/generate-presigned-url",
+    {
+      fileName: file.name,
+      fileType: file.type,
+    },
+    { withCredentials: true }
+  );
+  
+  const { url, key } = data;
+  
+  const uploadResponse = await axiosInstant.put(url, file, {
+    headers: {
+      "Content-Type": file.type,
+    },
+  });
+  
+  if (uploadResponse.status === 200) {
+    return key;
+  } else {
+    throw new Error("Upload failed");
+  }
+};
+
+export const saveAssuranceFileInfo = async (
+  axiosInstance: AxiosInstance,
+  projectId: string,
+  type: "limited" | "reasonable",
+  key: string
+) => {
+  try {
+    const payload = { projectId, [type]: key };
+    const response = await axiosInstance.post(
+      "/api/additionalInfo/save",
+      payload,
+      { withCredentials: true }
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error saving assurance file info:", error);
+    throw error;
+  }
+};
+
+export const fetchAssuranceFiles = async (
+  axiosInstance: AxiosInstance,
+  projectId: string
+) => {
+  try {
+    const response = await axiosInstance.get(
+      `/api/additionalInfo/by-project/${projectId}`,
+      { withCredentials: true }
+    );
+    return response.data; // { limited: string, reasonable: string }
+  } catch (error) {
+    console.error("Error fetching assurance files:", error);
+    throw error;
+  }
+};
+
+export const getAssurancePresignedUrl = async (
+  axiosInstance: AxiosInstance,
+  key: string
+) => {
+  try {
+    const response = await axiosInstance.post(
+      "/api/additionalInfo/get-presigned-url",
+      { fileKey: key },
+      { withCredentials: true }
+    );
+    return response.data.url;
+  } catch (error: unknown) {
+    console.error("Error getting presigned URL:", error);
+    throw error;
+  }
+};
