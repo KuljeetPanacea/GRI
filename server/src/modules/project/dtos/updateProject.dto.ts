@@ -89,7 +89,7 @@ export class UpdateProjectDto {
 
   @IsString()
   @IsOptional()
-  QSA?: string;
+  Auditor?: string;
 
   @IsString()
   @IsOptional()

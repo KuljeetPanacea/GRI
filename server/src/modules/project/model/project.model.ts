@@ -25,7 +25,7 @@ export class Project extends TenantBaseModel {
     public client: Object;
 
     @Prop({type:Object })
-    public QSA: Object;
+    public Auditor: Object;
     @Prop({type:Object })
     public ScopeDocument: Object;
 

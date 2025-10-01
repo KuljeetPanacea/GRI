@@ -97,7 +97,7 @@ const GapManagementComponent = () => {
   
   // Get user role from Redux store
   const userRole = useSelector((state: RootState) => state.login.user?.roles?.[0]);
-  const isAEPocUser = userRole === "AEPoc" || userRole === "AEPoC";
+  const isAEPocUser = userRole === "ClientPoc" || userRole === "ClientPoC";
 
   // Handle questionnaire data from navigation state
   useEffect(() => {
@@ -106,7 +106,7 @@ const GapManagementComponent = () => {
       if (questionnaireData && questionsWithGaps) {
         setIsQuestionnaireView(true);
         setIsAEPocView(isAEPoc || false);
-        console.log('AEPoc view set to:', isAEPoc || false);
+        console.log('ClientPoc view set to:', isAEPoc || false);
         console.log('User role:', userRole, 'isAEPocUser:', isAEPocUser);
 
         // Transform questionnaire gaps to table format
@@ -309,7 +309,7 @@ const GapManagementComponent = () => {
                 onChange={(e) => setSelectedQuestionnaire(e.target.value)}
                 disabled={isAEPocView || isAEPocUser}
                 className={styles.statusSelect}
-                title={isAEPocView || isAEPocUser ? "Dropdown disabled for AEPoc users" : "Select questionnaire"}
+                title={isAEPocView || isAEPocUser ? "Dropdown disabled for Client Poc users" : "Select questionnaire"}
               >
                 {availableQuestionnaires.map((questionnaire) => (
                   <option key={questionnaire} value={questionnaire}>

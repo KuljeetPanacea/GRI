@@ -67,15 +67,15 @@ const ProjectManagementListView: React.FC<{ showSnackbar: (msg: string, severity
     },
     { key: "currentAuditStage", header: "Project Stage" },
     {
-      key: "QSA",
-      header: "QSA",
+      key: "Auditor",
+      header: "Auditor",
       render: (_: number, row: Project) => (
-        <div className={styles.name}>{row.assignedTo?.find((entity) => entity.role === "QSA")?.name}</div>
+        <div className={styles.name}>{row.assignedTo?.find((entity) => entity.role === "Auditor")?.name}</div>
       ),
     },
     {
       key: "qsaAssignedDate",
-      header: "QSA Assigned date",
+      header: "Auditor Assigned date",
       render: (_: number, row: Project) => (
         <div className={styles.name}>
           {row.createDtTime

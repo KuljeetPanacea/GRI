@@ -58,7 +58,7 @@ const ProjectFilter = () => {
   };
 
   const axiosInstance = useAxios();
-  const [QSA, setQSA] = useState<string[]>([]);
+  const [Auditor, setAuditor] = useState<string[]>([]);
   const [projectStatusOptions, setProjectStatusOptions] = useState<string[]>(
     []
   );
@@ -67,16 +67,16 @@ const ProjectFilter = () => {
 
   const fetchQSA = async () => {
     try {
-      const responseOfQSA = await getUserByRole(axiosInstance, "QSA");
+      const responseOfQSA = await getUserByRole(axiosInstance, "Auditor");
 
       const QSAvalues = responseOfQSA.map((user: User) => ({
         label: `${user.name} (${user.email})`,
         value: user.id,
       }));
 
-      setQSA(QSAvalues);
+      setAuditor(QSAvalues);
     } catch (error) {
-      console.error("Error fetching QSA:", error);
+      console.error("Error fetching Auditor:", error);
     }
   };
 
@@ -132,8 +132,8 @@ const ProjectFilter = () => {
         <SelectDropdown
           value={qsa}
           onChange={(e) => dispatch(setQsaFilter(e.target.value))}
-          options={QSA}
-          title="QSA"
+          options={Auditor}
+          title="Auditor"
         />
 
         <Button

@@ -104,7 +104,7 @@ const AEPocCard = () => {
               <div className={style.detailRow}>
                 <Typography className={style.detailLabel}>
                   Auditor assigned: {project.assignedTo
-                    ?.filter((auditor) => auditor.role === "QSA")
+                    ?.filter((auditor) => auditor.role === "Auditor")
                     .map((auditor) => auditor.name)
                     .join(", ") || "N/A"}
                 </Typography>

@@ -113,7 +113,7 @@ export class ProjectService extends BaseService {
       const sentEmails = new Set<string>();
       const qaUsers =
         projectData?.assignedTo?.filter(
-          (a) => a.role === "QSA" || a.role === "QA"
+          (a) => a.role === "Auditor" || a.role === "QA"
         ) || [];
 
       for (const { id } of qaUsers) {
@@ -710,7 +710,7 @@ export class ProjectService extends BaseService {
       newUser.email = aepocData.pocEmail;
       newUser.password = "Test@123";
       newUser.name = aepocData.pocName;
-      newUser.roles = [UserRole.AEPOC];
+      newUser.roles = [UserRole.ClientPOC];
       newUser.countryCode = 91;
       newUser.mobileNumber = Number(aepocData.pocPhoneNumber);
       newUser.status = UserStatus.Active;
@@ -723,13 +723,13 @@ export class ProjectService extends BaseService {
     const aepocAssignment = {
       id: aepocUser.id,
       name: aepocUser.name,
-      role: UserRole.AEPOC,
+      role: UserRole.ClientPOC,
     };
 
     // Ensure the AEPOC user is not already assigned to the project
     if (
       !projectDetails.assignedTo.some(
-        (entity) => entity.id === aepocUser.id && entity.role === UserRole.AEPOC
+        (entity) => entity.id === aepocUser.id && entity.role === UserRole.ClientPOC
       )
     ) {
       projectDetails.assignedTo.push(aepocAssignment);

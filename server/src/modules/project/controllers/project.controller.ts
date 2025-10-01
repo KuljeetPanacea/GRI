@@ -105,7 +105,7 @@ export class ProjectController {
   @UseGuards(JwtAuthGuard,PermissionsGuard)
   async projectStageChange(@Param("id") projectId: string) {
    const response = await this.projectService.projectStageChange(projectId)
-   return { success: true, messgae: "Send To AEPOC Succesfully" };
+   return { success: true, messgae: "Send To Client POC Succesfully" };
   }
 
   @Post("add-new-questionair/:projectId/:questionairId")

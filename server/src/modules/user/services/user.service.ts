@@ -225,7 +225,7 @@ if (filter.name &&filter.name.trim() !== "") {
     // Get role IDs for both superadmin and admin roles
     const restrictedRoles = await this.roleService.findRoleByName([
       UserRole.SuperAdmin, 
-      UserRole.Admin
+      UserRole.ProjectManager
     ]);
     
     const restrictedRoleIds = restrictedRoles.map(role => role.id);

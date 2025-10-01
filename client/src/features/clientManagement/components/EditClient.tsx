@@ -79,7 +79,7 @@ const EditClient = () => {
                     onChange={(e) => setFormData({ ...formData, clientEmail: e.target.value })}
                 />
                 <SelectDropdown
-                    options={["Admin", "User", "Manager"]}
+                    options={["ProjectManager", "User", "Manager"]}
                     title="Role"
                     value={formData.clientRole}
                     onChange={(e) => setFormData({ ...formData, clientRole: e.target.value })}
