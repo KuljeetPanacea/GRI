@@ -24,6 +24,7 @@
     "axios": "^1.7.9",
     "date-fns": "^4.1.0",
     "dayjs": "^1.11.13",
+    "docx-preview": "^0.3.7",
     "lodash.debounce": "^4.0.8",
     "lucide-react": "^0.525.0",
     "react": "^18.3.1",

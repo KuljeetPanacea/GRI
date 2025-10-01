@@ -124,6 +124,12 @@ const AssessmentView = () => {
             </Button>
             <Button
               variant="outlined"
+              onClick={() => handlePhaseChange("assuranceReport")}
+            >
+              Assurance Report
+            </Button>
+            <Button
+              variant="outlined"
               onClick={() => handlePhaseChange("complianceReport")}
             >
               Go to Compliance Report

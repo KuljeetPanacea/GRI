@@ -17,8 +17,13 @@ const phases = [
     phaseName: "gapandRemediation",
     title: "Gap & Remediation",
   },
-  {
+   {
     id: 4,
+    phaseName: "assuranceReport",
+    title: "Assurance Report",
+  },
+  {
+    id: 5,
     phaseName: "complianceReport",
     title: "Compliance Report",
   },
