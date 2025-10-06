@@ -86,6 +86,29 @@ export class QuestionDto {
     clientComment?: string;
     status?: string;
   };
+
+  // Table-specific properties
+  @IsOptional()
+  @IsArray()
+  tableColumns?: Array<{
+    id: string;
+    label: string;
+    type: 'text' | 'number' | 'date' | 'select' | 'checkbox';
+    options?: string[];
+    validation?: {
+      min?: number;
+      max?: number;
+      pattern?: string;
+    };
+  }>;
+
+  @IsOptional()
+  @IsString()
+  tableRows?: number;
+
+  @IsOptional()
+  @IsArray()
+  tableData?: Record<string, any>[];
 }
 
 export class QuestionnaireDto extends BaseDTO {

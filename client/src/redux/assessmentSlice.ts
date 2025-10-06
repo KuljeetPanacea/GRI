@@ -1,9 +1,28 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { RootState } from "./store";
-import { Control } from "../features/AuditProjectFlow/phases/Assessment/useAssessmentView";
 import { RocControlFindingDTO } from "../api/rocData";
-import { AssessmentQuestion } from "../features/AuditProjectFlow/phases/Assessment/useExpandPanel";
-import { EvidenceType } from "../features/AuditProjectFlow/phases/Assessment/components/useEvidenceUpload";
+
+// Define local interfaces to replace deleted imports
+interface Control {
+  id: string;
+  name: string;
+  title: string;
+  description?: string;
+}
+
+interface AssessmentQuestion {
+  id: string;
+  text: string;
+  type: string;
+  required?: boolean;
+}
+
+interface EvidenceType {
+  fileName: string;
+  fileType: string;
+  folderName: string;
+  s3Path: string;
+}
 
 interface Comment {
   Date: string;

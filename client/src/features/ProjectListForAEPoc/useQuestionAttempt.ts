@@ -5,20 +5,46 @@ import useAxios from '../../api/useAxios';
 import { storeUserResponse } from '../../api/project';
 
 interface Question {
-  _id: string;
+  _id?: string;
   text: string;
   type: string;
   choices?: Array<{ value: string }>;
   requirements?: string | null;
   subRequirements?: string | null;
   subControl?: string | null;
-  userResponse?: string;
+  userResponse?: string | string[];
+  gaps?: {
+    gaps?: string;
+    clientComment?: string;
+    status?: string;
+  };
+  // Table-specific properties
+  tableColumns?: Array<{
+    id: string;
+    label: string;
+    type: 'text' | 'number' | 'date' | 'select' | 'checkbox';
+    options?: string[];
+    validation?: {
+      min?: number;
+      max?: number;
+      pattern?: string;
+    };
+  }>;
+  tableRows?: number;
+  tableData?: Record<string, string | number | boolean>[];
 }
 
 interface Questionnaire {
   id?: string;
   _id?: string;
   title?: string;
+  description?: string;
+  default?: boolean;
+  createDtTime?: string;
+  createdBy?: string;
+  updateDtTime?: string;
+  complianceType?: string;
+  status?: string;
   questions?: Question[];
   currentQuestionTracker?: string;
 }
@@ -32,7 +58,7 @@ const useQuestionAttempt = (questionnaireId: string) => {
   const [error, setError] = useState<string>('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [questionsPerPage, setQuestionsPerPage] = useState(1);
-  const [localResponses, setLocalResponses] = useState<{[key: string]: string | string[]}>({});
+  const [localResponses, setLocalResponses] = useState<{[key: string]: string | string[] | Record<string, string | number | boolean>[]}>({});
   const [isSaving, setIsSaving] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
   const initializedQuestions = useRef<Set<string>>(new Set());
@@ -108,11 +134,27 @@ const useQuestionAttempt = (questionnaireId: string) => {
   // Initialize local responses for current questions
   useEffect(() => {
     if (currentQuestions && currentQuestions.length > 0) {
-      const newResponses: {[key: string]: string | string[]} = {};
+      const newResponses: {[key: string]: string | string[] | Record<string, string | number | boolean>[]} = {};
       currentQuestions.forEach(question => {
-        // Only initialize if not already initialized
-        if (!initializedQuestions.current.has(question._id)) {
-          newResponses[question._id] = question.userResponse || '';
+        // Only initialize if not already initialized and _id exists
+        if (question._id && !initializedQuestions.current.has(question._id)) {
+          if (question.type === 'table_type') {
+            if (question.userResponse) {
+              // Parse table data from JSON string
+              try {
+                const tableData = JSON.parse(question.userResponse as string);
+                newResponses[question._id] = tableData;
+              } catch (e) {
+                console.error('Error parsing table data:', e);
+                newResponses[question._id] = [];
+              }
+            } else {
+              // Initialize table questions with empty array
+              newResponses[question._id] = [];
+            }
+          } else {
+            newResponses[question._id] = question.userResponse || '';
+          }
           initializedQuestions.current.add(question._id);
         }
       });
@@ -128,7 +170,7 @@ const useQuestionAttempt = (questionnaireId: string) => {
   }, []);
 
   // Handle local response change for multiple questions
-  const handleLocalResponseChange = useCallback((questionId: string, value: string | string[]) => {
+  const handleLocalResponseChange = useCallback((questionId: string, value: string | string[] | Record<string, string | number | boolean>[]) => {
     setLocalResponses(prev => {
       // Only update if the value actually changed
       if (prev[questionId] === value) {
@@ -144,13 +186,23 @@ const useQuestionAttempt = (questionnaireId: string) => {
 
   // Check if all questions on current page are answered
   const allQuestionsAnswered = currentQuestions.every(question => {
+    if (!question._id) return false;
     const response = localResponses[question._id];
-    return response && (Array.isArray(response) ? response.length > 0 : response.toString().trim() !== '');
+    
+    if (response === undefined || response === null) return false;
+    
+    // Handle table data
+    if (question.type === 'table_type') {
+      return Array.isArray(response); // Table questions are considered answered if they have any data (even empty array)
+    }
+    
+    // Handle other response types
+    return Array.isArray(response) ? response.length > 0 : response.toString().trim() !== '';
   });
 
   // Submit response to database
   const handleSubmitResponse = useCallback(async () => {
-    if (!currentQuestion || !userResponse) return;
+    if (!currentQuestion || !userResponse || !currentQuestion._id) return;
 
     try {
       setIsSubmitting(true);
@@ -226,7 +278,7 @@ const useQuestionAttempt = (questionnaireId: string) => {
   }, [currentQuestionIndex]);
 
   // Save all responses for current page
-  const handleSaveAllResponses = useCallback(async (responses: {[key: string]: string | string[]}) => {
+  const handleSaveAllResponses = useCallback(async (responses: {[key: string]: string | string[] | Record<string, string | number | boolean>[]}) => {
     try {
       setIsSubmitting(true);
       
@@ -235,26 +287,48 @@ const useQuestionAttempt = (questionnaireId: string) => {
 
       // Save each response
       for (const [questionId, response] of Object.entries(responses)) {
-        if (response && (Array.isArray(response) ? response.length > 0 : response.toString().trim() !== '')) {
-          const responseData = {
-            questionId: questionId,
-            choiceValue: Array.isArray(response) ? response : [response],
-            assessmentId: questionnaireId,
-          };
-
-          await storeUserResponse(role, axiosInstance, responseData);
+        if (response !== undefined && response !== null) {
+          // Find the question to check its type
+          const question = questionnaire?.questions?.find(q => q._id === questionId);
+          
+          if (question?.type === 'table_type') {
+            // This is table data - convert to JSON string for storage
+            const responseData = {
+              questionId: questionId,
+              choiceValue: [JSON.stringify(response)],
+              assessmentId: questionnaireId,
+            };
+            await storeUserResponse(role, axiosInstance, responseData);
+          } else if (Array.isArray(response) ? response.length > 0 : response.toString().trim() !== '') {
+            // Handle regular responses
+            const responseData = {
+              questionId: questionId,
+              choiceValue: Array.isArray(response) ? response as string[] : [response as string],
+              assessmentId: questionnaireId,
+            };
+            await storeUserResponse(role, axiosInstance, responseData);
+          }
         }
       }
 
       // Update local questionnaire state
       if (questionnaire && questionnaire.questions) {
         const updatedQuestions = questionnaire.questions.map(q => {
+          if (!q._id) return q;
           const response = responses[q._id];
-          if (response) {
-            return {
-              ...q,
-              userResponse: Array.isArray(response) ? response.join(', ') : response
-            };
+          if (response !== undefined && response !== null) {
+            // Handle table data
+            if (q.type === 'table_type') {
+              return {
+                ...q,
+                userResponse: JSON.stringify(response)
+              };
+            } else {
+              return {
+                ...q,
+                userResponse: Array.isArray(response) ? response.join(', ') : response
+              };
+            }
           }
           return q;
         });

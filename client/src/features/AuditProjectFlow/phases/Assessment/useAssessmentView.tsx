@@ -33,6 +33,8 @@ import {
 } from "../../../../api/rocData";
 
 export interface Control {
+  id: string;
+  name: string;
   title: string;
 }
 
@@ -96,7 +98,11 @@ const useAssessment = () => {
         const res = response.data;
         if (res && res.length > 0) {
           setHeader(res);
-          dispatch(setSelectedControl({ title: res[0].controlNo }));
+          dispatch(setSelectedControl({ 
+            id: res[0].controlNo, 
+            name: res[0].controlNo, 
+            title: res[0].controlNo 
+          }));
           dispatch(setSelectedAssesmentId(res[0].assessmentId));
         }
       } catch (err) {

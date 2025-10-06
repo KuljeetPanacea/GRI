@@ -498,6 +498,20 @@ export class ProjectService extends BaseService {
             case "multiple_choice":
               userResponse = isArray ? choiceValue : [choiceValue];
               break;
+            case "table_type":
+              // For table_type, parse the JSON string and store in tableData
+              try {
+                const tableData = isArray ? JSON.parse(choiceValue[0]) : JSON.parse(choiceValue);
+                return { 
+                  ...question, 
+                  userResponse: JSON.stringify(tableData),
+                  tableData: tableData
+                };
+              } catch (error) {
+                console.error('Error parsing table data:', error);
+                userResponse = question.userResponse;
+              }
+              break;
             default:
               userResponse = question.userResponse;
           }

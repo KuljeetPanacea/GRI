@@ -8,6 +8,7 @@ import {
   RadioGroup,
   TextField,
 } from "@mui/material";
+import TableInput from "./TableInput";
 import styles from "../BuildQstnr.module.css";
 import PrimaryButton from "../../../../common/ui/PrimaryButton";
 import {  useEffect, useState } from "react";
@@ -82,7 +83,7 @@ const QstnPreview = () => {
   const handleNext = async () => {
     if (!currentQuestion) return;
   
-    let selectedResponse: string | string[] = "";
+    let selectedResponse: string | string[] | Record<string, string | number | boolean>[] = "";
   
     if (currentQuestion.type === "single_choice") {
       selectedResponse = selectedValue;
@@ -93,6 +94,8 @@ const QstnPreview = () => {
       currentQuestion.type === "long_text"
     ) {
       selectedResponse = textValue;
+    } else if (currentQuestion.type === "table_type") {
+      selectedResponse = currentQuestion.tableData || [];
     }
   
     try {
@@ -154,7 +157,14 @@ const handlePrevious = () => {
 
   return (
     <div className={styles.previewContainer}>
-      <Card className={styles.previewCard} key={currentQuestion._id}>
+      <Card 
+        className={
+          currentQuestion.type === "table_type" 
+            ? styles.tablePreviewCard 
+            : styles.previewCard
+        } 
+        key={currentQuestion._id}
+      >
         <Typography variant="h4" sx={{ mb: 2 }}>
           {currentQuestion.text}
         </Typography>
@@ -198,6 +208,20 @@ const handlePrevious = () => {
               }
             }}
             style={{ marginTop: "10px", marginBottom: "10px" }}
+          />
+        ) : currentQuestion.type === "table_type" ? (
+          <TableInput
+            columns={currentQuestion.tableColumns || []}
+            data={currentQuestion.tableData || []}
+            onDataChange={(data) => {
+              // Update the current question with new table data
+              setCurrentQuestion({
+                ...currentQuestion,
+                tableData: data
+              });
+              console.log("Table data changed:", data);
+            }}
+            readOnly={false}
           />
         ) : currentQuestion.type === "short_text" ||
           currentQuestion.type === "long_text" ? (

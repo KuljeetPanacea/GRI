@@ -13,7 +13,7 @@ import {
 } from "../../../../redux/GapsRemediationSlice";
 import { useNavigate, useLocation } from 'react-router-dom';
 import useAxios from '../../../../api/useAxios';
-import { getSignedUrlAssessment, storeGapComment } from '../../../../api/project';
+import { getSignedUrlAssessment, storeGapComment, storeUserResponse, userResponseDto } from '../../../../api/project';
 import { Evidence } from '../../../../redux/assessmentSlice';
 import { createDebounce } from '../../../../common/hooks/useDebouncedValue';
 interface HoverData {
@@ -60,6 +60,12 @@ type DeviceGap = {
   completedGaps: number;
 };
 
+// Define the type for evidence
+interface GapEvidence {
+  name: string;
+  uploadedAt: string;
+}
+
 // Define the type for the flattened gap object
 interface FlattenedGap {
   id: string;
@@ -67,9 +73,9 @@ interface FlattenedGap {
   controlReference: string;
   AEInternalAssessor: string;
   Status: string;
-  previousEvidence: Evidence[];
+  previousEvidence: GapEvidence[];
   previousDate: string;
-  latestEvidence: Evidence[];
+  latestEvidence: GapEvidence[];
   latestDate: string;
   resolutionComment: string;
   resolutionDate: string;
@@ -129,7 +135,12 @@ export const useGapAndRemediationView = () => {
   const [questionnaireGaps, setQuestionnaireGaps] = useState<QuestionnaireGap[]>([]);
   const [isQuestionnaireView, setIsQuestionnaireView] = useState(false);
   const [selectedQuestionnaire, setSelectedQuestionnaire] = useState<string>("");
-  const [isAEPocView, setIsAEPocView] = useState(false);
+  const [isClientPocView, setIsClientPocView] = useState(false);
+  
+  // State for popup
+  const [isPopupOpen, setIsPopupOpen] = useState(false);
+  const [selectedGap, setSelectedGap] = useState<QuestionnaireGap | null>(null);
+  const [popupResponse, setPopupResponse] = useState<string | string[]>("");
   const { totalNoOfGaps, PendingClient, PendingQsa, selectedReqNo,gapRemediationDropdown, gapRemediationData, ActiveFilter ,requirementsData} =
       useSelector((state: RootState) => state.gapsRemediation);
   const selectedProject = useSelector(
@@ -138,7 +149,7 @@ export const useGapAndRemediationView = () => {
   
   // Get user role from Redux store
   const userRole = useSelector((state: RootState) => state.login.user?.roles?.[0]);
-  const isAEPocUser = userRole === "AEPoc" || userRole === "AEPoC";
+  const isClientPoC = userRole === "ClientPoC" || userRole === "ClientPoC";
 
 console.log("gapRemediationData", gapRemediationData);
   const { handlePhaseClick } = usePhaseBreadcrumbs();
@@ -158,9 +169,8 @@ useEffect(() => {
     const { questionnaireData, questionsWithGaps, isAEPoc } = location.state;
     if (questionnaireData && questionsWithGaps) {
       setIsQuestionnaireView(true);
-      setIsAEPocView(isAEPoc || false);
-      console.log('AEPoc view set to:', isAEPoc || false);
-      console.log('User role:', userRole, 'isAEPocUser:', isAEPocUser);
+      setIsClientPocView(isAEPoc || false);
+      
 
       // Transform questionnaire gaps to table format
       const transformedGaps: QuestionnaireGap[] = questionsWithGaps.map(
@@ -192,7 +202,7 @@ useEffect(() => {
       }
     }
   }
-}, [location.state, userRole, isAEPocUser]);
+}, [location.state, userRole, isClientPoC]);
 
 
 const setDropdownFilter = async (value: string) => {
@@ -454,27 +464,103 @@ const matchesAssessor =
  // Calculate questionnaire gaps count
  const questionnaireGapsCount = questionnaireGaps.length;
  
- // Calculate combined status data
- const statusData = [
-    { 
-      label: "Total gaps", 
-      count: isQuestionnaireView ? questionnaireGapsCount : totalNoOfGaps, 
-      color: "#1E88E5", 
-      type: "total" 
-    },
-    { 
-      label: "Pending client", 
-      count: isQuestionnaireView ? questionnaireGapsCount : PendingClient, 
-      color: "#EC8526", 
-      type: "completed" 
-    },
-    { 
-      label: "Pending Auditor", 
-      count: isQuestionnaireView ? questionnaireGapsCount : PendingQsa, 
-      color: "#DD524C", 
-      type: "pending" 
-    },
-  ];
+  // Handle row click based on user type
+  const handleRowClickWithUserCheck = (index: number, gap: QuestionnaireGap) => {
+    if (isClientPoC) {
+      // For AEPoc users, open popup with actual question
+      setSelectedGap(gap);
+      
+      // Initialize response based on question type
+      if (gap.questionType === 'multiple_choice') {
+        // For multiple choice, convert comma-separated string to array
+        const responseArray = gap.userResponse ? gap.userResponse.split(',').map(s => s.trim()) : [];
+        setPopupResponse(responseArray);
+      } else {
+        // For single choice and text, use string directly
+        setPopupResponse(gap.userResponse || "");
+      }
+      
+      setIsPopupOpen(true);
+    } else {
+      // For other users, redirect to assessment phase with exact question
+      handleRowClick(index);
+      // Navigate to assessment phase with question data
+      navigate('/landing/assessment', { 
+        state: { 
+          questionId: gap.questionId,
+          questionnaireId: gap.questionnaireTitle,
+          questionText: gap.questionText,
+          currentResponse: gap.userResponse,
+          questionType: gap.questionType,
+          choices: gap.choices
+        } 
+      });
+    }
+  };
+
+  // Handle popup response update
+  const handlePopupResponseUpdate = async () => {
+    if (selectedGap) {
+      try {
+        // Convert array to string for API call if needed
+        const responseValue = Array.isArray(popupResponse) ? popupResponse.join(', ') : popupResponse;
+        
+        // Prepare the API payload
+        const userResponseData: userResponseDto = {
+          questionId: selectedGap.questionId,
+          choiceValue: Array.isArray(popupResponse) ? popupResponse : [responseValue]
+        };
+        
+        // Call the userResponse API
+        await storeUserResponse(userRole || "AEPoc", axiosInstance, userResponseData);
+        
+        // Update the userResponse in local state
+        setQuestionnaireGaps((prevGaps) =>
+          prevGaps.map((g) =>
+            g.id === selectedGap.id
+              ? { ...g, userResponse: responseValue }
+              : g
+          )
+        );
+        
+        setIsPopupOpen(false);
+        setSelectedGap(null);
+        setPopupResponse("");
+      } catch (error) {
+        console.error('Error updating user response:', error);
+      }
+    }
+  };
+
+  // Close popup
+  const closePopup = () => {
+    setIsPopupOpen(false);
+    setSelectedGap(null);
+    setPopupResponse("");
+  };
+
+
+  // Calculate combined status data
+  const statusData = [
+     { 
+       label: "Total gaps", 
+       count: isQuestionnaireView ? questionnaireGapsCount : totalNoOfGaps, 
+       color: "#1E88E5", 
+       type: "total" 
+     },
+     { 
+       label: "Pending client", 
+       count: isQuestionnaireView ? questionnaireGapsCount : PendingClient, 
+       color: "#EC8526", 
+       type: "completed" 
+     },
+     { 
+       label: "Pending Auditor", 
+       count: isQuestionnaireView ? questionnaireGapsCount : PendingQsa, 
+       color: "#DD524C", 
+       type: "pending" 
+     },
+   ];
   return {
     handleDeviceChange,
     activeFilter, 
@@ -526,10 +612,10 @@ const matchesAssessor =
     setIsQuestionnaireView,
     selectedQuestionnaire,
     setSelectedQuestionnaire,
-    isAEPocView,
-    setIsAEPocView,
+    isClientPocView,
+    setIsClientPocView,
     userRole,
-    isAEPocUser,
+    isClientPoC,
     location,
     processGapsForMerging,
     filteredQuestionnaireGaps,
@@ -538,7 +624,17 @@ const matchesAssessor =
     getStatusTextColor,
     processedGaps,
     handleClientResponseChange,
-    questionnaireGapsCount
+    questionnaireGapsCount,
+    // New popup-related state and functions
+    isPopupOpen,
+    setIsPopupOpen,
+    selectedGap,
+    setSelectedGap,
+    popupResponse,
+    setPopupResponse,
+    handleRowClickWithUserCheck,
+    handlePopupResponseUpdate,
+    closePopup
   };
 };
 

@@ -4,59 +4,11 @@ import styles from "./styles/GapManagementComponent.module.css";
 import { AlertTriangle } from "lucide-react";
 import { setIsGapRemediation } from "../../../../../redux/GapsRemediationSlice";
 import { useGapAndRemediationView } from "../useGapAndRemediationView";
-import { useState } from "react";
-import { storeUserResponse, userResponseDto, storeGapComment } from "../../../../../api/project";
-import { useSelector } from "react-redux";
-import { RootState } from "../../../../../redux/store";
-import { useLocation } from "react-router-dom";
-
-interface Evidence {
-  name: string;
-  uploadedAt: string;
-}
-
-// Define the type for the flattened gap object
-interface FlattenedGap {
-  id: string;
-  description: string;
-  controlReference: string;
-  AEInternalAssessor: string;
-  Status: string;
-  previousEvidence: Evidence[];
-  previousDate: string;
-  latestEvidence: Evidence[];
-  latestDate: string;
-  resolutionComment: string;
-  resolutionDate: string;
-  originalId: string;
-  ReqNo: string;
-  subReqNo: string;
-  originalIndex?: number;
-  isFirstInGroup?: boolean;
-  rowSpan?: number;
-  uploadedAt?: string;
-}
-
-// Define the type for questionnaire gaps
-interface QuestionnaireGap {
-  id: string;
-  questionText: string;
-  userResponse: string;
-  gapComment: string;
-  questionnaireTitle: string;
-  questionnairePhase: string;
-  questionId: string;
-  status?: string;
-  clientComment?: string;
-  questionType?: string;
-  choices?: Array<{ value: string }>;
-}
+import { storeGapComment } from "../../../../../api/project";
 
 const GapManagementComponent = () => {
-  const location = useLocation();
   const {
     selectedRow,
-
     handleResolveClick,
     handleRowClick,
     handleEvidenceClick,
@@ -65,102 +17,24 @@ const GapManagementComponent = () => {
     // New questionnaire-related state and functions
     setQuestionnaireGaps,
     isQuestionnaireView,
-    isAEPocView,
-    isAEPocUser,
+    isClientPocView,
+    isClientPoC,
     filteredQuestionnaireGaps,
     processedGaps,
     handleClientResponseChange,
     axiosInstance,
+    // Popup-related state and functions
+    isPopupOpen,
+    selectedGap,
+    popupResponse,
+    setPopupResponse,
+    handleRowClickWithUserCheck,
+    handlePopupResponseUpdate,
+    closePopup
   } = useGapAndRemediationView();
 
-  // Get user role from Redux store
-  const userRole = useSelector((state: RootState) => state.login.user?.roles?.[0]);
-
-  // State for popup
-  const [isPopupOpen, setIsPopupOpen] = useState(false);
-  const [selectedGap, setSelectedGap] = useState<QuestionnaireGap | null>(null);
-  const [popupResponse, setPopupResponse] = useState<string | string[]>("");
-
-  // Handle row click based on user type
-  const handleRowClickWithUserCheck = (index: number, gap: QuestionnaireGap) => {
-    if (isAEPocUser) {
-      // For AEPoc users, open popup with actual question
-      setSelectedGap(gap);
-      
-      // Initialize response based on question type
-      if (gap.questionType === 'multiple_choice') {
-        // For multiple choice, convert comma-separated string to array
-        const responseArray = gap.userResponse ? gap.userResponse.split(',').map(s => s.trim()) : [];
-        setPopupResponse(responseArray);
-      } else {
-        // For single choice and text, use string directly
-        setPopupResponse(gap.userResponse || "");
-      }
-      
-      setIsPopupOpen(true);
-    } else {
-      // For other users, redirect to assessment phase with exact question
-      handleRowClick(index);
-      // Navigate to assessment phase with question data
-      navigate('/landing/assessment', { 
-        state: { 
-          questionId: gap.questionId,
-          questionnaireId: gap.questionnaireTitle,
-          questionText: gap.questionText,
-          currentResponse: gap.userResponse,
-          questionType: gap.questionType,
-          choices: gap.choices
-        } 
-      });
-    }
-  };
-
-  // Handle popup response update
-  const handlePopupResponseUpdate = async () => {
-    if (selectedGap) {
-      try {
-        // Convert array to string for API call if needed
-        const responseValue = Array.isArray(popupResponse) ? popupResponse.join(', ') : popupResponse;
-        
-        // Prepare the API payload
-        const userResponseData: userResponseDto = {
-          questionId: selectedGap.questionId,
-          choiceValue: Array.isArray(popupResponse) ? popupResponse : [responseValue]
-        };
-        
-        // Call the userResponse API
-        await storeUserResponse(userRole || "AEPoc", axiosInstance, userResponseData);
-        
-        // Update the userResponse in local state
-        setQuestionnaireGaps((prevGaps) =>
-          prevGaps.map((g) =>
-            g.id === selectedGap.id
-              ? { ...g, userResponse: responseValue }
-              : g
-          )
-        );
-        
-        console.log('User response updated successfully');
-        
-        setIsPopupOpen(false);
-        setSelectedGap(null);
-        setPopupResponse("");
-      } catch (error) {
-        console.error('Error updating user response:', error);
-        // You might want to show an error message to the user here
-      }
-    }
-  };
-
-  // Close popup
-  const closePopup = () => {
-    setIsPopupOpen(false);
-    setSelectedGap(null);
-    setPopupResponse("");
-  };
-
   // Render question input based on type
-  const renderQuestionInput = (question: QuestionnaireGap) => {
+  const renderQuestionInput = (question: { questionType?: string; choices?: Array<{ value: string }> }) => {
     if (!question) return null;
 
     switch (question.questionType || 'short_text') {
@@ -178,7 +52,7 @@ const GapManagementComponent = () => {
       case 'single_choice':
         return (
           <div className={styles.radioGroup}>
-            {question.choices?.map((choice, index) => (
+            {question.choices?.map((choice: { value: string }, index: number) => (
               <label key={index} className={styles.radioLabel}>
                 <input
                   type="radio"
@@ -197,7 +71,7 @@ const GapManagementComponent = () => {
       case 'multiple_choice':
         return (
           <div className={styles.checkboxGroup}>
-            {question.choices?.map((choice, index) => (
+            {question.choices?.map((choice: { value: string }, index: number) => (
               <label key={index} className={styles.checkboxLabel}>
                 <input
                   type="checkbox"
@@ -208,7 +82,7 @@ const GapManagementComponent = () => {
                     if (e.target.checked) {
                       setPopupResponse([...currentValues, choice.value]);
                     } else {
-                      setPopupResponse(currentValues.filter(v => v !== choice.value));
+                      setPopupResponse(currentValues.filter((v: string) => v !== choice.value));
                     }
                   }}
                   className={styles.checkboxInput}
@@ -287,7 +161,7 @@ const GapManagementComponent = () => {
             <tbody>
               {isQuestionnaireView
                 ? filteredQuestionnaireGaps.map(
-                    (gap: QuestionnaireGap, index: number) => (
+                    (gap, index: number) => (
                       <tr
                         key={gap.id}
                         className={`${styles.tableRow} ${
@@ -321,7 +195,7 @@ const GapManagementComponent = () => {
                         <td
                           className={`${styles.tableCell} ${styles.commentCell}`}
                         >
-                          {isAEPocView || isAEPocUser ? (
+                          {isClientPocView || isClientPoC ? (
                             <textarea
                               value={gap.clientComment || ""}
                               onChange={(e) => {
@@ -352,7 +226,7 @@ const GapManagementComponent = () => {
                           <select
                             className={`${styles.statusSelect} ${styles.questionnaireStatusSelect} ${styles.statusSelectInline}`}
                             value={gap.status || "Finding Open"}
-                            disabled={isAEPocUser}
+                            disabled={isClientPoC}
                             onChange={async (e) => {
                               e.stopPropagation();
                               const newStatus = e.target.value;
@@ -429,7 +303,7 @@ const GapManagementComponent = () => {
                       </tr>
                     )
                   )
-                : processedGaps.map((gap: FlattenedGap, index: number) => (
+                : processedGaps.map((gap, index: number) => (
                     <tr
                       key={gap.originalId || index}
                       className={`${styles.tableRow} ${
@@ -473,7 +347,7 @@ const GapManagementComponent = () => {
                               gap.previousEvidence.length > 0 ? (
                                 <>
                                   {gap.previousEvidence.map(
-                                    (evidence: Evidence, idx: number) => (
+                                    (evidence, idx: number) => (
                                       <>
                                         <div
                                           key={idx}
@@ -524,7 +398,7 @@ const GapManagementComponent = () => {
                               gap.latestEvidence.length > 0 ? (
                                 <>
                                   {gap.latestEvidence.map(
-                                    (evidence: Evidence, idx: number) => (
+                                    (evidence, idx: number) => (
                                       <>
                                         <div
                                           key={idx}

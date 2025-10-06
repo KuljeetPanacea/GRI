@@ -51,7 +51,6 @@ const GapAndRemediationView = () => {
     setDeviceTypes,
     selectedProject,
     dispatch,
-    
     axiosInstance,
    
   } = useGapAndRemediationView();

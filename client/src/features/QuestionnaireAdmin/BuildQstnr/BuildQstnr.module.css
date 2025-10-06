@@ -75,6 +75,15 @@
   max-width: 600px;
 }
 
+.tableQuestionCard {
+  padding: 24px !important;
+  border-radius: 20px !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+  margin-top: 32px !important;
+  width: 100%;
+  max-width: none;
+}
+
 .questionInput {
   font-size: 20px !important;
   font-weight: bold;
@@ -175,7 +184,15 @@
   border-radius: 20px !important;
   background-color: white !important;
   border: none !important;
+}
+
+.tablePreviewCard {
+  padding: 25px;
   width: 100%;
+  max-width: none;
+  border-radius: 20px !important;
+  background-color: white !important;
+  border: none !important;
   margin: 15px auto;
 }
 

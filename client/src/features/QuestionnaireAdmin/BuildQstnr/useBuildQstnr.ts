@@ -27,6 +27,7 @@ import {
   BranchingLogic,
   FormBranchingLogic,
   Question,
+  TableColumn,
 } from "../../../redux/qstnrQuestion";
 import store, { AppDispatch, RootState } from "../../../redux/store";
 import useAxios from "../../../api/useAxios";
@@ -115,7 +116,7 @@ const useBuildQstnr = () => {
     } catch (error) {
       console.error("Error fetching questionnaire:", error);
     }
-  }, [qstnrId, dispatch]);
+  }, [qstnrId, dispatch, axiosInstance, questionList]);
   useEffect(() => {
     if (qstnrId) {
       getQuestions();
@@ -269,6 +270,36 @@ const useBuildQstnr = () => {
     dispatch(questionTypeValue(questionType));
     dispatch(setNewQuestion(true));
     dispatch(setDisableReq(true));
+    
+      // For table_type questions, initialize with empty table configuration
+      if (questionType === 'table_type') {
+        const tempQuestion: Question = {
+          _id: `temp_${Date.now()}`,
+          questionnaireId: qstnrId || '',
+          type: 'table_type',
+          text: '',
+          tableColumns: [],
+          tableRows: 3,
+          tableData: [],
+          requirements: null,
+          subRequirements: null,
+          subControl: null,
+          isEditing: false,
+          isDeleted: false,
+          alwaysGoTo: null,
+          setting: {},
+          choices: [],
+          branchingLogic: [],
+          formBranchingLogic: [],
+          evidenceReference: undefined,
+          testingProcedure: undefined,
+          userResponse: '',
+          gaps: undefined
+        };
+        dispatch(addQuestion(tempQuestion));
+        dispatch(selectQuestion(tempQuestion._id || null));
+      }
+    
     setAnchorEl(null);
   };
 
@@ -334,6 +365,11 @@ const validateAndAddQuestion = async () => {
       ...(questionType === "file_type" && { 
         evidenceReference: store.getState().qstnrQuestion.selectedEvidenceReference,
         testingProcedure: store.getState().qstnrQuestion.selectedTestingProcedure 
+      }),
+      ...(questionType === "table_type" && { 
+        tableColumns: store.getState().qstnrQuestion.selectedQuestion?.tableColumns || [],
+        tableRows: store.getState().qstnrQuestion.selectedQuestion?.tableRows || 3,
+        tableData: store.getState().qstnrQuestion.selectedQuestion?.tableData || []
       }),
     };
     
@@ -795,6 +831,12 @@ const addQuestionInList = async () => {
           Date.now().toString() + index,
         value: option,
       })),
+      // Preserve table configuration for table_type questions
+      ...(selectedQuestion.type === "table_type" && {
+        tableColumns: selectedQuestion.tableColumns || [],
+        tableRows: selectedQuestion.tableRows || 3,
+        tableData: selectedQuestion.tableData || []
+      }),
     };
 
     dispatch(updateQuestion(newQuestion));
@@ -813,6 +855,47 @@ const addQuestionInList = async () => {
       );
     } catch (error) {
       console.error("Error while updating question:", error);
+    }
+  };
+
+  // Table configuration functions
+  const updateTableColumns = (columns: TableColumn[]) => {
+    console.log('Updating table columns:', columns);
+    if (selectedQuestion) {
+      dispatch(updateQuestion({
+        ...selectedQuestion,
+        tableColumns: columns
+      }));
+    } else {
+      // If no selected question, create a temporary one for table configuration
+      const tempQuestion = {
+        _id: `temp_${Date.now()}`,
+        questionnaireId: qstnrId || '',
+        type: 'table_type',
+        text: question || '',
+        tableColumns: columns,
+        tableRows: 3,
+        tableData: []
+      };
+      dispatch(updateQuestion(tempQuestion));
+    }
+  };
+
+  const updateTableRows = (rows: number) => {
+    if (selectedQuestion) {
+      dispatch(updateQuestion({
+        ...selectedQuestion,
+        tableRows: rows
+      }));
+    }
+  };
+
+  const updateTableData = (data: Record<string, string | number | boolean>[]) => {
+    if (selectedQuestion) {
+      dispatch(updateQuestion({
+        ...selectedQuestion,
+        tableData: data
+      }));
     }
   };
 
@@ -871,6 +954,9 @@ const addQuestionInList = async () => {
     updateQuestionInList,
     editingRuleIndex,
     setEditingRuleIndex,
+    updateTableColumns,
+    updateTableRows,
+    updateTableData,
   };
 };
 

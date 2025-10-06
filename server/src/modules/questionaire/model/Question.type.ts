@@ -8,6 +8,7 @@ export enum QuestionType {
   LONG_TEXT = 'long_text',
   SINGLE_CHOICE = 'single_choice',
   FILE_TYPE = 'file_type',
+  TABLE_TYPE = 'table_type',
 }
 
 @Schema({ _id: false })
@@ -73,6 +74,39 @@ export class Question {
     clientComment?: string;
     status?: string;
   };
+
+  // Table-specific properties
+  @Prop({ 
+    type: [{
+      id: { type: String, required: true },
+      label: { type: String, required: true },
+      type: { type: String, enum: ['text', 'number', 'date', 'select', 'checkbox'], required: true },
+      options: { type: [String], default: [] },
+      validation: {
+        min: { type: Number },
+        max: { type: Number },
+        pattern: { type: String }
+      }
+    }], 
+    required: false 
+  })
+  tableColumns?: Array<{ 
+    id: string; 
+    label: string; 
+    type: 'text' | 'number' | 'date' | 'select' | 'checkbox'; 
+    options?: string[]; 
+    validation?: { 
+      min?: number; 
+      max?: number; 
+      pattern?: string; 
+    }; 
+  }>;
+
+  @Prop({ type: Number, default: 3 })
+  tableRows?: number;
+
+  @Prop({ type: [Object], default: [] })
+  tableData?: Record<string, any>[];
 
 }
 

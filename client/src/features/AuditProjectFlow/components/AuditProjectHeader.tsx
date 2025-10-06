@@ -5,7 +5,6 @@ import PrimaryButton from "../../../common/ui/PrimaryButton";
 import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import AuditProjectPhases from "./AuditProjectPhases";
-import AddNewAEInternalAssesssors from "./AddNewAEInternalAssesssors";
 import FeedbackSnackbar from "../../../common/ui/FeedbackSnackbar";
 import store, { AppDispatch, RootState } from "../../../redux/store";
 import {
@@ -37,8 +36,6 @@ const AuditProjectHeader: React.FC = () => {
     project,
     isDetailsVisible,
     toggleDetails,
-    showAEInternalAssesssorsModal,
-    closeAEInternalAssesssorsModal,
     snackbar,
     handleSnackbarClose,
     AEListView,
@@ -186,12 +183,7 @@ const AuditProjectHeader: React.FC = () => {
       
         </div>
 
-        {showAEInternalAssesssorsModal && (
-          <AddNewAEInternalAssesssors
-            open={showAEInternalAssesssorsModal}
-            onClose={closeAEInternalAssesssorsModal}
-          />
-        )}
+        
       </div>
       {store.getState().projectView.isDetailsOpen && <AuditProjectPhases />}
 

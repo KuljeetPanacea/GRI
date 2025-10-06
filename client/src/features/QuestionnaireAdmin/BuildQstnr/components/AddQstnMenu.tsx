@@ -4,6 +4,7 @@ import CheckBoxIcon from "@mui/icons-material/CheckBox";
 import RadioButtonCheckedIcon from "@mui/icons-material/RadioButtonChecked";
 import AttachFileIcon from "@mui/icons-material/AttachFile";
 import TextFieldsIcon from "@mui/icons-material/TextFields";
+import TableChartIcon from "@mui/icons-material/TableChart";
 import AddIcon from "@mui/icons-material/Add";
 import useBuildQstnr from "../useBuildQstnr";
 import styles from "../BuildQstnr.module.css";
@@ -48,6 +49,10 @@ const AddQstnMenu = () => {
         <MenuItem onClick={() => addMenuValue("file_type")}>
           <AttachFileIcon className={styles.AddQstnMenumenuIcon} />
           File Upload
+        </MenuItem>
+        <MenuItem onClick={() => addMenuValue("table_type")}>
+          <TableChartIcon className={styles.AddQstnMenumenuIcon} />
+          Table Input
         </MenuItem>
       </Menu>
     </div>

@@ -44,6 +44,18 @@ export interface AdditionalCondition {
   values: Choice[];
 }
 
+export interface TableColumn {
+  id: string;
+  label: string;
+  type: 'text' | 'number' | 'date' | 'select' | 'checkbox';
+  options?: string[]; // for select type
+  validation?: {
+    min?: number;
+    max?: number;
+    pattern?: string;
+  };
+}
+
 export interface Question {
   _id?: string;
   questionnaireId: string;
@@ -59,6 +71,16 @@ export interface Question {
   branchingLogic?: BranchingLogic[];
   formBranchingLogic?: FormBranchingLogic[];
   alwaysGoTo: null | string;
+  userResponse?: string | string[];
+  gaps?: {
+    gaps?: string;
+    clientComment?: string;
+    status?: string;
+  };
+  // Table-specific properties
+  tableColumns?: TableColumn[];
+  tableRows?: number;
+  tableData?: Record<string, string | number | boolean>[];
   setting?: {
     characterLimit?: number;
     placeholder?: string;
@@ -94,6 +116,10 @@ interface UpdateQuestionPayload {
   selectedSubControl?: string;
   evidenceReference?: string;
   testingProcedure?: string;
+  // Table-specific properties
+  tableColumns?: TableColumn[];
+  tableRows?: number;
+  tableData?: Record<string, string | number | boolean>[];
 }
 
 interface BuildQstnrState {
@@ -180,7 +206,20 @@ export const createQuestionThunk = createAsyncThunk(
         subControl: state.qstnrQuestion.selectedSubControl,
         evidenceReference: state.qstnrQuestion.selectedEvidenceReference,
         testingProcedure: state.qstnrQuestion.selectedTestingProcedure,
+        // Include table configuration if it's a table question
+        ...((data as Question).type === 'table_type' && {
+          tableColumns: state.qstnrQuestion.selectedQuestion?.tableColumns || [],
+          tableRows: state.qstnrQuestion.selectedQuestion?.tableRows || 3,
+          tableData: state.qstnrQuestion.selectedQuestion?.tableData || []
+        }),
       }
+      
+      console.log('Creating question with data:', newData);
+      console.log('Table configuration:', {
+        tableColumns: newData.tableColumns,
+        tableRows: newData.tableRows,
+        tableData: newData.tableData
+      });
       const createdQuestion: Question = await createQstn(qstnrId, newData, axiosInstance); 
       return createdQuestion;
     } catch (error) {
@@ -270,6 +309,10 @@ const QstnrQuestionSlice = createSlice({
           subControl: action.payload.selectedSubControl ?? state.questions[questionIndex].subControl,
           evidenceReference: action.payload.evidenceReference ?? state.questions[questionIndex].evidenceReference,
           testingProcedure: action.payload.testingProcedure ?? state.questions[questionIndex].testingProcedure,
+          // Table-specific properties
+          tableColumns: action.payload.tableColumns ?? state.questions[questionIndex].tableColumns,
+          tableRows: action.payload.tableRows ?? state.questions[questionIndex].tableRows,
+          tableData: action.payload.tableData ?? state.questions[questionIndex].tableData,
         };
         state.questions[questionIndex] = updatedQuestion;
         if (state.selectedQuestion?._id === action.payload._id) {

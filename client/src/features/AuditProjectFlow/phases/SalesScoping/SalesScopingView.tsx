@@ -15,7 +15,7 @@ import PrimaryButton from "../../../../common/ui/PrimaryButton";
 import { scopingQSTRNR } from "../../../../redux/projectManagementSlice";
 import useAxios from "../../../../api/useAxios";
 import { getUserById } from "../../../../api/user";
-import { useScopeDocument } from "../Scoping/hooks/useScopeDocuments";
+import { getScopingQstnr } from "../../../../api/qstnr";
 
 const SalesScopingView: React.FC = () => {
   const { handleSend } = useSalesScoping(5);
@@ -24,36 +24,49 @@ const SalesScopingView: React.FC = () => {
   const viewMode = useSelector(selectViewMode);
   const dispatch = useDispatch();
   const axiosInstance = useAxios();
+  const [scopingData, setScopingData] = useState<scopingQSTRNR[]>([]);
 
-  const {scopingDataArray} = useScopeDocument();
-
-  // Fetch user names for createdBy
+  // Fetch scoping questionnaires and then user names for createdBy
   useEffect(() => {
-    const fetchUsers = async () => {
-      const data = scopingDataArray || [];
-      const uniqueUserIds = Array.from(new Set(data.map((q) => q.createdBy)));
+    const fetchScopingAndUsers = async () => {
+      try {
+        // Fetch scoping questionnaires
+        const response = await getScopingQstnr(axiosInstance);
+        // Expecting response to be an array of questionnaires
+        const questionnaires: scopingQSTRNR[] = Array.isArray(response) ? response : (response?.data ?? []);
+        setScopingData(questionnaires);
 
-      const userPromises = uniqueUserIds.map(async (id) => {
-        try {
-          const user = await getUserById(axiosInstance, id);
-          return { id, name: user || "Unknown" };
-        } catch {
-          return { id, name: "Unknown" };
-        }
-      });
-
-      const users = await Promise.all(userPromises);
-      const map: Record<string, string> = {};
-      users.forEach(({ id, name }) => {
-        if (id !== undefined) {
-          map[id] = name;
-        }
-      });
-      setUserMap(map);
+        // Fetch user display names for createdBy mapping
+        const uniqueUserIds = Array.from(
+          new Set((questionnaires || []).map((q: scopingQSTRNR) => q.createdBy).filter(Boolean))
+        );
+        const userPromises = uniqueUserIds.map(async (id) => {
+          if (!id) {
+            return { id: "", name: "Unknown" } as { id: string; name: string };
+          }
+          try {
+            const user = await getUserById(axiosInstance, id as string);
+            return { id, name: user || "Unknown" };
+          } catch {
+            return { id, name: "Unknown" };
+          }
+        });
+        const users = await Promise.all(userPromises);
+        const map: Record<string, string> = {};
+        users.forEach(({ id, name }) => {
+          if (id !== undefined) {
+            map[id] = name;
+          }
+        });
+        setUserMap(map);
+      } catch {
+        // Silently ignore for now; UI will show empty table
+        setScopingData([]);
+      }
     };
 
-    fetchUsers();
-  }, [scopingDataArray, axiosInstance]);
+    fetchScopingAndUsers();
+  }, [axiosInstance]);
 
   const columns = [
     {
@@ -104,7 +117,7 @@ const SalesScopingView: React.FC = () => {
         <div>
           <EnhancedTable
             columns={columns}
-            data={scopingDataArray || []}
+            data={scopingData || []}
             showCheckbox={false}
             selectedRows={selectedRows}
             onRowSelect={setSelectedRows}
