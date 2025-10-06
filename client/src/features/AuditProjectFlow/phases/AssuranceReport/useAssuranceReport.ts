@@ -1,6 +1,8 @@
 import { useState, useRef, useEffect } from "react";
-import { fetchAssuranceFiles, getAssurancePresignedUrl, saveAssuranceFileInfo, uploadAssuranceFile } from "../../../api/project.ts";
-import useAxios from "../../../api/useAxios";
+import { uploadCdeDocument, saveCdeDocumentInfo, fetchCdeDocuments, getCdeDocumentPresignedUrl } from "../../../../api/project.ts";
+import useAxios from "../../../../api/useAxios.ts";
+import { useSelector } from "react-redux";
+import { RootState } from "../../../../redux/store";
 
 const validateFile = (file: File): boolean => {
   const allowedTypes = [".pdf", ".docx", ".doc"];
@@ -28,6 +30,11 @@ export const formatFileSize = (bytes: number): string => {
 
 export const useAssuranceReport = () => {
   const axiosInstance = useAxios();
+  
+  // Get project from Redux state
+  const selectedProject = useSelector(
+    (state: RootState) => state.projectView.selectedProject
+  ) || JSON.parse(localStorage.getItem("selectedProject") || "null");
   const [completed, setCompleted] = useState<{
     limited: boolean;
     reasonable: boolean;
@@ -46,6 +53,8 @@ export const useAssuranceReport = () => {
     limited: false,
     reasonable: false,
   });
+
+  const [initialLoading, setInitialLoading] = useState(true);
 
   const [dragOver, setDragOver] = useState<{
     limited: boolean;
@@ -75,14 +84,32 @@ export const useAssuranceReport = () => {
   const processNewFile = async (file: File, type: "limited" | "reasonable") => {
     setLoading((prev) => ({ ...prev, [type]: true }));
 
-      const selectedProjectId = localStorage.getItem("selectedProjectId")?.replace(/"/g, "");
+    if (!selectedProject?._id) {
+      alert("No project selected. Please select a project first.");
+      setLoading((prev) => ({ ...prev, [type]: false }));
+      return;
+    }
 
     try {
-      const key = await uploadAssuranceFile(axiosInstance, file);
+      // Upload file to S3 using CDE document API
+      const key = await uploadCdeDocument(axiosInstance, file, selectedProject._id, type);
 
-    await saveAssuranceFileInfo(axiosInstance, selectedProjectId!, type, key);
+      // Save document info to project's cdeDocs field
+      const cdeDocument = {
+        fileName: file.name,
+        fileType: file.type,
+        folderName: `projects/${selectedProject._id}/cde-docs`,
+        s3Path: key,
+        status: "uploaded",
+        uploadedAt: new Date(),
+        uploadedBy: "current-user", // You might want to get this from auth context
+        cdeType: type,
+        tags: ["assurance-report"]
+      };
 
-      // 3. Save the key in state and create a mock File object for UI
+      await saveCdeDocumentInfo(axiosInstance, selectedProject._id, cdeDocument);
+
+      // Save the key in state and create a mock File object for UI
       if (type === "limited") {
         setLimitedAssuranceKey(key);
         setLimitedAssuranceFile(file);
@@ -106,6 +133,7 @@ export const useAssuranceReport = () => {
   const handleFileSelect = async (file: File, type: "limited" | "reasonable") => {
     if (!validateFile(file)) return;
 
+    // Always show replace modal if there's an existing file
     if (
       (type === "limited" && limitedAssuranceFile) ||
       (type === "reasonable" && reasonableAssuranceFile)
@@ -140,7 +168,7 @@ export const useAssuranceReport = () => {
       const key = type === "limited" ? limitedAssuranceKey : reasonableAssuranceKey;
       if (!key) return;
 
-      const url = await getAssurancePresignedUrl(axiosInstance, key);
+      const url = await getCdeDocumentPresignedUrl(axiosInstance, key);
       const a = document.createElement("a");
       a.href = url;
       a.download = file.name;
@@ -158,7 +186,7 @@ export const useAssuranceReport = () => {
       const key = type === "limited" ? limitedAssuranceKey : reasonableAssuranceKey;
       if (!key) return;
 
-      const url = await getAssurancePresignedUrl(axiosInstance, key);
+      const url = await getCdeDocumentPresignedUrl(axiosInstance, key);
       setViewingFile(url);
       setViewingFileName(file.name);
     } catch (error) {
@@ -185,48 +213,84 @@ export const useAssuranceReport = () => {
 
   useEffect(() => {
     const fetchData = async () => {
-      const selectedProjectId = localStorage.getItem("selectedProjectId")?.replace(/"/g, "");
-      if (!selectedProjectId) return;
+      if (!selectedProject?._id) {
+        console.log("No project selected, skipping file fetch");
+        setInitialLoading(false);
+        return;
+      }
+      
+      console.log("Fetching CDE documents for project:", selectedProject._id);
+      setInitialLoading(true);
       
       try {
+        // Fetch CDE documents from project
+        const response = await fetchCdeDocuments(axiosInstance, selectedProject._id);
+        console.log("Fetched CDE documents response:", response);
+        
+        // Extract the data array from the response
+        const data = response.data || response;
+        console.log("CDE documents data:", data);
+        
+        // Find limited and reasonable assurance documents
+        const limitedDoc = data.find((doc: { cdeType: string }) => doc.cdeType === "limited");
+        const reasonableDoc = data.find((doc: { cdeType: string }) => doc.cdeType === "reasonable");
 
-        const data = await fetchAssuranceFiles(axiosInstance, selectedProjectId);
-        const limitedKey = data.limited;
-        const reasonableKey = data.reasonable;
+        console.log("Limited doc:", limitedDoc);
+        console.log("Reasonable doc:", reasonableDoc);
 
         // Create mock File objects for existing files
-        if (limitedKey) {
-          setLimitedAssuranceKey(limitedKey);
+        if (limitedDoc) {
+          setLimitedAssuranceKey(limitedDoc.s3Path);
           setLimitedAssuranceFile({ 
-            name: limitedKey.split("/").pop() || "limited_assurance.pdf",
+            name: limitedDoc.fileName,
             size: 0,
-            type: "application/pdf",
-            lastModified: Date.now(),
+            type: limitedDoc.fileType,
+            lastModified: new Date(limitedDoc.uploadedAt).getTime(),
           } as File);
+          console.log("Set limited assurance file:", limitedDoc.fileName);
+        } else {
+          // Reset if no document found
+          setLimitedAssuranceKey(null);
+          setLimitedAssuranceFile(null);
+          console.log("No limited assurance file found");
         }
 
-        if (reasonableKey) {
-          setReasonableAssuranceKey(reasonableKey);
+        if (reasonableDoc) {
+          setReasonableAssuranceKey(reasonableDoc.s3Path);
           setReasonableAssuranceFile({ 
-            name: reasonableKey.split("/").pop() || "reasonable_assurance.pdf",
+            name: reasonableDoc.fileName,
             size: 0,
-            type: "application/pdf",
-            lastModified: Date.now(),
+            type: reasonableDoc.fileType,
+            lastModified: new Date(reasonableDoc.uploadedAt).getTime(),
           } as File);
+          console.log("Set reasonable assurance file:", reasonableDoc.fileName);
+        } else {
+          // Reset if no document found
+          setReasonableAssuranceKey(null);
+          setReasonableAssuranceFile(null);
+          console.log("No reasonable assurance file found");
         }
       } catch (error) {
-        console.error("Error fetching assurance files:", error);
+        console.error("Error fetching CDE documents:", error);
+        // Reset state on error
+        setLimitedAssuranceKey(null);
+        setLimitedAssuranceFile(null);
+        setReasonableAssuranceKey(null);
+        setReasonableAssuranceFile(null);
+      } finally {
+        setInitialLoading(false);
       }
     };
 
     fetchData();
-  }, []);
+  }, [axiosInstance, selectedProject?._id]);
 
   return {
     completed,
     limitedAssuranceFile,
     reasonableAssuranceFile,
     loading,
+    initialLoading,
     dragOver,
     viewingFile,
     viewingFileName,

@@ -1,7 +1,6 @@
 import { useDispatch, useSelector } from "react-redux";
 import { setActiveTab } from "../../../../redux/scopingSlice";
 import styles from "./ScopingView.module.css";
-import Questionnaire from "./components/Questionnaire";
 import ScopingQuestionnaire from "./components/ScopingQuestionnaire";
 import QuestionList from "./components/QuestionList";
 import ScopeGraph from "./components/ScopeGraph";

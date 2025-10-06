@@ -1,5 +1,5 @@
 import React from "react";
-import styles from ".././styles/AssuranceReport.module.css";
+import styles from "./AssuranceReport.module.css";
 import LoadingSpinner from "./LoadingSpinner";
 import UploadComplete from "./UploadComplete";
 import {  FileText, FileUp } from "lucide-react";

@@ -65,4 +65,18 @@ async deleteFile(
   return  await this.s3Service.getSignedAssessmentDownloadUrl(fileName);
 }
 
+  @Permissions("S3-Upload")
+  @Post("generate-presigned-url")
+  @UseGuards(JwtAuthGuard,PermissionsGuard)
+  async generatePresignedUrl(@Body() body: { fileName: string; fileType: string; folderName: string }) {
+    return await this.s3Service.generatePresignedUrl(body.fileName, body.fileType, body.folderName);
+  }
+
+  @Permissions("S3-Upload")
+  @Post("get-presigned-url")
+  @UseGuards(JwtAuthGuard,PermissionsGuard)
+  async getPresignedUrl(@Body() body: { fileKey: string }) {
+    return await this.s3Service.getPresignedUrl(body.fileKey);
+  }
+
 }

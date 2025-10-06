@@ -8,7 +8,7 @@ import ComplianceReportView from "../phases/ComplianceReport/ComplianceReportVie
 import { RootState } from "../../../redux/store";
 import { setIsDetailsOpen } from "../../../redux/projectViewSlice";
 import GapManagementComponent from "../phases/GapAndRemediation/components/GapManagementComponent";
-import AssuranceReport from "../../ProjectListForAEPoc/components/AssuranceReport";
+import AssuranceReport from "../phases/AssuranceReport/AssuranceReport";
 const usePhaseView = () => {
   
   const phaseComponents: Record<string, React.ComponentType> = {

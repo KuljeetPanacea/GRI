@@ -1,182 +1,182 @@
-name: Deploy to Production (main branch)
+# name: Deploy to Production (main branch)
 
 
-on:
-  workflow_dispatch:
-  push:
-    branches:
-      - main
+# on:
+#   workflow_dispatch:
+#   push:
+#     branches:
+#       - main
 
-concurrency:
-  group: main-branch
-  cancel-in-progress: false
+# concurrency:
+#   group: main-branch
+#   cancel-in-progress: false
 
-jobs:
+# jobs:
 
-  build:
-    runs-on: ubuntu-latest
-    outputs:
-      commit_id: ${{ steps.commit_info.outputs.commit_id }}
-      author: ${{ steps.commit_info.outputs.author }}
+#   build:
+#     runs-on: ubuntu-latest
+#     outputs:
+#       commit_id: ${{ steps.commit_info.outputs.commit_id }}
+#       author: ${{ steps.commit_info.outputs.author }}
 
-    steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v2
+#     steps:
+#       - name: Checkout Repository
+#         uses: actions/checkout@v2
 
-      - name: Get Commit Details
-        id: commit_info
-        run: |
-          echo commit_id=$(git rev-parse HEAD)
-          echo author=$(git log -1 --pretty=format:'%an')
-          echo "commit_id=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
-          echo "author=$(git log -1 --pretty=format:'%an')" >> "$GITHUB_OUTPUT"
+#       - name: Get Commit Details
+#         id: commit_info
+#         run: |
+#           echo commit_id=$(git rev-parse HEAD)
+#           echo author=$(git log -1 --pretty=format:'%an')
+#           echo "commit_id=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+#           echo "author=$(git log -1 --pretty=format:'%an')" >> "$GITHUB_OUTPUT"
     
 
-      - name: Deploy .env file from GitHub Secrets
-        run: | 
-         echo "${{ secrets.ENV }}" > server/.env 
+#       - name: Deploy .env file from GitHub Secrets
+#         run: | 
+#          echo "${{ secrets.ENV }}" > server/.env 
           
-      - name: Install Dependencies
-        run: |
-          chmod +x scripts/build.sh
-          echo "✔️✔️✔️🛫🛫version checking "
-          node -v
-          npm -v
-          ./scripts/build.sh
+#       - name: Install Dependencies
+#         run: |
+#           chmod +x scripts/build.sh
+#           echo "✔️✔️✔️🛫🛫version checking "
+#           node -v
+#           npm -v
+#           ./scripts/build.sh
 
-      - name: Set up SSH
-        uses: webfactory/ssh-agent@v0.5.3
-        with:
-          ssh-private-key: ${{ secrets.EC2_SSH_KEY }}
+#       - name: Set up SSH
+#         uses: webfactory/ssh-agent@v0.5.3
+#         with:
+#           ssh-private-key: ${{ secrets.EC2_SSH_KEY }}
 
 
-      - name: Copying Artifact to Server  
-        run: | 
-              set -e
-              SECONDS=0
+#       - name: Copying Artifact to Server  
+#         run: | 
+#               set -e
+#               SECONDS=0
 
-              echo "😶‍🌫️😶‍🌫️ Removing Existing Files😶‍🌫️😶‍🌫️"
-              ssh -o StrictHostKeyChecking=no ubuntu@13.126.133.4 'find /home/ubuntu -mindepth 1 -maxdepth 1 ! -name pi-ai-asmt-conv-agent ! -name ".*" -exec rm -rf {} +'
+#               echo "😶‍🌫️😶‍🌫️ Removing Existing Files😶‍🌫️😶‍🌫️"
+#               ssh -o StrictHostKeyChecking=no ubuntu@13.126.133.4 'find /home/ubuntu -mindepth 1 -maxdepth 1 ! -name pi-ai-asmt-conv-agent ! -name ".*" -exec rm -rf {} +'
               
-              echo "✅ Done in ${SECONDS} seconds"
-              step1_time=$SECONDS
-              SECONDS=0
+#               echo "✅ Done in ${SECONDS} seconds"
+#               step1_time=$SECONDS
+#               SECONDS=0
 
-              ###### Copy deploy script and Nginx config
-              echo "🛩️🛩️copying deploy.sh"
-              scp -o StrictHostKeyChecking=no ./scripts/deploy.sh ubuntu@13.126.133.4:deploy.sh
-              echo "🛩️🛩️copying nginx.conf"
-              scp -o StrictHostKeyChecking=no nginx.conf ubuntu@13.126.133.4:nginx.conf
+#               ###### Copy deploy script and Nginx config
+#               echo "🛩️🛩️copying deploy.sh"
+#               scp -o StrictHostKeyChecking=no ./scripts/deploy.sh ubuntu@13.126.133.4:deploy.sh
+#               echo "🛩️🛩️copying nginx.conf"
+#               scp -o StrictHostKeyChecking=no nginx.conf ubuntu@13.126.133.4:nginx.conf
 
-              echo "✅ Done in ${SECONDS} seconds"
-              step2_time=$SECONDS
-              SECONDS=0
+#               echo "✅ Done in ${SECONDS} seconds"
+#               step2_time=$SECONDS
+#               SECONDS=0
 
-              ###### Create required directories on the server
-              echo " 🌨️🌨️Creating server and client directory"
-              ssh -o StrictHostKeyChecking=no ubuntu@13.126.133.4 "mkdir -p /home/ubuntu/server /home/ubuntu/client"
+#               ###### Create required directories on the server
+#               echo " 🌨️🌨️Creating server and client directory"
+#               ssh -o StrictHostKeyChecking=no ubuntu@13.126.133.4 "mkdir -p /home/ubuntu/server /home/ubuntu/client"
           
-              ###### Copy server files
-              echo "🛩️🛩️copying /server/dist"
-              scp -o StrictHostKeyChecking=no -r ./server/dist ubuntu@13.126.133.4:/home/ubuntu/server
+#               ###### Copy server files
+#               echo "🛩️🛩️copying /server/dist"
+#               scp -o StrictHostKeyChecking=no -r ./server/dist ubuntu@13.126.133.4:/home/ubuntu/server
 
 
-              echo "🛩️🛩️copying /server/dist"
+#               echo "🛩️🛩️copying /server/dist"
 
-              echo "📦 Server dist size:"
-              du -sh ./server/dist
+#               echo "📦 Server dist size:"
+#               du -sh ./server/dist
               
-              echo "🔍 Top files in server dist:"
-              du -ah ./server/dist | sort -rh | head -n 10
+#               echo "🔍 Top files in server dist:"
+#               du -ah ./server/dist | sort -rh | head -n 10
 
-              echo "✅ Done in ${SECONDS} seconds"
-              step3_time=$SECONDS
-              SECONDS=0
+#               echo "✅ Done in ${SECONDS} seconds"
+#               step3_time=$SECONDS
+#               SECONDS=0
 
 
-              echo "🛩️🛩️copying /server/.env"
-              scp -o StrictHostKeyChecking=no -r ./server/.env ubuntu@13.126.133.4:/home/ubuntu/server/.env
+#               echo "🛩️🛩️copying /server/.env"
+#               scp -o StrictHostKeyChecking=no -r ./server/.env ubuntu@13.126.133.4:/home/ubuntu/server/.env
 
-              echo "🛩️🛩️copying /server/tsconfig.json"
-              scp -o StrictHostKeyChecking=no -r ./server/tsconfig.json ubuntu@13.126.133.4:/home/ubuntu/server/tsconfig.json
+#               echo "🛩️🛩️copying /server/tsconfig.json"
+#               scp -o StrictHostKeyChecking=no -r ./server/tsconfig.json ubuntu@13.126.133.4:/home/ubuntu/server/tsconfig.json
               
               
-              echo "🛩️🛩️copying /server/package.json"
-              scp -o StrictHostKeyChecking=no ./server/package.json ubuntu@13.126.133.4:/home/ubuntu/server/package.json
+#               echo "🛩️🛩️copying /server/package.json"
+#               scp -o StrictHostKeyChecking=no ./server/package.json ubuntu@13.126.133.4:/home/ubuntu/server/package.json
               
-              echo "🛩️🛩️copying /server/pm2.config.js"
-              scp -o StrictHostKeyChecking=no ./server/pm2.config.js ubuntu@13.126.133.4:/home/ubuntu/server/pm2.config.js
+#               echo "🛩️🛩️copying /server/pm2.config.js"
+#               scp -o StrictHostKeyChecking=no ./server/pm2.config.js ubuntu@13.126.133.4:/home/ubuntu/server/pm2.config.js
 
-              echo "🛩️🛩️copy complete server files"
-              echo "✅ Done in ${SECONDS} seconds"
-              step4_time=$SECONDS
-              SECONDS=0
+#               echo "🛩️🛩️copy complete server files"
+#               echo "✅ Done in ${SECONDS} seconds"
+#               step4_time=$SECONDS
+#               SECONDS=0
 
-              cd client
-              ls
-              cd ..
+#               cd client
+#               ls
+#               cd ..
               
-              ##### Copy client files
-              echo "🛩️🛩️copying /client/dist"
-              scp -o StrictHostKeyChecking=no -r ./client/dist ubuntu@13.126.133.4:/home/ubuntu/client
+#               ##### Copy client files
+#               echo "🛩️🛩️copying /client/dist"
+#               scp -o StrictHostKeyChecking=no -r ./client/dist ubuntu@13.126.133.4:/home/ubuntu/client
 
-              echo "🛩️🛩️copying /client/src"
-              echo "✅ Done in ${SECONDS} seconds"
-              step5_time=$SECONDS
-              SECONDS=0
+#               echo "🛩️🛩️copying /client/src"
+#               echo "✅ Done in ${SECONDS} seconds"
+#               step5_time=$SECONDS
+#               SECONDS=0
 
-              echo "🛩️🛩️copying /client/package.json"
-              scp -o StrictHostKeyChecking=no -r ./client/package.json ubuntu@13.126.133.4:/home/ubuntu/client/package.json
+#               echo "🛩️🛩️copying /client/package.json"
+#               scp -o StrictHostKeyChecking=no -r ./client/package.json ubuntu@13.126.133.4:/home/ubuntu/client/package.json
               
-              #### Execute the deployment script on the server
+#               #### Execute the deployment script on the server
               
-              echo "🛩️🛩️executing deploy.sh"
-              ssh -o StrictHostKeyChecking=no ubuntu@13.126.133.4 "cd /home/ubuntu && bash deploy.sh"
+#               echo "🛩️🛩️executing deploy.sh"
+#               ssh -o StrictHostKeyChecking=no ubuntu@13.126.133.4 "cd /home/ubuntu && bash deploy.sh"
           
-              echo "Connected to the server!"
+#               echo "Connected to the server!"
 
 
-              echo "✅ Done in ${SECONDS} seconds"
-              step6_time=$SECONDS
-              SECONDS=0
+#               echo "✅ Done in ${SECONDS} seconds"
+#               step6_time=$SECONDS
+#               SECONDS=0
 
 
-              echo "Total time taken for deployment: $((step2_time + step3_time + step4_time + step5_time + step6_time)) seconds"
-              echo "📝 Timing Summary:"
-              echo "➡️ step1_time: ${step1_time}s"
-              echo "➡️ step2_time: ${step2_time}s"
-              echo "➡️ step3_time: ${step3_time}s"
-              echo "➡️ step4_time: ${step4_time}s"
-              echo "➡️ step5_time: ${step5_time}s"
-              echo "➡️ step6_time: ${step6_time}s"
+#               echo "Total time taken for deployment: $((step2_time + step3_time + step4_time + step5_time + step6_time)) seconds"
+#               echo "📝 Timing Summary:"
+#               echo "➡️ step1_time: ${step1_time}s"
+#               echo "➡️ step2_time: ${step2_time}s"
+#               echo "➡️ step3_time: ${step3_time}s"
+#               echo "➡️ step4_time: ${step4_time}s"
+#               echo "➡️ step5_time: ${step5_time}s"
+#               echo "➡️ step6_time: ${step6_time}s"
               
-      - name: Restart Services
-        run: |
-          echo "🔄 Restarting pi-audit-app.service on server"
-          ssh -o StrictHostKeyChecking=no ubuntu@13.126.133.4 "sudo systemctl restart pi-audit-app.service"
+#       - name: Restart Services
+#         run: |
+#           echo "🔄 Restarting pi-audit-app.service on server"
+#           ssh -o StrictHostKeyChecking=no ubuntu@13.126.133.4 "sudo systemctl restart pi-audit-app.service"
 
-          echo "🔄 Restarting nginx.service on server"
-          ssh -o StrictHostKeyChecking=no ubuntu@13.126.133.4 "sudo systemctl restart nginx.service"
+#           echo "🔄 Restarting nginx.service on server"
+#           ssh -o StrictHostKeyChecking=no ubuntu@13.126.133.4 "sudo systemctl restart nginx.service"
 
-          echo "✅ Services restarted successfully!"
+#           echo "✅ Services restarted successfully!"
 
 
-  notify:
-    needs: build
-    if: always()
-    runs-on: ubuntu-latest
-    steps:
+#   notify:
+#     needs: build
+#     if: always()
+#     runs-on: ubuntu-latest
+#     steps:
     
-      - name: Send Notification
-        uses: cinotify/github-action@main
-        with:
-          to: 'shivramdutt.trainee@panaceainfosec.com, ravinder@panaceainfosec.com, kishore@panaceainfosec.com, rajat.agarwal@panaceainfosec.com, kapil.trainee@panaceainfosec.com'
+#       - name: Send Notification
+#         uses: cinotify/github-action@main
+#         with:
+#           to: 'shivramdutt.trainee@panaceainfosec.com, ravinder@panaceainfosec.com, kishore@panaceainfosec.com, rajat.agarwal@panaceainfosec.com, kapil.trainee@panaceainfosec.com'
           
-          subject: ${{ needs.build.result == 'success' && '✅ Deployment Successful - Main Branch' || '❌ Deployment Failed - Main Branch' }} PI Audit Management System
-          body: |
-              <strong>Commit ID:</strong> ${{ needs.build.outputs.commit_id }}<br>
-              <strong>Author:</strong> ${{ needs.build.outputs.author }}<br>
-              <a href="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}">🔗 View Logs</a>
-          type: 'text/html'
-          # attachment: 'artifacts.zip'  # 🔹 Attach artifacts if available
+#           subject: ${{ needs.build.result == 'success' && '✅ Deployment Successful - Main Branch' || '❌ Deployment Failed - Main Branch' }} PI Audit Management System
+#           body: |
+#               <strong>Commit ID:</strong> ${{ needs.build.outputs.commit_id }}<br>
+#               <strong>Author:</strong> ${{ needs.build.outputs.author }}<br>
+#               <a href="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}">🔗 View Logs</a>
+#           type: 'text/html'
+#           # attachment: 'artifacts.zip'  # 🔹 Attach artifacts if available
     

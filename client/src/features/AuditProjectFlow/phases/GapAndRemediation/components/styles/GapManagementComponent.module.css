@@ -611,3 +611,357 @@
 .questionnaireStatusSelect:active {
   transform: translateY(0) !important;
 }
+
+/* Inline styles moved from component */
+.statusSelectInline {
+  background-color: var(--status-bg-color, #f59e0b) !important;
+  color: white !important;
+  border: none !important;
+  border-radius: 8px !important;
+  padding: 8px 32px 8px 12px !important;
+  font-size: 14px !important;
+  font-weight: 500 !important;
+  cursor: pointer !important;
+  outline: none !important;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1) !important;
+  transition: all 0.2s ease !important;
+  appearance: none !important;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='white' d='M6 9L1 4h10z'/%3E%3C/svg%3E") !important;
+  background-repeat: no-repeat !important;
+  background-position: right 12px center !important;
+}
+
+.statusSelectInline:hover {
+  transform: translateY(-1px) !important;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.15) !important;
+}
+
+.statusSelectInline:not(:hover) {
+  transform: translateY(0) !important;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1) !important;
+}
+
+/* Status-specific background colors */
+.statusSelectInline[data-status="Finding Closed"] {
+  --status-bg-color: #10b981 !important;
+}
+
+.statusSelectInline[data-status="Finding Open"] {
+  --status-bg-color: #f59e0b !important;
+}
+
+.statusSelectInline[data-status="Client input pending"] {
+  --status-bg-color: #3b82f6 !important;
+}
+
+.statusSelectInline[data-status="Under Auditor Review"] {
+  --status-bg-color: #8b5cf6 !important;
+}
+
+/* Option styles moved from component */
+.optionFindingClosed {
+  background-color: #10b981 !important;
+  color: white !important;
+  padding: 8px !important;
+}
+
+.optionFindingOpen {
+  background-color: #f59e0b !important;
+  color: white !important;
+  padding: 8px !important;
+}
+
+.optionClientInputPending {
+  background-color: #3b82f6 !important;
+  color: white !important;
+  padding: 8px !important;
+}
+
+.optionUnderAuditorReview {
+  background-color: #8b5cf6 !important;
+  color: white !important;
+  padding: 8px !important;
+}
+
+/* Question column styles */
+.questionHeader {
+  width: 25% !important;
+  min-width: 200px !important;
+}
+
+.questionCell {
+  width: 25% !important;
+  min-width: 200px !important;
+}
+
+.questionText {
+  font-size: 13px !important;
+  color: #1f2937 !important;
+  line-height: 1.4 !important;
+  word-wrap: break-word !important;
+  max-width: 100% !important;
+}
+
+/* Last Update column styles */
+.lastUpdateHeader {
+  width: 15% !important;
+  min-width: 120px !important;
+}
+
+.lastUpdateCell {
+  width: 15% !important;
+  min-width: 120px !important;
+}
+
+.lastUpdateText {
+  font-size: 12px !important;
+  color: #6b7280 !important;
+  font-weight: 500 !important;
+  text-align: center !important;
+}
+/* Popup Overlay with Animation */
+.popupOverlay {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  background-color: rgba(0, 0, 0, 0.55) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  z-index: 1000 !important;
+  animation: fadeIn 0.25s ease-in-out !important;
+}
+
+/* Popup Content */
+.popupContent {
+  background: #ffffff !important;
+  border-radius: 14px !important;
+  box-shadow: 0 20px 35px rgba(0, 0, 0, 0.15) !important;
+  width: 90% !important;
+  max-width: 600px !important;
+  max-height: 80vh !important;
+  overflow-y: auto !important;
+  transform: translateY(20px) !important;
+  animation: slideUp 0.3s ease-out forwards !important;
+}
+
+/* Header */
+.popupHeader {
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  padding: 20px 24px !important;
+  border-bottom: 1px solid #e5e7eb !important;
+}
+
+.popupTitle {
+  font-size: 20px !important;
+  font-weight: 600 !important;
+  color: #111827 !important;
+  margin: 0 !important;
+}
+
+.closeButton {
+  background: none !important;
+  border: none !important;
+  cursor: pointer !important;
+  padding: 6px !important;
+  border-radius: 50% !important;
+  color: #6b7280 !important;
+  transition: all 0.25s ease !important;
+}
+
+.closeButton:hover {
+  background-color: #f3f4f6 !important;
+  color: #dc2626 !important;
+  transform: rotate(90deg) !important;
+}
+
+/* Body */
+.popupBody {
+  padding: 24px !important;
+}
+
+.questionSection,
+.responseSection {
+  margin-bottom: 20px !important;
+}
+
+.questionLabel,
+.responseLabel {
+  display: block !important;
+  font-size: 15px !important;
+  font-weight: 600 !important;
+  color: #374151 !important;
+  margin-bottom: 8px !important;
+}
+
+.questionText {
+  font-size: 14px !important;
+  color: #1f2937 !important;
+  line-height: 1.5 !important;
+  padding: 12px !important;
+  background-color: #f9fafb !important;
+  border-radius: 8px !important;
+  border: 1px solid #e5e7eb !important;
+}
+
+/* Textarea */
+.popupTextarea {
+  width: 100% !important;
+  min-height: 110px !important;
+  padding: 12px !important;
+  border: 1px solid #d1d5db !important;
+  border-radius: 8px !important;
+  font-size: 14px !important;
+  font-family: inherit !important;
+  resize: vertical !important;
+  background-color: #ffffff !important;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease !important;
+}
+
+.popupTextarea:focus {
+  outline: none !important;
+  border-color: #2563eb !important;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15) !important;
+}
+
+/* Footer */
+.popupFooter {
+  display: flex !important;
+  justify-content: flex-end !important;
+  gap: 12px !important;
+  padding: 20px 24px !important;
+  border-top: 1px solid #e5e7eb !important;
+}
+
+.cancelButton,
+.updateButton {
+  padding: 10px 18px !important;
+  border-radius: 8px !important;
+  font-size: 14px !important;
+  font-weight: 500 !important;
+  cursor: pointer !important;
+  transition: all 0.25s ease !important;
+}
+
+/* Cancel */
+.cancelButton {
+  background-color: #f3f4f6 !important;
+  color: #374151 !important;
+  border: 1px solid #d1d5db !important;
+}
+
+.cancelButton:hover {
+  background-color: #e5e7eb !important;
+}
+
+/* Update */
+.updateButton {
+  background: linear-gradient(90deg, #3b82f6, #2563eb) !important;
+  color: #fff !important;
+  border: none !important;
+  box-shadow: 0 4px 10px rgba(37, 99, 235, 0.3) !important;
+}
+
+.updateButton:hover {
+  background: linear-gradient(90deg, #2563eb, #1d4ed8) !important;
+  transform: translateY(-1px) !important;
+}
+
+/* Radio & Checkbox */
+/* Radio & Checkbox Containers */
+.radioGroup,
+.checkboxGroup {
+  display: flex !important;
+  flex-direction: column !important;
+}
+
+/* Shared Label Styles */
+.radioLabel,
+.checkboxLabel {
+  display: flex !important;
+  align-items: center !important;
+  gap: 10px !important;
+  cursor: pointer !important;
+  padding: 10px 14px !important;
+  border-radius: 8px !important;
+  border: 1px solid #d1d5db !important;
+  transition: all 0.25s ease !important;
+  background: #fff !important;
+}
+
+.radioLabel:hover,
+.checkboxLabel:hover {
+  background-color: #f9fafb !important;
+  border-color: #2563eb !important;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15) !important;
+}
+
+/* Radio Input */
+.radioInput {
+  appearance: none !important;
+  width: 18px !important;
+  height: 18px !important;
+  border: 2px solid #9ca3af !important;
+  border-radius: 50% !important;
+  background: #fff !important;
+  cursor: pointer !important;
+  transition: all 0.25s ease !important;
+  position: relative !important;
+}
+
+.radioInput:checked {
+  border-color: #2563eb !important;
+  background: radial-gradient(circle at center, #2563eb 45%, transparent 46%) !important;
+}
+
+/* Checkbox Input */
+.checkboxInput {
+  appearance: none !important;
+  width: 18px !important;
+  height: 18px !important;
+  border: 2px solid #9ca3af !important;
+  border-radius: 6px !important;
+  background: #fff !important;
+  cursor: pointer !important;
+  transition: all 0.25s ease !important;
+  position: relative !important;
+}
+
+.checkboxInput:checked {
+  background-color: #2563eb !important;
+  border-color: #2563eb !important;
+}
+
+.checkboxInput:checked::after {
+  content: "✔" !important;
+  position: absolute !important;
+  top: 50% !important;
+  left: 50% !important;
+  transform: translate(-50%, -52%) !important;
+  font-size: 12px !important;
+  color: white !important;
+  font-weight: bold !important;
+}
+
+/* Text beside inputs */
+.radioText,
+.checkboxText {
+  font-size: 14px !important;
+  color: #374151 !important;
+}
+
+
+/* Animations */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { transform: translateY(30px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}

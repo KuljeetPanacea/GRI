@@ -125,4 +125,39 @@ export class S3Service extends BaseService {
   
     return getSignedUrl(this.s3, command, { expiresIn: 300 });
   }
+
+  async generatePresignedUrl(fileName: string, fileType: string, folderName: string): Promise<{ url: string; key: string }> {
+    const tenantId = TenantContext.getInstance().getTenantId();
+    const key = `${this.bucketFolder}/${tenantId}/${folderName}/${fileName}`;
+
+    if (!tenantId) {
+      throw new NotFoundException("TenantId Not found");
+    }
+
+    const command = new PutObjectCommand({
+      Bucket: this.bucketName,
+      Key: key,
+      ContentType: fileType,
+    });
+
+    const signedUrl = await getSignedUrl(this.s3, command, { expiresIn: 300 });
+    
+    return {
+      url: signedUrl,
+      key: key
+    };
+  }
+
+  async getPresignedUrl(fileKey: string): Promise<{ url: string }> {
+    const command = new GetObjectCommand({
+      Bucket: this.bucketName,
+      Key: fileKey,
+    });
+
+    const signedUrl = await getSignedUrl(this.s3, command, { expiresIn: 300 });
+    
+    return {
+      url: signedUrl
+    };
+  }
 }

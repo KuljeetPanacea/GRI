@@ -29,12 +29,21 @@ interface AssessmentQuestionListProps {
   questionnaires: Questionnaire[];
   isLoading?: boolean;
   error?: string;
+  navigationState?: {
+    questionId?: string;
+    questionnaireId?: string;
+    questionText?: string;
+    currentResponse?: string;
+    questionType?: string;
+    choices?: Array<{ value: string }>;
+  };
 }
 
 const AssessmentQuestionList: React.FC<AssessmentQuestionListProps> = ({
   questionnaires,
   isLoading = false,
   error = '',
+  navigationState,
 }) => {
   return (
     <Box sx={{ p: 2 }}>
@@ -42,6 +51,7 @@ const AssessmentQuestionList: React.FC<AssessmentQuestionListProps> = ({
         questionnaires={questionnaires}
         isLoading={isLoading}
         error={error}
+        navigationState={navigationState}
       />
     </Box>
   );

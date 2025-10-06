@@ -1,5 +1,5 @@
 import { FileCheck2 } from "lucide-react";
-import styles from ".././styles/AssuranceReport.module.css";
+import styles from "./AssuranceReport.module.css";
 
 
 interface UploadCompleteProps {

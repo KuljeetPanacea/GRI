@@ -787,8 +787,20 @@ async getProjectByAELeadership(projectId: string) {
 
     const existingDocs = existingProject.cdeDocs || [];
 
-    // Merge the new document with the existing ones
-    const updatedCdeDocs = [...existingDocs, newDoc];
+    // Check if a document with the same cdeType already exists
+    const existingDocIndex = existingDocs.findIndex(
+      (doc: any) => doc.cdeType === newDoc.cdeType
+    );
+
+    let updatedCdeDocs;
+    if (existingDocIndex !== -1) {
+      // Replace the existing document with the same cdeType
+      updatedCdeDocs = [...existingDocs];
+      updatedCdeDocs[existingDocIndex] = newDoc;
+    } else {
+      // Add new document if no document with this cdeType exists
+      updatedCdeDocs = [...existingDocs, newDoc];
+    }
 
     // Prepare the final update payload
     const updatePayload = {

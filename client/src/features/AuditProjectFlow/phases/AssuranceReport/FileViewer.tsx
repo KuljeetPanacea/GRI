@@ -1,6 +1,6 @@
 import React, { useRef, useEffect, useState } from "react";
 import { renderAsync } from "docx-preview";
-import styles from ".././styles/AssuranceReport.module.css";
+import styles from "./AssuranceReport.module.css";
 
 
 interface FileViewerProps {

@@ -1,7 +1,7 @@
 // AssuranceReport.tsx
 import React from "react";
-import styles from ".././styles/AssuranceReport.module.css";
-import useAssuranceReport from "../hooks/useAssuranceReport";
+import styles from "./AssuranceReport.module.css";
+import useAssuranceReport from "./useAssuranceReport";
 import ReplaceModal from "./ReplaceModal";
 import UploadCard from "./UploadCard";
 import FileViewer from "./FileViewer";
@@ -13,6 +13,7 @@ const AssuranceReport: React.FC = () => {
     limitedAssuranceFile,
     reasonableAssuranceFile,
     loading,
+    initialLoading,
     dragOver,
     viewingFile,
     viewingFileName,
@@ -57,38 +58,45 @@ const AssuranceReport: React.FC = () => {
           onConfirm={confirmReplace}
         />
 
-        <div className={styles.grid}>
-          <UploadCard
-            title="Upload Limited Assurance"
-            type="limited"
-            file={limitedAssuranceFile}
-            dragOverState={dragOver.limited}
-            isLoading={loading.limited}
-            fileInputRef={limitedFileInputRef}
-            onDrop={handleDrop}
-            onDragOver={handleDragOver}
-            onDragLeave={handleDragLeave}
-            onFileInputChange={handleFileInputChange}
-            onDownload={(file) => downloadFile(file, "limited")}
-            onView={(file) => viewFile(file, "limited")}
-            completed={completed.limited}
-          />
-          <UploadCard
-            title="Upload Reasonable Assurance"
-            type="reasonable"
-            file={reasonableAssuranceFile}
-            dragOverState={dragOver.reasonable}
-            isLoading={loading.reasonable}
-            fileInputRef={reasonableFileInputRef}
-            onDrop={handleDrop}
-            onDragOver={handleDragOver}
-            onDragLeave={handleDragLeave}
-            onFileInputChange={handleFileInputChange}
-            onDownload={(file) => downloadFile(file, "reasonable")}
-            onView={(file) => viewFile(file, "reasonable")}
-            completed={completed.reasonable}
-          />
-        </div>
+        {initialLoading ? (
+          <div className={styles.loadingContainer}>
+            <div className={styles.loadingSpinner}></div>
+            <p>Loading existing files...</p>
+          </div>
+        ) : (
+          <div className={styles.grid}>
+            <UploadCard
+              title="Upload Limited Assurance"
+              type="limited"
+              file={limitedAssuranceFile}
+              dragOverState={dragOver.limited}
+              isLoading={loading.limited}
+              fileInputRef={limitedFileInputRef}
+              onDrop={handleDrop}
+              onDragOver={handleDragOver}
+              onDragLeave={handleDragLeave}
+              onFileInputChange={handleFileInputChange}
+              onDownload={(file) => downloadFile(file, "limited")}
+              onView={(file) => viewFile(file, "limited")}
+              completed={completed.limited}
+            />
+            <UploadCard
+              title="Upload Reasonable Assurance"
+              type="reasonable"
+              file={reasonableAssuranceFile}
+              dragOverState={dragOver.reasonable}
+              isLoading={loading.reasonable}
+              fileInputRef={reasonableFileInputRef}
+              onDrop={handleDrop}
+              onDragOver={handleDragOver}
+              onDragLeave={handleDragLeave}
+              onFileInputChange={handleFileInputChange}
+              onDownload={(file) => downloadFile(file, "reasonable")}
+              onView={(file) => viewFile(file, "reasonable")}
+              completed={completed.reasonable}
+            />
+          </div>
+        )}
 
         {viewingFile && (
           <FileViewer

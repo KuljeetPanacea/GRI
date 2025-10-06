@@ -1,307 +1,307 @@
-name: Testing your code (Continuous Integration)😈😈.......
+# name: Testing your code (Continuous Integration)😈😈.......
  
-on:
-  workflow_dispatch:
-  # pull_request:
-  #   branches:
-  #      - main
-  # push:
-  #   branches:
-  #     - CICD
+# on:
+#   workflow_dispatch:
+#   # pull_request:
+#   #   branches:
+#   #      - main
+#   # push:
+#   #   branches:
+#   #     - CICD
 
-# concurrency:
-#   group: main-branch
-#   cancel-in-progress: false
+# # concurrency:
+# #   group: main-branch
+# #   cancel-in-progress: false
 
-jobs:
+# jobs:
 
-  build:
-    runs-on: self-hosted
-    outputs:
-      commit_id: ${{ steps.commit_info.outputs.commit_id }}
-      author: ${{ steps.commit_info.outputs.author }}
-    steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v2
-        with:
-            fetch-depth: 0 
+#   build:
+#     runs-on: self-hosted
+#     outputs:
+#       commit_id: ${{ steps.commit_info.outputs.commit_id }}
+#       author: ${{ steps.commit_info.outputs.author }}
+#     steps:
+#       - name: Checkout Repository
+#         uses: actions/checkout@v2
+#         with:
+#             fetch-depth: 0 
           
-      - name: Cache npm dependencies
-        uses: actions/cache@v3
-        with:
-          path: ~/.npm
-          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-node-
+#       - name: Cache npm dependencies
+#         uses: actions/cache@v3
+#         with:
+#           path: ~/.npm
+#           key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+#           restore-keys: |
+#             ${{ runner.os }}-node-
 
-      - name: Get Commit Details
-        id: commit_info
-        run: |
-          echo commit_id=$(git rev-parse HEAD)
-          echo author=$(git log -1 --pretty=format:'%an')
-          echo "commit_id=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
-          echo "author=$(git log -1 --pretty=format:'%an')" >> "$GITHUB_OUTPUT"
+#       - name: Get Commit Details
+#         id: commit_info
+#         run: |
+#           echo commit_id=$(git rev-parse HEAD)
+#           echo author=$(git log -1 --pretty=format:'%an')
+#           echo "commit_id=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+#           echo "author=$(git log -1 --pretty=format:'%an')" >> "$GITHUB_OUTPUT"
 
-      - name: Deploy .env file from GitHub Secrets
-        run: | 
-         echo "${{ secrets.ENV }}" > server/.env 
+#       - name: Deploy .env file from GitHub Secrets
+#         run: | 
+#          echo "${{ secrets.ENV }}" > server/.env 
           
-      - name: Install Dependencies
-        run: |
-          chmod +x scripts/build.sh
-          echo "✔️✔️✔️🛫🛫version checking "
-          node -v
-          npm -v
-          ./scripts/build.sh
+#       - name: Install Dependencies
+#         run: |
+#           chmod +x scripts/build.sh
+#           echo "✔️✔️✔️🛫🛫version checking "
+#           node -v
+#           npm -v
+#           ./scripts/build.sh
 
-  Trivy:
-    runs-on: self-hosted
-    needs: build
+#   Trivy:
+#     runs-on: self-hosted
+#     needs: build
     
-    steps:
-      - name: Trivy FS scan
-        run: |
-         docker run --rm -v $(pwd):/workspace aquasec/trivy fs --format table --exit-code 0 --severity CRITICAL,HIGH -o /workspace/trivy_report.json /workspace
+#     steps:
+#       - name: Trivy FS scan
+#         run: |
+#          docker run --rm -v $(pwd):/workspace aquasec/trivy fs --format table --exit-code 0 --severity CRITICAL,HIGH -o /workspace/trivy_report.json /workspace
 
-      - name: Upload Trivy Scan Report
-        uses: actions/upload-artifact@v4.6.1
-        with:
-          name: TRIVY-CODE-SCAN-REPORT
-          path: trivy_report.json
+#       - name: Upload Trivy Scan Report
+#         uses: actions/upload-artifact@v4.6.1
+#         with:
+#           name: TRIVY-CODE-SCAN-REPORT
+#           path: trivy_report.json
   
-  SonarQube:
-    runs-on: self-hosted
-    needs: build
+#   SonarQube:
+#     runs-on: self-hosted
+#     needs: build
 
-    steps:
-      - name: SonarQube Scan
-        env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
-        uses: SonarSource/sonarqube-scan-action@master
-        with:
-          projectBaseDir: ./
-          args: >
-            -Dsonar.projectKey=pi-audit-management
-            -Dsonar.sources=.
-            -Dsonar.exclusions=node_modules/**,build/**
-            -Dsonar.host.url=${{ secrets.SONAR_HOST_URL }}
-            -Dsonar.login=${{ secrets.SONAR_TOKEN }} 
+#     steps:
+#       - name: SonarQube Scan
+#         env:
+#           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+#           SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+#         uses: SonarSource/sonarqube-scan-action@master
+#         with:
+#           projectBaseDir: ./
+#           args: >
+#             -Dsonar.projectKey=pi-audit-management
+#             -Dsonar.sources=.
+#             -Dsonar.exclusions=node_modules/**,build/**
+#             -Dsonar.host.url=${{ secrets.SONAR_HOST_URL }}
+#             -Dsonar.login=${{ secrets.SONAR_TOKEN }} 
 
-  Docker-Build:
-      runs-on: self-hosted
-      needs: SonarQube
+#   Docker-Build:
+#       runs-on: self-hosted
+#       needs: SonarQube
       
-      steps:
-        - name: Set up QEMU   #Sets up QEMU, which is an emulator that helps build Docker images for different architectures (e.g., arm64, amd64).
-          uses: docker/setup-qemu-action@v3
+#       steps:
+#         - name: Set up QEMU   #Sets up QEMU, which is an emulator that helps build Docker images for different architectures (e.g., arm64, amd64).
+#           uses: docker/setup-qemu-action@v3
           
-        - name: Set up Docker Buildx #Enables Docker Buildx, which is an advanced builder for faster and multi-platform builds.
-          uses: docker/setup-buildx-action@v3
+#         - name: Set up Docker Buildx #Enables Docker Buildx, which is an advanced builder for faster and multi-platform builds.
+#           uses: docker/setup-buildx-action@v3
           
-        - name: Setting Date
-          run: echo "IMAGE_TAG=$(date +'%d-%m-%Y')" >> $GITHUB_ENV
+#         - name: Setting Date
+#           run: echo "IMAGE_TAG=$(date +'%d-%m-%Y')" >> $GITHUB_ENV
         
-        - name: Build Docker Image
-          run: |
-               pwd
-               cd server
-               docker build -t pi-audit-server:${{ env.IMAGE_TAG }} .
-               cd ..
-               cd client
-               docker build -t pi-audit-client:${{ env.IMAGE_TAG }} .
+#         - name: Build Docker Image
+#           run: |
+#                pwd
+#                cd server
+#                docker build -t pi-audit-server:${{ env.IMAGE_TAG }} .
+#                cd ..
+#                cd client
+#                docker build -t pi-audit-client:${{ env.IMAGE_TAG }} .
 
-  Trivy-Docker-Scan-Server:
-      runs-on: self-hosted
-      needs: Docker-Build
+#   Trivy-Docker-Scan-Server:
+#       runs-on: self-hosted
+#       needs: Docker-Build
 
-      steps:
-        - name: Setting Date
-          run: echo "IMAGE_TAG=$(date +'%d-%m-%Y')" >> $GITHUB_ENV
+#       steps:
+#         - name: Setting Date
+#           run: echo "IMAGE_TAG=$(date +'%d-%m-%Y')" >> $GITHUB_ENV
           
-        - name: SCANNING "pi-audit-server" docker image 
-          uses: aquasecurity/trivy-action@0.9.2
-          with:
-            image-ref: 'pi-audit-server:${{ env.IMAGE_TAG }}'
-            format: 'table'
-            exit-code: '0'
-            ignore-unfixed: true
-            vuln-type: 'os,library'
-            severity: 'CRITICAL,HIGH'
+#         - name: SCANNING "pi-audit-server" docker image 
+#           uses: aquasecurity/trivy-action@0.9.2
+#           with:
+#             image-ref: 'pi-audit-server:${{ env.IMAGE_TAG }}'
+#             format: 'table'
+#             exit-code: '0'
+#             ignore-unfixed: true
+#             vuln-type: 'os,library'
+#             severity: 'CRITICAL,HIGH'
                
-        - name: Making Report of issues
-          uses: aquasecurity/trivy-action@0.9.2
-          with:
-            image-ref: 'pi-audit-server:${{ env.IMAGE_TAG }}'
-            format: 'table'
-            output: "Server-image-trivy.json"
-            exit-code: '0'  # Don't fail pipeline
-            ignore-unfixed: true
-            vuln-type: 'os,library'
-            severity: 'CRITICAL,HIGH,MEDIUM,LOW'
+#         - name: Making Report of issues
+#           uses: aquasecurity/trivy-action@0.9.2
+#           with:
+#             image-ref: 'pi-audit-server:${{ env.IMAGE_TAG }}'
+#             format: 'table'
+#             output: "Server-image-trivy.json"
+#             exit-code: '0'  # Don't fail pipeline
+#             ignore-unfixed: true
+#             vuln-type: 'os,library'
+#             severity: 'CRITICAL,HIGH,MEDIUM,LOW'
 
-        - name: Upload Trivy Scan Report
-          uses: actions/upload-artifact@v4.6.1
-          with:
-            name: TRIVY-DOCKER-SCAN-REPORT(Server)
-            path: Server-image-trivy.json
+#         - name: Upload Trivy Scan Report
+#           uses: actions/upload-artifact@v4.6.1
+#           with:
+#             name: TRIVY-DOCKER-SCAN-REPORT(Server)
+#             path: Server-image-trivy.json
 
-  Trivy-Docker-Scan-Client:
-    runs-on: self-hosted
-    needs: Docker-Build
+#   Trivy-Docker-Scan-Client:
+#     runs-on: self-hosted
+#     needs: Docker-Build
 
-    steps:
-      - name: Setting Date
-        run: echo "IMAGE_TAG=$(date +'%d-%m-%Y')" >> $GITHUB_ENV
+#     steps:
+#       - name: Setting Date
+#         run: echo "IMAGE_TAG=$(date +'%d-%m-%Y')" >> $GITHUB_ENV
         
-      - name: SCANNING "pi-audit-client" docker image 
-        uses: aquasecurity/trivy-action@0.9.2
-        with:
-          image-ref: 'pi-audit-client:${{ env.IMAGE_TAG }}'
-          format: 'table'
-          exit-code: '0'
-          ignore-unfixed: true
-          vuln-type: 'os,library'
-          severity: 'CRITICAL,HIGH'
+#       - name: SCANNING "pi-audit-client" docker image 
+#         uses: aquasecurity/trivy-action@0.9.2
+#         with:
+#           image-ref: 'pi-audit-client:${{ env.IMAGE_TAG }}'
+#           format: 'table'
+#           exit-code: '0'
+#           ignore-unfixed: true
+#           vuln-type: 'os,library'
+#           severity: 'CRITICAL,HIGH'
              
-      - name: Making Report of issues
-        uses: aquasecurity/trivy-action@0.9.2
-        with:
-          image-ref: 'pi-audit-client:${{ env.IMAGE_TAG }}'
-          format: 'table'
-          output: "Client-image-trivy.json"
-          exit-code: '0'  # Don't fail pipeline
-          ignore-unfixed: true
-          vuln-type: 'os,library'
-          severity: 'CRITICAL,HIGH,MEDIUM,LOW'
+#       - name: Making Report of issues
+#         uses: aquasecurity/trivy-action@0.9.2
+#         with:
+#           image-ref: 'pi-audit-client:${{ env.IMAGE_TAG }}'
+#           format: 'table'
+#           output: "Client-image-trivy.json"
+#           exit-code: '0'  # Don't fail pipeline
+#           ignore-unfixed: true
+#           vuln-type: 'os,library'
+#           severity: 'CRITICAL,HIGH,MEDIUM,LOW'
 
-      - name: Upload Trivy Scan Report
-        uses: actions/upload-artifact@v4.6.1
-        with:
-          name: TRIVY-DOCKER-SCAN-REPORT(Client)
-          path: Client-image-trivy.json
+#       - name: Upload Trivy Scan Report
+#         uses: actions/upload-artifact@v4.6.1
+#         with:
+#           name: TRIVY-DOCKER-SCAN-REPORT(Client)
+#           path: Client-image-trivy.json
 
-  Publishing-Server_Image-to-GHCR:
-    runs-on: self-hosted
-    needs: Trivy-Docker-Scan-Server
+#   Publishing-Server_Image-to-GHCR:
+#     runs-on: self-hosted
+#     needs: Trivy-Docker-Scan-Server
   
-    steps:
-      - name: Setting Date
-        run: echo "IMAGE_TAG=$(date +'%d-%m-%Y')" >> $GITHUB_ENV
+#     steps:
+#       - name: Setting Date
+#         run: echo "IMAGE_TAG=$(date +'%d-%m-%Y')" >> $GITHUB_ENV
   
-      - name: Renaming Docker Image
-        run: |
-          docker tag pi-audit-server:${{ env.IMAGE_TAG }} ghcr.io/panacea-infosec/pi-audit-server:${{ env.IMAGE_TAG }}
+#       - name: Renaming Docker Image
+#         run: |
+#           docker tag pi-audit-server:${{ env.IMAGE_TAG }} ghcr.io/panacea-infosec/pi-audit-server:${{ env.IMAGE_TAG }}
   
-      - name: Login to GHCR
-        run: echo "${{ secrets.TOKEN_GITHUB }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+#       - name: Login to GHCR
+#         run: echo "${{ secrets.TOKEN_GITHUB }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
   
-      - name: Pushing Image
-        run: |
-          docker push ghcr.io/panacea-infosec/pi-audit-server:${{ env.IMAGE_TAG }}
+#       - name: Pushing Image
+#         run: |
+#           docker push ghcr.io/panacea-infosec/pi-audit-server:${{ env.IMAGE_TAG }}
 
-  Publishing-Client_Image-to-GHCR:
-      runs-on: self-hosted
-      needs: Trivy-Docker-Scan-Client
+#   Publishing-Client_Image-to-GHCR:
+#       runs-on: self-hosted
+#       needs: Trivy-Docker-Scan-Client
     
-      steps:
-        - name: Setting Date
-          run: echo "IMAGE_TAG=$(date +'%d-%m-%Y')" >> $GITHUB_ENV
+#       steps:
+#         - name: Setting Date
+#           run: echo "IMAGE_TAG=$(date +'%d-%m-%Y')" >> $GITHUB_ENV
     
-        - name: Renaming Docker Image
-          run: |
-            docker tag pi-audit-client:${{ env.IMAGE_TAG }} ghcr.io/panacea-infosec/pi-audit-client:${{ env.IMAGE_TAG }}
+#         - name: Renaming Docker Image
+#           run: |
+#             docker tag pi-audit-client:${{ env.IMAGE_TAG }} ghcr.io/panacea-infosec/pi-audit-client:${{ env.IMAGE_TAG }}
     
-        - name: Login to GHCR
-          run: echo "${{ secrets.TOKEN_GITHUB }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+#         - name: Login to GHCR
+#           run: echo "${{ secrets.TOKEN_GITHUB }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
     
-        - name: Pushing Image
-          run: |
-            docker push ghcr.io/panacea-infosec/pi-audit-client:${{ env.IMAGE_TAG }}
+#         - name: Pushing Image
+#           run: |
+#             docker push ghcr.io/panacea-infosec/pi-audit-client:${{ env.IMAGE_TAG }}
 
-  Removing_Docker_Images:
-      runs-on: self-hosted
-      needs: Publishing-Client_Image-to-GHCR
+#   Removing_Docker_Images:
+#       runs-on: self-hosted
+#       needs: Publishing-Client_Image-to-GHCR
       
-      steps:
-      - name: Removing Unwanted Docker Images
-        run: |
-              docker images --format "{{.Repository}}:{{.Tag}} {{.ID}}" | \
-              awk '!/sonarqube|tonistiigi\/binfmt|moby\/buildkit|aquasec\/trivy|postgres/ {print $2}' | \
-              xargs docker rmi -f
-              sudo apt autoremove -y
-              sudo apt autoclean
-              sudo apt clean
+#       steps:
+#       - name: Removing Unwanted Docker Images
+#         run: |
+#               docker images --format "{{.Repository}}:{{.Tag}} {{.ID}}" | \
+#               awk '!/sonarqube|tonistiigi\/binfmt|moby\/buildkit|aquasec\/trivy|postgres/ {print $2}' | \
+#               xargs docker rmi -f
+#               sudo apt autoremove -y
+#               sudo apt autoclean
+#               sudo apt clean
 
    
-  notify:
-    runs-on: self-hosted
-    needs: [Publishing-Client_Image-to-GHCR , build]
-    if: always()
-    steps:
+#   notify:
+#     runs-on: self-hosted
+#     needs: [Publishing-Client_Image-to-GHCR , build]
+#     if: always()
+#     steps:
   
-      # - name: Install GitHub CLI
-      #   run: sudo apt update && sudo apt install -y gh
+#       # - name: Install GitHub CLI
+#       #   run: sudo apt update && sudo apt install -y gh
   
-      # - name: Authenticate GitHub CLI
-      #   env:
-      #     GH_TOKEN: ${{ secrets.TOKEN_GITHUB }}
-      #   run: gh auth status
+#       # - name: Authenticate GitHub CLI
+#       #   env:
+#       #     GH_TOKEN: ${{ secrets.TOKEN_GITHUB }}
+#       #   run: gh auth status
   
-      - name: Store Build Status
-        run: |
-          if [[ "${{ needs.Publishing-Client_Image-to-GHCR.result }}" == "success" ]]; then
-            echo "ACTIVITY_SUBTITLE=✅ Continuous Integration Successful - Main Branch" >> $GITHUB_ENV
-          else
-            echo "ACTIVITY_SUBTITLE=❌ Continuous Integration Failed - Main Branch" >> $GITHUB_ENV
-          fi
+#       - name: Store Build Status
+#         run: |
+#           if [[ "${{ needs.Publishing-Client_Image-to-GHCR.result }}" == "success" ]]; then
+#             echo "ACTIVITY_SUBTITLE=✅ Continuous Integration Successful - Main Branch" >> $GITHUB_ENV
+#           else
+#             echo "ACTIVITY_SUBTITLE=❌ Continuous Integration Failed - Main Branch" >> $GITHUB_ENV
+#           fi
           
-          echo "${{ env.ACTIVITY_SUBTITLE }}"
-          SONAR_URL=${{ secrets.SONAR_HOST_URL }}
-          echo "Sonar URL is: $SONAR_URL"
+#           echo "${{ env.ACTIVITY_SUBTITLE }}"
+#           SONAR_URL=${{ secrets.SONAR_HOST_URL }}
+#           echo "Sonar URL is: $SONAR_URL"
 
 
-      - name: Generate Microsoft Teams Notification JSON
-        run: |
-          cat <<EOF > teams_payload.json
-          {
-            "@type": "MessageCard",
-            "@context": "http://schema.org/extensions",
-            "themeColor": "0076D7",
-            "summary": "GitHub Actions Continuous Integration Notification",
-            echo  This is the Sonar URL : ${{ secrets.SONAR_HOST_URL }}",
-            "sections": [{
-                "activityTitle": "**GitHub Actions Continuous Integration Notification**",
-                "activitySubtitle": "${{ env.ACTIVITY_SUBTITLE }}",
-                "activityImage": "https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png",
-                "facts": [
-                    { "name": "Commit ID", "value": "${{ needs.build.outputs.commit_id}}" },
-                    { "name": "Author", "value": "${{ needs.build.outputs.author }}" },
-                    { "name": "View Logs", "value": "[🔗 View Logs](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})" },
-                    { "name": "SonarQube Report", "value": "[🔗 SonarQube Dashboard](${{ secrets.SONAR_HOST_URL }})" },
+#       - name: Generate Microsoft Teams Notification JSON
+#         run: |
+#           cat <<EOF > teams_payload.json
+#           {
+#             "@type": "MessageCard",
+#             "@context": "http://schema.org/extensions",
+#             "themeColor": "0076D7",
+#             "summary": "GitHub Actions Continuous Integration Notification",
+#             echo  This is the Sonar URL : ${{ secrets.SONAR_HOST_URL }}",
+#             "sections": [{
+#                 "activityTitle": "**GitHub Actions Continuous Integration Notification**",
+#                 "activitySubtitle": "${{ env.ACTIVITY_SUBTITLE }}",
+#                 "activityImage": "https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png",
+#                 "facts": [
+#                     { "name": "Commit ID", "value": "${{ needs.build.outputs.commit_id}}" },
+#                     { "name": "Author", "value": "${{ needs.build.outputs.author }}" },
+#                     { "name": "View Logs", "value": "[🔗 View Logs](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})" },
+#                     { "name": "SonarQube Report", "value": "[🔗 SonarQube Dashboard](${{ secrets.SONAR_HOST_URL }})" },
 
-                    ],
-                "markdown": true
-            }]
-          }
-          EOF
+#                     ],
+#                 "markdown": true
+#             }]
+#           }
+#           EOF
   
-      - name: Send Notification to Microsoft Teams
-        run: |
-          curl -H "Content-Type: application/json" -d @teams_payload.json ${{ secrets.TEAMS_WEBHOOK_URL }}
+#       - name: Send Notification to Microsoft Teams
+#         run: |
+#           curl -H "Content-Type: application/json" -d @teams_payload.json ${{ secrets.TEAMS_WEBHOOK_URL }}
           
-      - name: Send Notification
-        uses: cinotify/github-action@main
-        with:
-          # to: 'nitin.trainee@panaceainfosec.com,ravinder@panaceainfosec.com, kishore@panaceainfosec.com, rajat.agarwal@panaceainfosec.com'
-          to: 'shivram.dutt@panaceainfosec.com, kapil.kumar@panaceainfosec.com'
-          subject: ${{ needs.build.result == 'success' && '✅ Build Successful - Main Branch' || '❌ Build Failed - Main Branch' }}
-          body: |
-              <strong>Commit ID:</strong> ${{ needs.build.outputs.commit_id }}<br>
-              <strong>Author:</strong> ${{ needs.build.outputs.author }}<br>
-              <a href="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}">🔗 View Logs</a>
-          type: 'text/html'
-          # attachment:  
+#       - name: Send Notification
+#         uses: cinotify/github-action@main
+#         with:
+#           # to: 'nitin.trainee@panaceainfosec.com,ravinder@panaceainfosec.com, kishore@panaceainfosec.com, rajat.agarwal@panaceainfosec.com'
+#           to: 'shivram.dutt@panaceainfosec.com, kapil.kumar@panaceainfosec.com'
+#           subject: ${{ needs.build.result == 'success' && '✅ Build Successful - Main Branch' || '❌ Build Failed - Main Branch' }}
+#           body: |
+#               <strong>Commit ID:</strong> ${{ needs.build.outputs.commit_id }}<br>
+#               <strong>Author:</strong> ${{ needs.build.outputs.author }}<br>
+#               <a href="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}">🔗 View Logs</a>
+#           type: 'text/html'
+#           # attachment:  
      
 
 

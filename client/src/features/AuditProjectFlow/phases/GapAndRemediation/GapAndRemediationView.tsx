@@ -15,11 +15,6 @@ import {
 } from "../../../../redux/GapsRemediationSlice";
 import { deviceLookUp } from "../../../../api/project";
 import GapCard from "./components/GapCard";
-import {
-  findAlldeviceGaps,
-  findAllstakeholderGaps,
-  findDeviceRefGaps,
-} from "../../../../api/GapAndRemediation";
 import { fetchProjectQuestionaire } from "../../../../api/project";
 import { useNavigate } from "react-router-dom";
 
@@ -54,8 +49,6 @@ const GapAndRemediationView = () => {
  
     activeFilter,
     setDeviceTypes,
-    setAlldeviceGaps,
-    setAllStakeholderGaps,
     selectedProject,
     dispatch,
     
@@ -118,73 +111,6 @@ const GapAndRemediationView = () => {
     //  dispatch(setGapRemediationDropdown(data.map((item) => item.deviceType)));
   }, [dispatch, activeFilter, axiosInstance, selectedProject?._id]);
 
-  useEffect(() => {
-    const fetchDeviceGaps = async () => {
-      if (!selectedProject?._id) return;
-
-      try {
-        // If Device is selected
-        if (
-          activeFilter?.type?.toLowerCase() === "device" &&
-          activeFilter?.value.toLowerCase() === "asset"
-        ) {
-          const response = await findAlldeviceGaps(
-            axiosInstance,
-            selectedProject._id
-          );
-          setAlldeviceGaps(response.data);
-
-          dispatch(
-            setGapRemediationDropdown({
-              title: "Device Type",
-              options: response.data.map(
-                (item: GapsRemediation) => item.deviceType
-              ),
-            } as GapRemediationDropdown)
-          );
-        } else if (activeFilter?.value === "Stakeholder") {
-          const response = await findAllstakeholderGaps(
-            axiosInstance,
-            selectedProject._id
-          );
-
-          setAllStakeholderGaps(response.data);
-          dispatch(
-            setGapRemediationDropdown({
-              title: "Stakeholder",
-              options: response.data.map(
-                (item: GapsRemediation) => item.AEInternalAssessor
-              ),
-            } as GapRemediationDropdown)
-          );
-        }
-        // If specific device name is selected
-        else if (
-          activeFilter?.value !== "Asset" &&
-          activeFilter?.value !== "Requirement"
-        ) {
-          const response = await findDeviceRefGaps(
-            axiosInstance,
-            selectedProject._id,
-            activeFilter?.value
-          );
-          setAlldeviceGaps(response.data);
-          dispatch(
-            setGapRemediationDropdown({
-              title: "Device Reference",
-              options: response.data.map(
-                (item: GapsRemediation) => item.deviceRef
-              ),
-            } as GapRemediationDropdown)
-          );
-        }
-      } catch (error) {
-        console.error("Failed to fetch device gaps:", error);
-      }
-    };
-
-    fetchDeviceGaps();
-  }, [activeFilter, axiosInstance, dispatch, selectedProject?._id, setAllStakeholderGaps, setAlldeviceGaps]);
 
   // Calculate total gaps across all questionnaires
   const totalQuestionnaireGaps = questionnaires.reduce((total, questionnaire) => {
@@ -193,66 +119,70 @@ const GapAndRemediationView = () => {
 
 
   const renderContent = () => {
-    switch (activeFilter?.type === "tab" ? activeFilter.value : "Questionnaire") {
-      case "Questionnaire":
-        return (
-          <>
-            <StatusBar
-              totalNoOfGaps={totalQuestionnaireGaps}
-              PendingClient={0}
-              PendingQsa={totalQuestionnaireGaps}
-            />
-            <Box className={styles.requirementsContainer}>
-              <Grid container spacing={2}>
-                {questionnaires.length === 0 ? (
-                  <Grid item xs={12}>
-                    <Card>
-                      <CardContent>
-                        <Typography variant="h6" align="center" color="text.secondary">
-                          No questionnaires found
-                        </Typography>
-                      </CardContent>
-                    </Card>
-                  </Grid>
-                ) : (
-                  questionnaires.map((questionnaire, questionnaireIndex) => {
-                    const questionsWithGaps = questionnaire.questions?.filter(q => q.gaps?.gaps && q.gaps.gaps.trim() !== '') || [];
-                    
-                    if (questionsWithGaps.length === 0) {
-                      return null; // Don't render questionnaires without gaps
-                    }
-
-                    return (
-                      <Grid item xs={12} md={6} key={questionnaireIndex}>
-                        <GapCard
-                          title={questionnaire.title || `Questionnaire ${questionnaireIndex + 1}`}
-                          description={questionnaire.phase ? `Phase: ${questionnaire.phase}` : undefined}
-                          totalGaps={questionsWithGaps.length}
-                          completedGaps={0}
-                          onClick={() => {
-                            // Navigate to gap remediation page with questionnaire data
-                            navigate('/landing/gap-remediation', { 
-                              state: { 
-                                questionnaireId: questionnaire.id || questionnaire._id,
-                                questionnaireTitle: questionnaire.title,
-                                questionnaireData: questionnaire,
-                                questionsWithGaps: questionsWithGaps
-                              } 
-                            });
-                          }}
-                        />
-                      </Grid>
-                    );
-                  })
-                )}
+    return (
+      <>
+        <StatusBar
+          totalNoOfGaps={totalQuestionnaireGaps}
+          PendingClient={0}
+          PendingQsa={totalQuestionnaireGaps}
+        />
+        <Box className={styles.requirementsContainer}>
+          <Grid container spacing={2}>
+            {questionnaires.length === 0 ? (
+              <Grid item xs={12}>
+                <Card>
+                  <CardContent>
+                    <Typography variant="h6" align="center" color="text.secondary">
+                      No questionnaires found
+                    </Typography>
+                  </CardContent>
+                </Card>
               </Grid>
-            </Box>
-          </>
-        );
+            ) : totalQuestionnaireGaps === 0 ? (
+              <Grid item xs={12}>
+                <Card>
+                  <CardContent>
+                    <Typography variant="h6" align="center" color="text.secondary">
+                      No gaps found in questionnaires
+                    </Typography>
+                  </CardContent>
+                </Card>
+              </Grid>
+            ) : (
+              questionnaires.map((questionnaire, questionnaireIndex) => {
+                const questionsWithGaps = questionnaire.questions?.filter(q => q.gaps?.gaps && q.gaps.gaps.trim() !== '') || [];
+                
+                if (questionsWithGaps.length === 0) {
+                  return null; // Don't render questionnaires without gaps
+                }
 
-       default:
-        return <h1>Please select a tab</h1>;
-    }
+                return (
+                  <Grid item xs={12} md={6} key={questionnaireIndex}>
+                    <GapCard
+                      title={questionnaire.title || `Questionnaire ${questionnaireIndex + 1}`}
+                      description={questionnaire.phase ? `Phase: ${questionnaire.phase}` : undefined}
+                      totalGaps={questionsWithGaps.length}
+                      completedGaps={0}
+                      onClick={() => {
+                        // Navigate to gap remediation page with questionnaire data
+                        navigate('/landing/gap-remediation', { 
+                          state: { 
+                            questionnaireId: questionnaire.id || questionnaire._id,
+                            questionnaireTitle: questionnaire.title,
+                            questionnaireData: questionnaire,
+                            questionsWithGaps: questionsWithGaps
+                          } 
+                        });
+                      }}
+                    />
+                  </Grid>
+                );
+              })
+            )}
+          </Grid>
+        </Box>
+      </>
+    );
   };
   return (
     <div className={styles.container}>

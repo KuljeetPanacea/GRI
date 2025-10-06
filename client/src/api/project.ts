@@ -844,3 +844,103 @@ export const getAssurancePresignedUrl = async (
     throw error;
   }
 };
+
+// CDE Document Upload Functions
+export const uploadCdeDocument = async (
+  axiosInstance: AxiosInstance,
+  file: File,
+  projectId: string,
+  _cdeType: string
+): Promise<string> => {
+  try {
+    // Get presigned URL for upload
+    const { data } = await axiosInstance.post(
+      "/api/s3/generate-presigned-url",
+      {
+        fileName: file.name,
+        fileType: file.type,
+        folderName: `projects/${projectId}/cde-docs`,
+      },
+      { withCredentials: true }
+    );
+    
+    const { url, key } = data;
+    
+    // Upload file to S3
+    const uploadResponse = await axiosInstance.put(url, file, {
+      headers: {
+        "Content-Type": file.type,
+      },
+    });
+    
+    if (uploadResponse.status === 200) {
+      return key;
+    } else {
+      throw new Error("Upload failed");
+    }
+  } catch (error) {
+    console.error("Error uploading CDE document:", error);
+    throw error;
+  }
+};
+
+export const saveCdeDocumentInfo = async (
+  axiosInstance: AxiosInstance,
+  projectId: string,
+  cdeDocument: {
+    fileName: string;
+    fileType: string;
+    folderName: string;
+    s3Path: string;
+    status: string;
+    uploadedAt: Date;
+    uploadedBy: string;
+    cdeType: string;
+    tags?: string[];
+  }
+) => {
+  try {
+    const response = await axiosInstance.post(
+      `/api/project/${projectId}/cde-docs`,
+      cdeDocument,
+      { withCredentials: true }
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error saving CDE document info:", error);
+    throw error;
+  }
+};
+
+export const fetchCdeDocuments = async (
+  axiosInstance: AxiosInstance,
+  projectId: string
+) => {
+  try {
+    const response = await axiosInstance.get(
+      `/api/project/${projectId}/cde-docs`,
+      { withCredentials: true }
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching CDE documents:", error);
+    throw error;
+  }
+};
+
+export const getCdeDocumentPresignedUrl = async (
+  axiosInstance: AxiosInstance,
+  key: string
+) => {
+  try {
+    const response = await axiosInstance.post(
+      "/api/s3/get-presigned-url",
+      { fileKey: key },
+      { withCredentials: true }
+    );
+    return response.data.url;
+  } catch (error) {
+    console.error("Error getting CDE document presigned URL:", error);
+    throw error;
+  }
+};

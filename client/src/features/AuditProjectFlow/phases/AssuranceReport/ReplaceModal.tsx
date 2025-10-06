@@ -1,6 +1,6 @@
 import { Replace } from "lucide-react";
-import styles from ".././styles/AssuranceReport.module.css";
-import { formatFileSize } from "../hooks/useAssuranceReport";
+import styles from "./AssuranceReport.module.css";
+import { formatFileSize } from "./useAssuranceReport";
 
 interface ReplaceModalProps {
   isOpen: boolean;
