@@ -761,3 +761,186 @@ export const getEvidenceTracker = async (
     throw error;
   }
 };
+
+
+//Assurance 
+export const uploadAssuranceFile = async (
+  axiosInstant: AxiosInstance,
+  file: File
+): Promise<string> => {
+  const { data } = await axiosInstant.post(
+    "/api/additionalInfo/generate-presigned-url",
+    {
+      fileName: file.name,
+      fileType: file.type,
+    },
+    { withCredentials: true }
+  );
+  
+  const { url, key } = data;
+  
+  const uploadResponse = await axiosInstant.put(url, file, {
+    headers: {
+      "Content-Type": file.type,
+    },
+  });
+  
+  if (uploadResponse.status === 200) {
+    return key;
+  } else {
+    throw new Error("Upload failed");
+  }
+};
+
+export const saveAssuranceFileInfo = async (
+  axiosInstance: AxiosInstance,
+  projectId: string,
+  type: "limited" | "reasonable",
+  key: string
+) => {
+  try {
+    const payload = { projectId, [type]: key };
+    const response = await axiosInstance.post(
+      "/api/additionalInfo/save",
+      payload,
+      { withCredentials: true }
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error saving assurance file info:", error);
+    throw error;
+  }
+};
+
+export const fetchAssuranceFiles = async (
+  axiosInstance: AxiosInstance,
+  projectId: string
+) => {
+  try {
+    const response = await axiosInstance.get(
+      `/api/additionalInfo/by-project/${projectId}`,
+      { withCredentials: true }
+    );
+    return response.data; // { limited: string, reasonable: string }
+  } catch (error) {
+    console.error("Error fetching assurance files:", error);
+    throw error;
+  }
+};
+
+export const getAssurancePresignedUrl = async (
+  axiosInstance: AxiosInstance,
+  key: string
+) => {
+  try {
+    const response = await axiosInstance.post(
+      "/api/additionalInfo/get-presigned-url",
+      { fileKey: key },
+      { withCredentials: true }
+    );
+    return response.data.url;
+  } catch (error: unknown) {
+    console.error("Error getting presigned URL:", error);
+    throw error;
+  }
+};
+
+// CDE Document Upload Functions
+export const uploadCdeDocument = async (
+  axiosInstance: AxiosInstance,
+  file: File,
+  projectId: string,
+  _cdeType: string
+): Promise<string> => {
+  try {
+    // Get presigned URL for upload
+    const { data } = await axiosInstance.post(
+      "/api/s3/generate-presigned-url",
+      {
+        fileName: file.name,
+        fileType: file.type,
+        folderName: `projects/${projectId}/cde-docs`,
+      },
+      { withCredentials: true }
+    );
+    
+    const { url, key } = data;
+    
+    // Upload file to S3
+    const uploadResponse = await axiosInstance.put(url, file, {
+      headers: {
+        "Content-Type": file.type,
+      },
+    });
+    
+    if (uploadResponse.status === 200) {
+      return key;
+    } else {
+      throw new Error("Upload failed");
+    }
+  } catch (error) {
+    console.error("Error uploading CDE document:", error);
+    throw error;
+  }
+};
+
+export const saveCdeDocumentInfo = async (
+  axiosInstance: AxiosInstance,
+  projectId: string,
+  cdeDocument: {
+    fileName: string;
+    fileType: string;
+    folderName: string;
+    s3Path: string;
+    status: string;
+    uploadedAt: Date;
+    uploadedBy: string;
+    cdeType: string;
+    tags?: string[];
+  }
+) => {
+  try {
+    const response = await axiosInstance.post(
+      `/api/project/${projectId}/cde-docs`,
+      cdeDocument,
+      { withCredentials: true }
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error saving CDE document info:", error);
+    throw error;
+  }
+};
+
+export const fetchCdeDocuments = async (
+  axiosInstance: AxiosInstance,
+  projectId: string
+) => {
+  try {
+    const response = await axiosInstance.get(
+      `/api/project/${projectId}/cde-docs`,
+      { withCredentials: true }
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching CDE documents:", error);
+    throw error;
+  }
+};
+
+export const getCdeDocumentPresignedUrl = async (
+  axiosInstance: AxiosInstance,
+  key: string
+) => {
+  try {
+    const response = await axiosInstance.post(
+      "/api/s3/get-presigned-url",
+      { fileKey: key },
+      { withCredentials: true }
+    );
+    return response.data.url;
+  } catch (error) {
+    console.error("Error getting CDE document presigned URL:", error);
+    throw error;
+  }
+};

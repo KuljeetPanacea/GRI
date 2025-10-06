@@ -164,6 +164,23 @@ export class ProjectController {
   ) {
     return await this.projectService.getProjectDevices(projectId, query);
   }
+
+  @Permissions("MyProjects")
+  @Get(":projectId/cde-docs")
+  @UseGuards(JwtAuthGuard,PermissionsGuard)
+  async getCdeDocuments(@Param("projectId") projectId: string) {
+    return await this.projectService.getDceDocs(projectId);
+  }
+
+  @Permissions("MyProjects")
+  @Post(":projectId/cde-docs")
+  @UseGuards(JwtAuthGuard,PermissionsGuard)
+  async addCdeDocument(
+    @Param("projectId") projectId: string,
+    @Body() cdeDocument: any
+  ) {
+    return await this.projectService.updateDceDocx(projectId, cdeDocument);
+  }
   
   @Permissions("MyProjects")
   @UseGuards(JwtAuthGuard,PermissionsGuard)

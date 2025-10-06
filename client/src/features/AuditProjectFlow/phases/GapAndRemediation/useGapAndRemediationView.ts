@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import { SelectChangeEvent } from "@mui/material";
 import { useDispatch, useSelector } from 'react-redux';
 import { GapsRemediation, setActiveFilterRedux, setSelectedReqNo, setsetAEInternalAssesorGap } from '../../../../redux/GapsRemediationSlice';
@@ -11,10 +11,11 @@ import {
   setSelectedSubReqNoGap,
   resetSelectedReqNoGap,
 } from "../../../../redux/GapsRemediationSlice";
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import useAxios from '../../../../api/useAxios';
-import { getSignedUrlAssessment } from '../../../../api/project';
+import { getSignedUrlAssessment, storeGapComment } from '../../../../api/project';
 import { Evidence } from '../../../../redux/assessmentSlice';
+import { createDebounce } from '../../../../common/hooks/useDebouncedValue';
 interface HoverData {
   color: string | undefined;
   percentage: number;
@@ -58,10 +59,64 @@ type DeviceGap = {
   totalGaps: number;
   completedGaps: number;
 };
+
+// Define the type for the flattened gap object
+interface FlattenedGap {
+  id: string;
+  description: string;
+  controlReference: string;
+  AEInternalAssessor: string;
+  Status: string;
+  previousEvidence: Evidence[];
+  previousDate: string;
+  latestEvidence: Evidence[];
+  latestDate: string;
+  resolutionComment: string;
+  resolutionDate: string;
+  originalId: string;
+  ReqNo: string;
+  subReqNo: string;
+  originalIndex?: number;
+  isFirstInGroup?: boolean;
+  rowSpan?: number;
+  uploadedAt?: string;
+}
+
+// Define the type for questionnaire gaps
+interface QuestionnaireGap {
+  id: string;
+  questionText: string;
+  userResponse: string;
+  gapComment: string;
+  questionnaireTitle: string;
+  questionnairePhase: string;
+  questionId: string;
+  status?: string;
+  clientComment?: string;
+  questionType?: string;
+  choices?: Array<{ value: string }>;
+}
+
+interface Question {
+  _id: string;
+  text: string;
+  type: string;
+  choices?: Array<{ value: string }>;
+  requirements?: string | null;
+  subRequirements?: string | null;
+  subControl?: string | null;
+  userResponse?: string;
+  gaps?: {
+    gaps?: string;
+    clientComment?: string;
+    status?: string;
+  };
+}
 export const useGapAndRemediationView = () => {
   const axiosInstance = useAxios();
   const dispatch: AppDispatch = useDispatch();
   const navigate = useNavigate();
+  const location = useLocation();
   const [deviceTypes, setDeviceTypes] = useState<DeviceType[]>([]);
   const [alldeviceGaps, setAlldeviceGaps] = useState<DeviceGap[]>([]);
   const [allStakeholderGaps, setAllStakeholderGaps] = useState<StakeholderGap[]>([]);
@@ -71,22 +126,73 @@ export const useGapAndRemediationView = () => {
   const [requirementFilter, setRequirementFilter] = useState("Req 1");
   const [selectedRow, setSelectedRow] = useState<number | null>(null);
   const [hoverData, setHoverData] = useState<HoverData | null>(null);
+  const [questionnaireGaps, setQuestionnaireGaps] = useState<QuestionnaireGap[]>([]);
+  const [isQuestionnaireView, setIsQuestionnaireView] = useState(false);
+  const [selectedQuestionnaire, setSelectedQuestionnaire] = useState<string>("");
+  const [isAEPocView, setIsAEPocView] = useState(false);
   const { totalNoOfGaps, PendingClient, PendingQsa, selectedReqNo,gapRemediationDropdown, gapRemediationData, ActiveFilter ,requirementsData} =
       useSelector((state: RootState) => state.gapsRemediation);
   const selectedProject = useSelector(
     (state: RootState) => state.projectView.selectedProject
   );
+  
+  // Get user role from Redux store
+  const userRole = useSelector((state: RootState) => state.login.user?.roles?.[0]);
+  const isAEPocUser = userRole === "AEPoc" || userRole === "AEPoC";
+
 console.log("gapRemediationData", gapRemediationData);
   const { handlePhaseClick } = usePhaseBreadcrumbs();
   const [activeFilter, setActiveFilter] = useState<{
   type: "tab" | "device" | null;
   value: string;
-}>({ type: "tab", value: ActiveFilter.value ?? "Requirement" });
+}>({ type: "tab", value: ActiveFilter.value ?? "Questionnaire" });
 
 useEffect(() => {
   dispatch(setActiveFilterRedux(activeFilter));
 
-}, [activeFilter]);
+}, [activeFilter, dispatch]);
+
+// Handle questionnaire data from navigation state
+useEffect(() => {
+  if (location.state) {
+    const { questionnaireData, questionsWithGaps, isAEPoc } = location.state;
+    if (questionnaireData && questionsWithGaps) {
+      setIsQuestionnaireView(true);
+      setIsAEPocView(isAEPoc || false);
+      console.log('AEPoc view set to:', isAEPoc || false);
+      console.log('User role:', userRole, 'isAEPocUser:', isAEPocUser);
+
+      // Transform questionnaire gaps to table format
+      const transformedGaps: QuestionnaireGap[] = questionsWithGaps.map(
+        (question: Question, index: number) => ({
+          id: `QSTNR-GAP-${String(index + 1).padStart(3, "0")}`,
+          questionText: question.text || "No question text",
+          userResponse: question.userResponse || "No response",
+          gapComment: question.gaps?.gaps || "", // QSA gap comment
+          questionnaireTitle:
+            questionnaireData.title || "Unknown Questionnaire",
+          questionnairePhase: questionnaireData.phase || "Unknown Phase",
+          questionId: question._id || `q-${index}`,
+          status: question.gaps?.status || "Finding Open",
+          clientComment: question.gaps?.clientComment || "", // AEPoc client comment
+          questionType: question.type || "short_text", // Add question type
+          choices: question.choices || [], // Add choices for single/multiple choice
+        })
+      );
+
+      setQuestionnaireGaps(transformedGaps);
+      
+      // Set available questionnaires (only those with gaps)
+      const uniqueQuestionnaires = Array.from(
+        new Set(transformedGaps.map(gap => gap.questionnaireTitle))
+      );
+      // Set default selected questionnaire to the first one
+      if (uniqueQuestionnaires.length > 0) {
+        setSelectedQuestionnaire(uniqueQuestionnaires[0]);
+      }
+    }
+  }
+}, [location.state, userRole, isAEPocUser]);
 
 
 const setDropdownFilter = async (value: string) => {
@@ -141,6 +247,146 @@ const handleResolveClick = (
 const handleRowClick = (index: number) => {
     setSelectedRow(selectedRow === index ? null : index);
   };
+
+// Process gaps for merging cells
+const processGapsForMerging = (gaps: FlattenedGap[]): FlattenedGap[] => {
+  const processed: FlattenedGap[] = [];
+  const gapGroups: { [key: string]: FlattenedGap[] } = {};
+
+  // Group gaps by ID and control reference
+  gaps.forEach((gap, index: number) => {
+    const groupKey = `${gap.id}-${gap.controlReference}`;
+    if (!gapGroups[groupKey]) {
+      gapGroups[groupKey] = [];
+    }
+    gapGroups[groupKey].push({ ...gap, originalIndex: index });
+  });
+
+  // Process each group
+  Object.keys(gapGroups).forEach((groupKey: string) => {
+    const group = gapGroups[groupKey];
+    group.forEach((gap, indexInGroup: number) => {
+      processed.push({
+        ...gap,
+        isFirstInGroup: indexInGroup === 0,
+        rowSpan: group.length,
+      });
+    });
+  });
+
+  return processed;
+};
+
+// Filter questionnaire gaps based on selected questionnaire
+const filteredQuestionnaireGaps = questionnaireGaps.filter(gap => {
+  if (!selectedQuestionnaire) return true; // Show all if no selection
+  return gap.questionnaireTitle === selectedQuestionnaire;
+});
+
+const getStatusChip = (status: string) => {
+  let colorClass = "";
+
+  switch (status.toLowerCase()) {
+    case "pending client":
+      colorClass = "statusClient";
+      break;
+    case "pending qsa":
+      colorClass = "statusQsa";
+      break;
+    case "yet to sent":
+      colorClass = "statusYet";
+      break;
+    case "resolved":
+      colorClass = "statusResolved";
+      break;
+    default:
+      colorClass = "statusDefault";
+  }
+
+  return colorClass;
+};
+
+const getStatusColor = (status: string) => {
+  switch (status) {
+    case "Finding Closed":
+      return "#10b981"; // Green
+    case "Finding Open":
+      return "#f59e0b"; // Amber
+    case "Client input pending":
+      return "#3b82f6"; // Blue
+    case "Under Auditor Review":
+      return "#8b5cf6"; // Purple
+    default:
+      return "#f59e0b"; // Default to amber
+  }
+};
+
+const getStatusTextColor = () => {
+  return "#ffffff"; // White text for all statuses
+};
+
+// Create a stable debounced function using useRef
+const debouncedSaveRef = useRef<ReturnType<typeof createDebounce> | null>(null);
+
+// Initialize the debounced function only once
+if (!debouncedSaveRef.current) {
+  debouncedSaveRef.current = createDebounce((...args: unknown[]) => {
+    const [questionId, clientResponse] = args as [string, string];
+    
+    // Save client response to database
+    const saveClientResponse = async () => {
+      try {
+        console.log('Saving client response:', { questionId, clientResponse });
+        
+        // Get current questionnaire gaps from state
+        setQuestionnaireGaps((currentGaps) => {
+          const currentGap = currentGaps.find(gap => gap.questionId === questionId);
+          const existingGapComment = currentGap?.gapComment || "";
+          
+          const gapCommentData = {
+            questionId,
+            gapComment: existingGapComment, // Keep existing gap comment for QSA
+            clientComment: clientResponse, // Update client comment for AEPoc
+            assessmentId: selectedProject?._id
+          };
+          
+          // Make API call
+          storeGapComment(axiosInstance, gapCommentData)
+            .then(() => {
+              console.log('Client response saved successfully');
+            })
+            .catch((error) => {
+              console.error('Error saving client response:', error);
+            });
+          
+          return currentGaps; // Return unchanged state
+        });
+        
+      } catch (error) {
+        console.error('Error saving client response:', error);
+      }
+    };
+    
+    saveClientResponse();
+  }, 1000);
+}
+
+// Handle client response change with debouncing
+const handleClientResponseChange = useCallback((questionId: string, clientResponse: string) => {
+  // Update local state immediately for UI responsiveness
+  setQuestionnaireGaps((prevGaps) =>
+    prevGaps.map((g) =>
+      g.questionId === questionId
+        ? { ...g, clientComment: clientResponse }
+        : g
+    )
+  );
+  
+  // Use the stable debounced save function
+  if (debouncedSaveRef.current) {
+    debouncedSaveRef.current(questionId, clientResponse);
+  }
+}, []);
 
  
 const filteredData = gapRemediationData?.filter((gap) => {
@@ -203,12 +449,40 @@ const matchesAssessor =
           },
         ]
   );
+
+  const processedGaps = processGapsForMerging(flattenedGaps);
+ // Calculate questionnaire gaps count
+ const questionnaireGapsCount = questionnaireGaps.length;
+ 
+ // Calculate combined status data
  const statusData = [
-    { label: "Total gaps", count: totalNoOfGaps, color: "#1E88E5", type: "total" },
-    { label: "Pending client", count: PendingClient, color: "#EC8526", type: "completed" },
-    { label: "Pending Auditor", count: PendingQsa, color: "#DD524C", type: "pending" },
+    { 
+      label: "Total gaps", 
+      count: isQuestionnaireView ? questionnaireGapsCount : totalNoOfGaps, 
+      color: "#1E88E5", 
+      type: "total" 
+    },
+    { 
+      label: "Pending client", 
+      count: isQuestionnaireView ? questionnaireGapsCount : PendingClient, 
+      color: "#EC8526", 
+      type: "completed" 
+    },
+    { 
+      label: "Pending Auditor", 
+      count: isQuestionnaireView ? questionnaireGapsCount : PendingQsa, 
+      color: "#DD524C", 
+      type: "pending" 
+    },
   ];
-  return {handleDeviceChange,activeFilter, hoverData, handleMouseLeave, handleMouseEnter, handleTabClick,searchTerm,
+  return {
+    handleDeviceChange,
+    activeFilter, 
+    hoverData, 
+    handleMouseLeave, 
+    handleMouseEnter, 
+    handleTabClick,
+    searchTerm,
     setSearchTerm,
     statusFilter,
     setStatusFilter,
@@ -224,7 +498,7 @@ const matchesAssessor =
     ActiveFilter,
     selectedProject,
     handlePhaseClick,
-    handleResolveClick  ,
+    handleResolveClick,
     handleRowClick,
     filteredData,
     deviceTypes,
@@ -234,15 +508,37 @@ const matchesAssessor =
     allStakeholderGaps,
     setAllStakeholderGaps,
     requirementsData,
-    axiosInstance,dispatch,navigate,
-      gapRemediationDropdown,
-      setSelectedReqNoGap,
-      PendingClient,
-      PendingQsa,
-      setDropdownFilter,
-      handleEvidenceClick,
-flattenedGaps,
-statusData  
+    axiosInstance,
+    dispatch,
+    navigate,
+    gapRemediationDropdown,
+    setSelectedReqNoGap,
+    PendingClient,
+    PendingQsa,
+    setDropdownFilter,
+    handleEvidenceClick,
+    flattenedGaps,
+    statusData,
+    // New questionnaire-related state and functions
+    questionnaireGaps,
+    setQuestionnaireGaps,
+    isQuestionnaireView,
+    setIsQuestionnaireView,
+    selectedQuestionnaire,
+    setSelectedQuestionnaire,
+    isAEPocView,
+    setIsAEPocView,
+    userRole,
+    isAEPocUser,
+    location,
+    processGapsForMerging,
+    filteredQuestionnaireGaps,
+    getStatusChip,
+    getStatusColor,
+    getStatusTextColor,
+    processedGaps,
+    handleClientResponseChange,
+    questionnaireGapsCount
   };
 };
 

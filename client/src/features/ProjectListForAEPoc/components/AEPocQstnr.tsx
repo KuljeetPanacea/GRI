@@ -15,10 +15,8 @@ import {
   scopingQSTRNR,
 } from "../../../redux/projectManagementSlice";
 import PrimaryButton from "../../../common/ui/PrimaryButton";
-import { useNavigate } from "react-router-dom";
 
 const AEPocQstnr = () => {
-  const navigate = useNavigate();
   const {
     handleQstnrChange,
     complianceType,
@@ -26,33 +24,13 @@ const AEPocQstnr = () => {
     setCurrentTab,
     project,
     handleViewQSTNR,
-    scopingDataArray
+    scopingDataArray,
+    hasGaps,
+    calculateProgress,
+    getProgressBarStyle,
+    handleViewGaps
   } = useAEPoc();
 
-  // Check if any questionnaire has gaps (questions with gap comments)
-  const hasGaps = (qstnr: scopingQSTRNR) => {
-    return qstnr.questions?.some(question => question.gaps?.gaps && question.gaps.gaps.trim() !== '');
-  };
-
-  const handleViewGaps = (qstnr: scopingQSTRNR) => {
-    // Find questions with gaps
-    const questionsWithGaps = qstnr.questions?.filter(question => 
-      question.gaps?.gaps && question.gaps.gaps.trim() !== ''
-    ) || [];
-
-    // Navigate to gap and remediation screen
-    navigate('/landing/gap-remediation', { 
-      state: { 
-        questionnaireData: {
-          id: qstnr.id,
-          title: qstnr.title,
-          phase: qstnr.phase
-        },
-        questionsWithGaps: questionsWithGaps,
-        isAEPoc: true
-      } 
-    });
-  };
 
   return (
     <>
@@ -105,43 +83,66 @@ const AEPocQstnr = () => {
         </div>
       </div>
       <div className={style.questionnaireContainer}>
-        {scopingDataArray.map((qstnr: scopingQSTRNR) => (
-          <Card className={style.questionnaireCard}>
-            <CardContent className={style.cardContentWrapper}>
-              <Typography className={style.titleText}>{qstnr.title}</Typography>
-              <div className={style.assignmentSection}>
-                <Typography className={style.assignmentInfo}>
-                  Assigned On:{" "}
-                  {qstnr.createDtTime
-                    ? new Date(qstnr.createDtTime).toLocaleDateString()
-                    : "N/A"}
-                </Typography>
+        {scopingDataArray.map((qstnr: scopingQSTRNR) => {
+          const progress = calculateProgress(qstnr);
+          const progressStyle = getProgressBarStyle(progress);
+          
+          // Debug logging
+          console.log(`Questionnaire: ${qstnr.title}, Progress: ${progress}%, Questions: ${qstnr.questions?.length || 0}`);
+          
+          return (
+            <Card key={qstnr.id} className={style.questionnaireCard}>
+              <CardContent className={style.cardContentWrapper}>
+                <Typography className={style.titleText}>{qstnr.title}</Typography>
+                <div className={style.assignmentSection}>
+                  <Typography className={style.assignmentInfo}>
+                    Assigned On:{" "}
+                    {qstnr.createDtTime
+                      ? new Date(qstnr.createDtTime).toLocaleDateString()
+                      : "N/A"}
+                  </Typography>
 
-                <Box className={style.progressSection}>
-                  <Box className={style.progressBarWrapper}>
-                    <Box className={style.progressBar}>
-                      <Box className={style.progressFill}></Box>
+                  <Box className={style.progressSection}>
+                    <Box className={style.progressBarWrapper}>
+                      <Box className={style.progressBar}>
+                        <Box 
+                          className={style.progressFill}
+                          style={progressStyle}
+                        ></Box>
+                      </Box>
+                      <Typography className={style.percentageText}>
+                        {progress}%
+                      </Typography>
                     </Box>
-                    <Typography className={style.percentageText}>0%</Typography>
-                  </Box>
 
-                  {hasGaps(qstnr) ? (
-                    <PrimaryButton
-                      children="View Gaps"
-                      onClick={() => handleViewGaps(qstnr)}
-                      className={style.viewGapsButton}
-                    />
-                  ) : (
-                    <PrimaryButton
-                      children="Begin"
-                      onClick={() => handleViewQSTNR(qstnr)}
-                    />
-                  )}
-                </Box>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
+                    {hasGaps(qstnr) ? (
+                      <PrimaryButton
+                        children="View Gaps"
+                        onClick={() => handleViewGaps(qstnr)}
+                        className={style.viewGapsButton}
+                      />
+                    ) : progress === 100 ? (
+                      <PrimaryButton
+                        children="Review"
+                        onClick={() => handleViewQSTNR(qstnr)}
+                      />
+                    ) : progress > 0 ? (
+                      <PrimaryButton
+                        children="Continue"
+                        onClick={() => handleViewQSTNR(qstnr)}
+                      />
+                    ) : (
+                      <PrimaryButton
+                        children="Begin"
+                        onClick={() => handleViewQSTNR(qstnr)}
+                      />
+                    )}
+                  </Box>
+                </div>
+              </CardContent>
+            </Card>
+          );
+        })}
       </div>
     </>
   );

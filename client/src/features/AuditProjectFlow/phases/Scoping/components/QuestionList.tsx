@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   Typography,
   Box,
@@ -52,12 +52,21 @@ interface QuestionListProps {
   questionnaires: Questionnaire[];
   isLoading?: boolean;
   error?: string;
+  navigationState?: {
+    questionId?: string;
+    questionnaireId?: string;
+    questionText?: string;
+    currentResponse?: string;
+    questionType?: string;
+    choices?: Array<{ value: string }>;
+  };
 }
 
 const QuestionList: React.FC<QuestionListProps> = ({
   questionnaires,
   isLoading = false,
   error = '',
+  navigationState,
 }) => {
   const [selectedTab, setSelectedTab] = useState(0);
   const [gapDialogOpen, setGapDialogOpen] = useState(false);
@@ -65,9 +74,81 @@ const QuestionList: React.FC<QuestionListProps> = ({
   const [gapComment, setGapComment] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState('');
+  const [questionsWithGaps, setQuestionsWithGaps] = useState<Set<string>>(new Set());
   const axiosInstance = useAxios();
+  const questionRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
 
-  const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
+  // Handle navigation to specific question
+  useEffect(() => {
+    if (navigationState?.questionId && questionnaires.length > 0) {
+      // Find the questionnaire and question
+      let targetQuestionnaireIndex = -1;
+
+      questionnaires.forEach((questionnaire, qIndex) => {
+        if (questionnaire.questions) {
+          questionnaire.questions.forEach((question) => {
+            if (question._id === navigationState.questionId) {
+              targetQuestionnaireIndex = qIndex;
+            }
+          });
+        }
+      });
+
+      if (targetQuestionnaireIndex !== -1) {
+        // Set the correct tab
+        setSelectedTab(targetQuestionnaireIndex);
+        
+        // Scroll to the question after a short delay to ensure DOM is updated
+        setTimeout(() => {
+          const questionElement = questionRefs.current[navigationState.questionId!];
+          if (questionElement) {
+            // Find the scrollable container by looking for the questions section
+            const questionsContainer = document.querySelector('[style*="flexGrow: 1"][style*="overflow: auto"]') as HTMLElement;
+            
+            if (questionsContainer) {
+              // Get the element's position relative to the container
+              const elementOffsetTop = questionElement.offsetTop;
+              
+              // Calculate the visible area height
+              const containerHeight = questionsContainer.clientHeight;
+              
+              // Calculate the target scroll position to center the element
+              // but keep it below the header area
+              const targetScrollTop = elementOffsetTop - (containerHeight / 3); // Position at 1/3 from top
+              
+              // Ensure we don't scroll to negative values
+              const finalScrollTop = Math.max(0, targetScrollTop);
+              
+              // Smooth scroll to the calculated position
+              questionsContainer.scrollTo({
+                top: finalScrollTop,
+                behavior: 'smooth'
+              });
+            } else {
+              // Fallback: use scrollIntoView with better options
+              questionElement.scrollIntoView({ 
+                behavior: 'smooth', 
+                block: 'nearest',
+                inline: 'nearest'
+              });
+            }
+            
+            // Add highlight effect
+            questionElement.style.backgroundColor = '#fff3cd';
+            questionElement.style.border = '2px solid #ffc107';
+            questionElement.style.transition = 'all 0.3s ease';
+            
+            setTimeout(() => {
+              questionElement.style.backgroundColor = '';
+              questionElement.style.border = '';
+            }, 3000);
+          }
+        }, 300); // Increased delay to ensure DOM is fully updated
+      }
+    }
+  }, [navigationState, questionnaires]);
+
+  const handleTabChange = (_event: React.SyntheticEvent, newValue: number) => {
     setSelectedTab(newValue);
   };
 
@@ -94,6 +175,9 @@ const QuestionList: React.FC<QuestionListProps> = ({
       };
 
       await storeGapComment(axiosInstance, gapCommentData);
+
+      // Update local state to immediately reflect the gap comment
+      setQuestionsWithGaps(prev => new Set([...prev, selectedQuestion._id]));
 
       setGapDialogOpen(false);
       setGapComment('');
@@ -312,6 +396,11 @@ const QuestionList: React.FC<QuestionListProps> = ({
           {currentQuestionnaire.questions?.map((question, questionIndex) => (
             <Paper
               key={question._id}
+              ref={(el) => {
+                if (el) {
+                  questionRefs.current[question._id] = el;
+                }
+              }}
               elevation={0}
               sx={{
                 p: 3,
@@ -369,14 +458,14 @@ const QuestionList: React.FC<QuestionListProps> = ({
                   size="small"
                   onClick={() => handleGapCommentClick(question)}
                   sx={{
-                    color: question.gaps?.gaps ? "#dc2626" : "#6b7280",
-                    backgroundColor: question.gaps?.gaps ? "rgba(220, 38, 38, 0.1)" : "transparent",
+                    color: (question.gaps?.gaps || questionsWithGaps.has(question._id)) ? "#dc2626" : "#6b7280",
+                    backgroundColor: (question.gaps?.gaps || questionsWithGaps.has(question._id)) ? "rgba(220, 38, 38, 0.1)" : "transparent",
                     '&:hover': {
-                      color: question.gaps?.gaps ? "#991b1b" : "#374151",
-                      backgroundColor: question.gaps?.gaps ? "rgba(220, 38, 38, 0.2)" : "rgba(0, 0, 0, 0.04)"
+                      color: (question.gaps?.gaps || questionsWithGaps.has(question._id)) ? "#991b1b" : "#374151",
+                      backgroundColor: (question.gaps?.gaps || questionsWithGaps.has(question._id)) ? "rgba(220, 38, 38, 0.2)" : "rgba(0, 0, 0, 0.04)"
                     }
                   }}
-                  title={question.gaps?.gaps ? "Edit Gap Comment" : "Add Gap Comment"}
+                  title={(question.gaps?.gaps || questionsWithGaps.has(question._id)) ? "Edit Gap Comment" : "Add Gap Comment"}
                 >
                   <CommentIcon fontSize="small" />
                 </IconButton>
@@ -400,7 +489,7 @@ const QuestionList: React.FC<QuestionListProps> = ({
                 {getResponseDisplay(question)}
 
                 {/* Gap Comment Display */}
-                {question.gaps?.gaps && (
+                {(question.gaps?.gaps || questionsWithGaps.has(question._id)) && (
                   <Box sx={{ mt: 2 }}>
                     <Typography 
                       variant="caption" 
@@ -425,9 +514,9 @@ const QuestionList: React.FC<QuestionListProps> = ({
                       }}
                     >
                       <Typography variant="body2" sx={{ color: '#991b1b' }}>
-                        {question.gaps.gaps}
+                        {question.gaps?.gaps || gapComment}
                       </Typography>
-                      {question.gaps.clientComment && (
+                      {/* {question.gaps?.clientComment && (
                         <>
                           <Typography 
                             variant="caption" 
@@ -447,8 +536,8 @@ const QuestionList: React.FC<QuestionListProps> = ({
                             {question.gaps.clientComment}
                           </Typography>
                         </>
-                      )}
-                      {question.gaps.status && (
+                      )} */}
+                      {/* {question.gaps?.status && (
                         <>
                           <Typography 
                             variant="caption" 
@@ -468,7 +557,7 @@ const QuestionList: React.FC<QuestionListProps> = ({
                             {question.gaps.status}
                           </Typography>
                         </>
-                      )}
+                      )} */}
                     </Paper>
                   </Box>
                 )}
