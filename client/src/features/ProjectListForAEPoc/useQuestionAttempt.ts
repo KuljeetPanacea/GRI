@@ -18,19 +18,26 @@ interface Question {
     clientComment?: string;
     status?: string;
   };
-  // Table-specific properties
-  tableColumns?: Array<{
-    id: string;
-    label: string;
-    type: 'text' | 'number' | 'date' | 'select' | 'checkbox';
-    options?: string[];
-    validation?: {
-      min?: number;
-      max?: number;
-      pattern?: string;
-    };
-  }>;
-  tableRows?: number;
+  // Unified table properties
+  tableConfig?: {
+    mode: 'dynamic' | 'template';
+    rows?: Array<{
+      id: string;
+      label: string;
+    }>;
+    columns: Array<{
+      id: string;
+      label: string;
+      type: 'text' | 'number' | 'date' | 'select' | 'checkbox';
+      options?: string[];
+      validation?: {
+        min?: number;
+        max?: number;
+        pattern?: string;
+      };
+    }>;
+    defaultRows?: number;
+  };
   tableData?: Record<string, string | number | boolean>[];
 }
 
@@ -139,10 +146,17 @@ const useQuestionAttempt = (questionnaireId: string) => {
         // Only initialize if not already initialized and _id exists
         if (question._id && !initializedQuestions.current.has(question._id)) {
           if (question.type === 'table_type') {
+            console.log('Initializing table question:', {
+              questionId: question._id,
+              userResponse: question.userResponse,
+              type: typeof question.userResponse
+            });
+            
             if (question.userResponse) {
               // Parse table data from JSON string
               try {
                 const tableData = JSON.parse(question.userResponse as string);
+                console.log('Parsed table data:', tableData);
                 newResponses[question._id] = tableData;
               } catch (e) {
                 console.error('Error parsing table data:', e);
@@ -150,6 +164,7 @@ const useQuestionAttempt = (questionnaireId: string) => {
               }
             } else {
               // Initialize table questions with empty array
+              console.log('No userResponse, initializing with empty array');
               newResponses[question._id] = [];
             }
           } else {
@@ -159,7 +174,11 @@ const useQuestionAttempt = (questionnaireId: string) => {
         }
       });
       if (Object.keys(newResponses).length > 0) {
-        setLocalResponses(prev => ({ ...prev, ...newResponses }));
+        setLocalResponses(prev => {
+          const updated = { ...prev, ...newResponses };
+          console.log('Updated localResponses:', updated);
+          return updated;
+        });
       }
     }
   }, [currentQuestions]);
@@ -293,11 +312,20 @@ const useQuestionAttempt = (questionnaireId: string) => {
           
           if (question?.type === 'table_type') {
             // This is table data - convert to JSON string for storage
+            console.log('Saving table response:', {
+              questionId,
+              response,
+              responseType: typeof response,
+              isArray: Array.isArray(response)
+            });
+            
             const responseData = {
               questionId: questionId,
               choiceValue: [JSON.stringify(response)],
               assessmentId: questionnaireId,
             };
+            
+            console.log('Table response data being sent to backend:', responseData);
             await storeUserResponse(role, axiosInstance, responseData);
           } else if (Array.isArray(response) ? response.length > 0 : response.toString().trim() !== '') {
             // Handle regular responses

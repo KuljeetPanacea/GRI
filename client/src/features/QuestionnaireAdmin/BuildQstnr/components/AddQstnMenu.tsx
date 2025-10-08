@@ -52,7 +52,7 @@ const AddQstnMenu = () => {
         </MenuItem>
         <MenuItem onClick={() => addMenuValue("table_type")}>
           <TableChartIcon className={styles.AddQstnMenumenuIcon} />
-          Table Input
+          Table
         </MenuItem>
       </Menu>
     </div>

@@ -87,9 +87,7 @@ const AEPocQstnr = () => {
           const progress = calculateProgress(qstnr);
           const progressStyle = getProgressBarStyle(progress);
           
-          // Debug logging
-          console.log(`Questionnaire: ${qstnr.title}, Progress: ${progress}%, Questions: ${qstnr.questions?.length || 0}`);
-          
+        
           return (
             <Card key={qstnr.id} className={style.questionnaireCard}>
               <CardContent className={style.cardContentWrapper}>

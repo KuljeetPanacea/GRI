@@ -5,6 +5,7 @@ import { AlertTriangle } from "lucide-react";
 import { setIsGapRemediation } from "../../../../../redux/GapsRemediationSlice";
 import { useGapAndRemediationView } from "../useGapAndRemediationView";
 import { storeGapComment } from "../../../../../api/project";
+import TableInput from "../../../../QuestionnaireAdmin/BuildQstnr/components/TableInput";
 
 const GapManagementComponent = () => {
   const {
@@ -34,7 +35,22 @@ const GapManagementComponent = () => {
   } = useGapAndRemediationView();
 
   // Render question input based on type
-  const renderQuestionInput = (question: { questionType?: string; choices?: Array<{ value: string }> }) => {
+  const renderQuestionInput = (question: { 
+    questionType?: string; 
+    choices?: Array<{ value: string }>;
+    tableConfig?: {
+      mode: 'dynamic' | 'template';
+      rows?: Array<{ id: string; label: string }>;
+      columns: Array<{
+        id: string;
+        label: string;
+        type: 'text' | 'number' | 'date' | 'select' | 'checkbox';
+        options?: string[];
+        validation?: { min?: number; max?: number; pattern?: string };
+      }>;
+      defaultRows?: number;
+    };
+  }) => {
     if (!question) return null;
 
     switch (question.questionType || 'short_text') {
@@ -69,29 +85,91 @@ const GapManagementComponent = () => {
         );
       
       case 'multiple_choice':
+        
         return (
           <div className={styles.checkboxGroup}>
-            {question.choices?.map((choice: { value: string }, index: number) => (
-              <label key={index} className={styles.checkboxLabel}>
-                <input
-                  type="checkbox"
-                  value={choice.value}
-                  checked={Array.isArray(popupResponse) && popupResponse.includes(choice.value)}
-                  onChange={(e) => {
-                    const currentValues = Array.isArray(popupResponse) ? popupResponse : [];
-                    if (e.target.checked) {
-                      setPopupResponse([...currentValues, choice.value]);
-                    } else {
-                      setPopupResponse(currentValues.filter((v: string) => v !== choice.value));
-                    }
-                  }}
-                  className={styles.checkboxInput}
-                />
-                <span className={styles.checkboxText}>{choice.value}</span>
-              </label>
-            ))}
+            {question.choices?.map((choice: { value: string }, index: number) => {
+              const isChecked = Array.isArray(popupResponse) && popupResponse.includes(choice.value);
+      
+              
+              return (
+                <label key={index} className={styles.checkboxLabel}>
+                  <input
+                    type="checkbox"
+                    value={choice.value}
+                    checked={isChecked}
+                    onChange={(e) => {
+                      const currentValues = Array.isArray(popupResponse) ? popupResponse : [];
+                      console.log('Checkbox change:', {
+                        choice: choice.value,
+                        checked: e.target.checked,
+                        currentValues,
+                        newValues: e.target.checked ? [...currentValues, choice.value] : currentValues.filter((v: string) => v !== choice.value)
+                      });
+                      
+                      if (e.target.checked) {
+                        setPopupResponse([...currentValues, choice.value]);
+                      } else {
+                        setPopupResponse(currentValues.filter((v: string) => v !== choice.value));
+                      }
+                    }}
+                    className={styles.checkboxInput}
+                  />
+                  <span className={styles.checkboxText}>{choice.value}</span>
+                </label>
+              );
+            })}
           </div>
         );
+      
+      case 'table_type': {
+        // Parse table data from popupResponse
+        let tableData: Record<string, string | number | boolean>[] = [];
+        if (typeof popupResponse === 'string' && popupResponse.startsWith('[')) {
+          try {
+            tableData = JSON.parse(popupResponse);
+          } catch (e) {
+            console.error('Error parsing table data:', e);
+            tableData = [];
+          }
+        } else if (Array.isArray(popupResponse)) {
+          tableData = popupResponse as unknown as Record<string, string | number | boolean>[];
+        }
+
+        // Check if tableConfig exists and has columns
+        const config = question.tableConfig;
+        if (!config || !config.columns || config.columns.length === 0) {
+          return (
+            <div style={{ 
+              padding: '20px', 
+              textAlign: 'center', 
+              backgroundColor: '#f5f5f5', 
+              border: '1px dashed #ccc',
+              borderRadius: '4px'
+            }}>
+              <p style={{ margin: '0 0 10px 0', color: '#666' }}>
+                Table configuration not available for this question.
+              </p>
+              <p style={{ margin: '0', fontSize: '14px', color: '#888' }}>
+                Please contact your administrator to configure the table structure.
+              </p>
+            </div>
+          );
+        }
+
+        return (
+          <div style={{ width: '100%', overflowX: 'auto' }}>
+            <TableInput
+              config={config}
+              data={tableData}
+              onDataChange={(newData) => {
+                setPopupResponse(JSON.stringify(newData));
+              }}
+              readOnly={false}
+            />
+          </div>
+        );
+      }
       
       default:
         return (
@@ -513,7 +591,9 @@ const GapManagementComponent = () => {
       {/* Popup for AEPoc users */}
       {isPopupOpen && selectedGap && (
         <div className={styles.popupOverlay}>
-          <div className={styles.popupContent}>
+          <div className={`${styles.popupContent} ${
+            selectedGap.questionType === 'table_type' ? styles.popupContentFullWidth : ''
+          }`}>
             <div className={styles.popupHeader}>
               <h3 className={styles.popupTitle}>Update Response</h3>
               <button 

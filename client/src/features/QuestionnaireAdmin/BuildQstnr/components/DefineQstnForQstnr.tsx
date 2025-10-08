@@ -12,77 +12,34 @@ import {
   InputLabel,
 } from "@mui/material";
 import styles from "../BuildQstnr.module.css";
-import React, { useEffect, useState, useRef } from "react";
+import React, { useState } from "react";
 import { Add, Remove } from "@mui/icons-material";
-import useBuildQstnr from "../useBuildQstnr";
-import { useDispatch, useSelector } from "react-redux";
-import { RootState, useAppSelector } from "../../../../redux/store";
+import { useSelector } from "react-redux";
+import { RootState } from "../../../../redux/store";
 import FeedbackSnackbar from "../../../../common/ui/FeedbackSnackbar";
-import { setErrorMessage, TableColumn } from "../../../../redux/qstnrQuestion";
+import { TableColumn, TableConfig, TableMode } from "../../../../redux/qstnrQuestion";
+import useDefineQstnForQstnr from "../hooks/useDefineQstnForQstnr";
 
 const DefineQstnForQstnr = () => {
   const {
     question,
     options,
-    setOptions,
+    open,
+    phase,
+    newQuestion,
+    ErrorMessage,
+    questionType,
+    selectedQuestion,
     setQuestion,
     handleOptionChange,
     handleAddOption,
     handleRemoveOption,
-    addQuestionInList,
-    updateQuestionInList,
-    updateTableColumns,
-    updateTableRows
-  } = useBuildQstnr();
-  
-  const dispatch = useDispatch();
-  const { phase } = useAppSelector((state: RootState) => state.defineQstnr);
-  const { newQuestion } = useAppSelector((state: RootState) => state.qstnrQuestion);
-  const ErrorMessage = useAppSelector(
-    (state: RootState) => state.qstnrQuestion.ErrorMessage);
-  const questionType = useSelector(
-    (state: RootState) => state.qstnrQuestion.type
-  );
-  const selectedQuestion = useSelector(
-    (state: RootState) => state.qstnrQuestion.selectedQuestion
-  );
-  
-  const [open, setOpen] = useState<boolean>(true);
-  const prevNewQuestionRef = useRef(newQuestion);
-  
-  // Clear fields when questionType changes, but only if newQuestion is true
-  useEffect(() => {
-    prevNewQuestionRef.current = newQuestion;
-    
-    if (newQuestion) {
-      setQuestion("");
-      setOptions([]);
-    }
-    
-  }, [newQuestion, setQuestion, setOptions]);
-  
-  // Handle selected question changes
-  useEffect(() => {
-    if (selectedQuestion) {
-      setQuestion(selectedQuestion.text || "");
-      setOptions(selectedQuestion.choices?.map((choice) => choice.value) || []);
-    }
-  }, [selectedQuestion, setOptions, setQuestion]);
-  
-  useEffect(() => {
-    if (ErrorMessage) {
-      setOpen(true);
-      
-      // Optional: Auto-hide after some time
-      const timer = setTimeout(() => {
-        setOpen(false);
-        dispatch(setErrorMessage("")); // Clear the error message
-      }, 5000); // 5 seconds
-      
-      return () => clearTimeout(timer);
-    }
-  }, [ErrorMessage, dispatch]);
-  
+    handleCancel,
+    handleSaveOrUpdate,
+    handleSnackbarClose,
+    updateTableConfig,
+  } = useDefineQstnForQstnr();
+
   return (
     <>
       {(questionType === "short_text" ||
@@ -124,9 +81,7 @@ const DefineQstnForQstnr = () => {
               + Add "Other" option
             </Button>
             <Button
-              onClick={
-                newQuestion ? addQuestionInList : updateQuestionInList
-              }
+              onClick={handleSaveOrUpdate}
               className={styles.addSaveUpdateButton}
             >
               {newQuestion ? "Save" : "Update"}
@@ -191,9 +146,7 @@ const DefineQstnForQstnr = () => {
               + Add "Other" option
             </Button>
             <Button
-              onClick={
-                newQuestion ? addQuestionInList : updateQuestionInList
-              }
+              onClick={handleSaveOrUpdate}
               className={styles.addSaveUpdateButton}
             >
               {newQuestion ? "Save" : "Update"}
@@ -204,6 +157,9 @@ const DefineQstnForQstnr = () => {
       {(questionType === "table_type" ||
         selectedQuestion?.type === "table_type") && (
         <Card className={styles.tableQuestionCard}>
+          <Typography variant="h6" color="primary" sx={{ mb: 2 }}>
+            🔧 TABLE TYPE QUESTION DETECTED - Mode: {selectedQuestion?.tableConfig?.mode || 'dynamic'}
+          </Typography>
           <TextField
             value={question}
             onChange={(e) => setQuestion(e.target.value)}
@@ -219,10 +175,27 @@ const DefineQstnForQstnr = () => {
           >
             Configure Table Columns
           </Typography>
-          <TableConfig 
-            updateTableColumns={updateTableColumns}
-            updateTableRows={updateTableRows}
+          <UnifiedTableConfig 
+            updateTableConfig={updateTableConfig}
           />
+          
+          {selectedQuestion?.type === "table_type" && 
+           selectedQuestion.tableConfig?.mode === "template" &&
+           (!selectedQuestion.tableConfig?.rows?.length || 
+            !selectedQuestion.tableConfig?.columns?.length) && (
+            <Box sx={{ 
+              mt: 2, 
+              p: 2, 
+              backgroundColor: '#fff3cd', 
+              border: '1px solid #ffeaa7', 
+              borderRadius: 1 
+            }}>
+              <Typography variant="body2" color="warning.dark">
+                <strong>Note:</strong> You need to add at least one row and one column before you can save this template table question.
+              </Typography>
+            </Box>
+          )}
+          
           <div
             style={{
               display: "flex",
@@ -232,19 +205,21 @@ const DefineQstnForQstnr = () => {
             }}
           >
             <Button
-              onClick={() => {
-                setQuestion("");
-                setOptions([]);
-              }}
+              onClick={handleCancel}
               className={styles.cancelButton}
             >
               Cancel
             </Button>
             <Button
-              onClick={
-                newQuestion ? addQuestionInList : updateQuestionInList
-              }
+              onClick={handleSaveOrUpdate}
               className={styles.addSaveUpdateButton}
+              disabled={
+                !question.trim() || 
+                (selectedQuestion?.type === "table_type" && 
+                 selectedQuestion.tableConfig?.mode === "template" &&
+                 (!selectedQuestion.tableConfig?.rows?.length || 
+                  !selectedQuestion.tableConfig?.columns?.length))
+              }
             >
               {newQuestion ? "Save" : "Update"}
             </Button>
@@ -289,9 +264,7 @@ const DefineQstnForQstnr = () => {
             }}
           >
             <Button
-              onClick={
-                newQuestion ? addQuestionInList : updateQuestionInList
-              }
+              onClick={handleSaveOrUpdate}
               className={styles.addSaveUpdateButton}
             >
               {newQuestion ? "Save" : "Update"}
@@ -304,137 +277,242 @@ const DefineQstnForQstnr = () => {
           open={open}
           message={ErrorMessage}
           severity={"error"}
-          onClose={() => setOpen(false)}
+          onClose={handleSnackbarClose}
         />
       }
     </>
   );
 };
 
-// Table Configuration Component
-interface TableConfigProps {
-  updateTableColumns: (columns: TableColumn[]) => void;
-  updateTableRows: (rows: number) => void;
+// Default configuration outside component to avoid dependency issues
+const defaultTableConfig: TableConfig = {
+  mode: 'dynamic',
+  columns: []
+};
+
+// Unified Table Configuration Component
+interface UnifiedTableConfigProps {
+  updateTableConfig: (config: TableConfig) => void;
 }
 
-const TableConfig = ({ updateTableColumns, updateTableRows }: TableConfigProps) => {
+const UnifiedTableConfig = ({ updateTableConfig }: UnifiedTableConfigProps) => {
   const selectedQuestion = useSelector((state: RootState) => state.qstnrQuestion.selectedQuestion);
-  const [columns, setColumns] = useState<TableColumn[]>(selectedQuestion?.tableColumns || []);
-  const [defaultRows, setDefaultRows] = useState(selectedQuestion?.tableRows || 3);
+  
+  const [config, setConfig] = useState<TableConfig>(
+    selectedQuestion?.tableConfig || defaultTableConfig
+  );
 
   // Update local state when selectedQuestion changes
   React.useEffect(() => {
-    if (selectedQuestion?.tableColumns) {
-      setColumns(selectedQuestion.tableColumns);
-    }
-    if (selectedQuestion?.tableRows) {
-      setDefaultRows(selectedQuestion.tableRows);
+    if (selectedQuestion?.tableConfig) {
+      setConfig(selectedQuestion.tableConfig);
+    } else {
+      setConfig(defaultTableConfig);
     }
   }, [selectedQuestion]);
+
+  const updateConfigAndStore = (newConfig: TableConfig) => {
+    setConfig(newConfig);
+    if (updateTableConfig) {
+      updateTableConfig(newConfig);
+    }
+  };
+
+  const updateMode = (mode: TableMode) => {
+    const newConfig: TableConfig = {
+      ...config,
+      mode,
+      // Reset rows when switching to dynamic mode
+      ...(mode === 'dynamic' && { rows: undefined }),
+      // Reset rows when switching to template mode
+      ...(mode === 'template' && { rows: [] })
+    };
+    updateConfigAndStore(newConfig);
+  };
 
   const addColumn = () => {
     const newColumn: TableColumn = {
       id: `column_${Date.now()}`,
-      label: `Column ${columns.length + 1}`,
+      label: `Column ${config.columns.length + 1}`,
       type: 'text'
     };
-    const newColumns = [...columns, newColumn];
-    setColumns(newColumns);
-    // Update Redux store
-    if (updateTableColumns) {
-      updateTableColumns(newColumns);
-    }
+    const newConfig = {
+      ...config,
+      columns: [...config.columns, newColumn]
+    };
+    updateConfigAndStore(newConfig);
   };
 
-  // Initialize with a default column if none exist
-  React.useEffect(() => {
-    if (columns.length === 0 && !selectedQuestion?.tableColumns) {
-      const defaultColumn: TableColumn = {
-        id: `column_${Date.now()}`,
-        label: 'Column 1',
-        type: 'text'
-      };
-      setColumns([defaultColumn]);
-      if (updateTableColumns) {
-        updateTableColumns([defaultColumn]);
-      }
-    }
-  }, [columns.length, selectedQuestion, updateTableColumns]);
-
   const updateColumn = (index: number, field: keyof TableColumn, value: string | number | boolean | string[]) => {
-    const newColumns = [...columns];
+    const newColumns = [...config.columns];
     newColumns[index] = { ...newColumns[index], [field]: value };
-    setColumns(newColumns);
-    // Update Redux store
-    if (updateTableColumns) {
-      updateTableColumns(newColumns);
-    }
+    const newConfig = {
+      ...config,
+      columns: newColumns
+    };
+    updateConfigAndStore(newConfig);
   };
 
   const removeColumn = (index: number) => {
-    const newColumns = columns.filter((_, i) => i !== index);
-    setColumns(newColumns);
-    // Update Redux store
-    if (updateTableColumns) {
-      updateTableColumns(newColumns);
-    }
+    const newColumns = config.columns.filter((_, i) => i !== index);
+    const newConfig = {
+      ...config,
+      columns: newColumns
+    };
+    updateConfigAndStore(newConfig);
+  };
+
+  const addRow = () => {
+    const newRow = {
+      id: `row_${Date.now()}`,
+      label: `Row ${(config.rows?.length || 0) + 1}`
+    };
+    const newConfig = {
+      ...config,
+      rows: [...(config.rows || []), newRow]
+    };
+    updateConfigAndStore(newConfig);
+  };
+
+  const updateRowLabel = (rowId: string, newLabel: string) => {
+    const newConfig = {
+      ...config,
+      rows: config.rows?.map(row => 
+        row.id === rowId ? { ...row, label: newLabel } : row
+      ) || []
+    };
+    updateConfigAndStore(newConfig);
+  };
+
+  const removeRow = (rowId: string) => {
+    if ((config.rows?.length || 0) <= 1) return; // Keep at least one row
+    const newConfig = {
+      ...config,
+      rows: config.rows?.filter(row => row.id !== rowId) || []
+    };
+    updateConfigAndStore(newConfig);
   };
 
   const addOption = (columnIndex: number, option: string) => {
-    const newColumns = [...columns];
+    const newColumns = [...config.columns];
     if (!newColumns[columnIndex].options) {
       newColumns[columnIndex].options = [];
     }
     newColumns[columnIndex].options!.push(option);
-    setColumns(newColumns);
-    // Update Redux store
-    if (updateTableColumns) {
-      updateTableColumns(newColumns);
-    }
+    const newConfig = {
+      ...config,
+      columns: newColumns
+    };
+    updateConfigAndStore(newConfig);
   };
 
   const removeOption = (columnIndex: number, optionIndex: number) => {
-    const newColumns = [...columns];
+    const newColumns = [...config.columns];
     newColumns[columnIndex].options!.splice(optionIndex, 1);
-    setColumns(newColumns);
-    // Update Redux store
-    if (updateTableColumns) {
-      updateTableColumns(newColumns);
-    }
+    const newConfig = {
+      ...config,
+      columns: newColumns
+    };
+    updateConfigAndStore(newConfig);
   };
 
   return (
     <Box sx={{ mt: 2 }}>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-        <Typography variant="h6">Table Configuration</Typography>
-        <Button
-          variant="outlined"
-          startIcon={<Add />}
-          onClick={addColumn}
-          size="small"
-        >
-          Add Column
-        </Button>
+      {/* Table Mode Selection */}
+      <Box sx={{ mb: 3 }}>
+        <Typography variant="subtitle1" sx={{ mb: 2, fontWeight: 'bold' }}>
+          Table Mode
+        </Typography>
+        <Box sx={{ display: 'flex', gap: 2 }}>
+          <Button
+            variant={config.mode === 'dynamic' ? 'contained' : 'outlined'}
+            onClick={() => updateMode('dynamic')}
+            size="small"
+          >
+            Dynamic Table
+          </Button>
+          <Button
+            variant={config.mode === 'template' ? 'contained' : 'outlined'}
+            onClick={() => updateMode('template')}
+            size="small"
+          >
+            Template Table
+          </Button>
+        </Box>
+        <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+          {config.mode === 'dynamic' 
+            ? 'Dynamic tables allow users to add/remove rows as needed.'
+            : 'Template tables have predefined rows with fixed labels.'}
+        </Typography>
       </Box>
 
-      <TextField
-        label="Default Number of Rows"
-        type="number"
-        value={defaultRows}
-        onChange={(e) => {
-          const rows = Number(e.target.value);
-          setDefaultRows(rows);
-          // Update Redux store
-          if (updateTableRows) {
-            updateTableRows(rows);
-          }
-        }}
-        size="small"
-        sx={{ mb: 2, width: 200 }}
-        inputProps={{ min: 1, max: 50 }}
-      />
 
-      {columns.map((column, index) => (
+      {/* Template Mode - Predefined Rows */}
+      {config.mode === 'template' && (
+        <Box sx={{ mb: 3 }}>
+          <Typography variant="subtitle1" sx={{ mb: 1, fontWeight: 'bold' }}>
+            Predefined Rows (Area of Change)
+          </Typography>
+          {config.rows?.map((row) => (
+            <Box key={row.id} sx={{ display: 'flex', gap: 1, mb: 1, alignItems: 'center' }}>
+              <TextField
+                value={row.label}
+                onChange={(e) => updateRowLabel(row.id, e.target.value)}
+                size="small"
+                sx={{ flex: 1 }}
+              />
+              <IconButton
+                onClick={() => removeRow(row.id)}
+                color="error"
+                size="small"
+                disabled={(config.rows?.length || 0) <= 1}
+              >
+                <Remove />
+              </IconButton>
+            </Box>
+          ))}
+          <Button
+            size="small"
+            startIcon={<Add />}
+            onClick={addRow}
+            sx={{ mt: 1 }}
+          >
+            Add Row
+          </Button>
+          
+          {(config.rows?.length || 0) === 0 && (
+            <Box sx={{ textAlign: 'center', py: 3, border: '2px dashed #ccc', borderRadius: 1, mt: 2 }}>
+              <Typography color="text.secondary" sx={{ mb: 2 }}>
+                No predefined rows yet.
+              </Typography>
+              <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                Add rows like "Activities", "Products", "Services", "Markets served", "Supply chain"
+              </Typography>
+              <Button variant="contained" onClick={addRow} sx={{ mt: 1 }}>
+                Add First Row
+              </Button>
+            </Box>
+          )}
+        </Box>
+      )}
+
+      {/* Columns Configuration */}
+      <Box sx={{ mb: 2 }}>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+          <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>
+            Table Columns
+          </Typography>
+          <Button
+            variant="outlined"
+            startIcon={<Add />}
+            onClick={addColumn}
+            size="small"
+          >
+            Add Column
+          </Button>
+        </Box>
+
+        {config.columns.map((column, index) => (
         <Card key={column.id} sx={{ mb: 2, p: 2 }}>
           <Box sx={{ display: 'flex', gap: 2, alignItems: 'center', mb: 2, flexWrap: 'wrap' }}>
             <TextField
@@ -513,20 +591,21 @@ const TableConfig = ({ updateTableColumns, updateTableRows }: TableConfigProps) 
                 label="Min Value"
                 type="number"
                 value={column.validation?.min || ''}
-                onChange={(e) => {
-                  const newColumns = [...columns];
-                  newColumns[index] = {
-                    ...newColumns[index],
-                    validation: {
-                      ...(newColumns[index].validation || {}),
-                      min: e.target.value ? Number(e.target.value) : undefined
-                    }
-                  };
-                  setColumns(newColumns);
-                  if (updateTableColumns) {
-                    updateTableColumns(newColumns);
-                  }
-                }}
+                     onChange={(e) => {
+                       const newColumns = [...config.columns];
+                       newColumns[index] = {
+                         ...newColumns[index],
+                         validation: {
+                           ...(newColumns[index].validation || {}),
+                           min: e.target.value ? Number(e.target.value) : undefined
+                         }
+                       };
+                       const newConfig = {
+                         ...config,
+                         columns: newColumns
+                       };
+                       updateConfigAndStore(newConfig);
+                     }}
                 size="small"
                 sx={{ width: 120 }}
               />
@@ -534,20 +613,21 @@ const TableConfig = ({ updateTableColumns, updateTableRows }: TableConfigProps) 
                 label="Max Value"
                 type="number"
                 value={column.validation?.max || ''}
-                onChange={(e) => {
-                  const newColumns = [...columns];
-                  newColumns[index] = {
-                    ...newColumns[index],
-                    validation: {
-                      ...(newColumns[index].validation || {}),
-                      max: e.target.value ? Number(e.target.value) : undefined
-                    }
-                  };
-                  setColumns(newColumns);
-                  if (updateTableColumns) {
-                    updateTableColumns(newColumns);
-                  }
-                }}
+                     onChange={(e) => {
+                       const newColumns = [...config.columns];
+                       newColumns[index] = {
+                         ...newColumns[index],
+                         validation: {
+                           ...(newColumns[index].validation || {}),
+                           max: e.target.value ? Number(e.target.value) : undefined
+                         }
+                       };
+                       const newConfig = {
+                         ...config,
+                         columns: newColumns
+                       };
+                       updateConfigAndStore(newConfig);
+                     }}
                 size="small"
                 sx={{ width: 120 }}
               />
@@ -556,11 +636,20 @@ const TableConfig = ({ updateTableColumns, updateTableRows }: TableConfigProps) 
         </Card>
       ))}
 
-      {columns.length === 0 && (
-        <Typography color="text.secondary" sx={{ textAlign: 'center', py: 4 }}>
-          No columns configured. Click "Add Column" to get started.
-        </Typography>
-      )}
+        {config.columns.length === 0 && (
+          <Box sx={{ textAlign: 'center', py: 4, border: '2px dashed #ccc', borderRadius: 1 }}>
+            <Typography color="text.secondary" sx={{ mb: 2 }}>
+              No columns configured yet.
+            </Typography>
+            <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+              Add columns like "Description of Change", "Reason/Impact", "Previous Period Data", "Current Period Data"
+            </Typography>
+            <Button variant="contained" onClick={addColumn} sx={{ mt: 1 }}>
+              Add First Column
+            </Button>
+          </Box>
+        )}
+      </Box>
     </Box>
   );
 };

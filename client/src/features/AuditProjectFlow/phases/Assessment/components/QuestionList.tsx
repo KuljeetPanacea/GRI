@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useEffect, useRef } from 'react';
 import {
   Typography,
   Box,
@@ -25,8 +25,8 @@ import {
 import CommentIcon from '@mui/icons-material/Comment';
 import QuizIcon from '@mui/icons-material/Quiz';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
-import useAxios from '../../../../../api/useAxios';
-import { storeGapComment } from '../../../../../api/project';
+import useAssessmentQuestionnaire from '../hooks/useAssessmentQuestionnaire';
+import styles from './QuestionList.module.css';
 
 interface Question {
   _id: string;
@@ -42,19 +42,22 @@ interface Question {
     clientComment?: string;
     status?: string;
   };
-  // Table-specific properties
-  tableColumns?: Array<{
-    id: string;
-    label: string;
-    type: 'text' | 'number' | 'date' | 'select' | 'checkbox';
-    options?: string[];
-    validation?: {
-      min?: number;
-      max?: number;
-      pattern?: string;
-    };
-  }>;
-  tableRows?: number;
+  tableConfig?: {
+    mode: 'dynamic' | 'template';
+    rows?: Array<{ id: string; label: string }>;
+    columns: Array<{
+      id: string;
+      label: string;
+      type: 'text' | 'number' | 'date' | 'select' | 'checkbox';
+      options?: string[];
+      validation?: {
+        min?: number;
+        max?: number;
+        pattern?: string;
+      };
+    }>;
+    defaultRows?: number;
+  };
   tableData?: Record<string, string | number | boolean>[];
 }
 
@@ -69,7 +72,7 @@ interface Questionnaire {
 }
 
 interface QuestionListProps {
-  questionnaires: Questionnaire[];
+  questionnaires?: Questionnaire[];
   isLoading?: boolean;
   error?: string;
   navigationState?: {
@@ -83,286 +86,287 @@ interface QuestionListProps {
 }
 
 const QuestionList: React.FC<QuestionListProps> = ({
-  questionnaires,
-  isLoading = false,
-  error = '',
+  questionnaires: propQuestionnaires,
+  isLoading: propIsLoading = false,
+  error: propError = '',
   navigationState,
 }) => {
-  const [selectedTab, setSelectedTab] = useState(0);
-  const [gapDialogOpen, setGapDialogOpen] = useState(false);
-  const [selectedQuestion, setSelectedQuestion] = useState<Question | null>(null);
-  const [gapComment, setGapComment] = useState('');
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [submitError, setSubmitError] = useState('');
-  const [questionsWithGaps, setQuestionsWithGaps] = useState<Set<string>>(new Set());
-  const axiosInstance = useAxios();
+  // Use the hook for state management
+  const {
+    questionnaires,
+    isLoading,
+    error,
+    selectedTab,
+    gapDialogOpen,
+    selectedQuestion,
+    gapComment,
+    isSubmitting,
+    submitError,
+    questionsWithGaps,
+    handleTabChange,
+    handleGapCommentClick,
+    handleGapCommentSubmit,
+    getResponseDisplay,
+    setGapComment,
+    setGapDialogOpen,
+  } = useAssessmentQuestionnaire(navigationState);
+
+  // Use prop values if provided, otherwise use hook values
+  const finalQuestionnaires = (propQuestionnaires && Array.isArray(propQuestionnaires)) ? propQuestionnaires : questionnaires;
+  const finalIsLoading = propIsLoading || isLoading;
+  const finalError = propError || error;
+
   const questionRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
 
-  // Handle navigation to specific question
+  // Handle navigation scrolling effect
   useEffect(() => {
-    if (navigationState?.questionId && questionnaires.length > 0) {
-      // Find the questionnaire and question
-      let targetQuestionnaireIndex = -1;
-
-      questionnaires.forEach((questionnaire, qIndex) => {
-        if (questionnaire.questions) {
-          questionnaire.questions.forEach((question) => {
-            if (question._id === navigationState.questionId) {
-              targetQuestionnaireIndex = qIndex;
-            }
-          });
-        }
-      });
-
-      if (targetQuestionnaireIndex !== -1) {
-        // Set the correct tab
-        setSelectedTab(targetQuestionnaireIndex);
-        
-        // Scroll to the question after a short delay to ensure DOM is updated
-        setTimeout(() => {
-          const questionElement = questionRefs.current[navigationState.questionId!];
-          if (questionElement) {
-            // Find the scrollable container by looking for the questions section
-            const questionsContainer = document.querySelector('[style*="flexGrow: 1"][style*="overflow: auto"]') as HTMLElement;
+    if (navigationState?.questionId && Array.isArray(finalQuestionnaires) && finalQuestionnaires.length > 0) {
+      // Scroll to the question after a short delay to ensure DOM is updated
+      setTimeout(() => {
+        const questionElement = questionRefs.current[navigationState.questionId!];
+        if (questionElement) {
+          // Find the scrollable container by looking for the questions section
+          const questionsContainer = document.querySelector('[style*="flexGrow: 1"][style*="overflow: auto"]') as HTMLElement;
+          
+          if (questionsContainer) {
+            // Get the element's position relative to the container
+            const elementOffsetTop = questionElement.offsetTop;
             
-            if (questionsContainer) {
-              // Get the element's position relative to the container
-              const elementOffsetTop = questionElement.offsetTop;
-              
-              // Calculate the visible area height
-              const containerHeight = questionsContainer.clientHeight;
-              
-              // Calculate the target scroll position to center the element
-              // but keep it below the header area
-              const targetScrollTop = elementOffsetTop - (containerHeight / 3); // Position at 1/3 from top
-              
-              // Ensure we don't scroll to negative values
-              const finalScrollTop = Math.max(0, targetScrollTop);
-              
-              // Smooth scroll to the calculated position
-              questionsContainer.scrollTo({
-                top: finalScrollTop,
-                behavior: 'smooth'
-              });
-            } else {
-              // Fallback: use scrollIntoView with better options
-              questionElement.scrollIntoView({ 
-                behavior: 'smooth', 
-                block: 'nearest',
-                inline: 'nearest'
-              });
-            }
+            // Calculate the visible area height
+            const containerHeight = questionsContainer.clientHeight;
             
-            // Add highlight effect
-            questionElement.style.backgroundColor = '#fff3cd';
-            questionElement.style.border = '2px solid #ffc107';
-            questionElement.style.transition = 'all 0.3s ease';
+            // Calculate the target scroll position to center the element
+            // but keep it below the header area
+            const targetScrollTop = elementOffsetTop - (containerHeight / 3); // Position at 1/3 from top
             
-            setTimeout(() => {
-              questionElement.style.backgroundColor = '';
-              questionElement.style.border = '';
-            }, 3000);
+            // Ensure we don't scroll to negative values
+            const finalScrollTop = Math.max(0, targetScrollTop);
+            
+            // Smooth scroll to the calculated position
+            questionsContainer.scrollTo({
+              top: finalScrollTop,
+              behavior: 'smooth'
+            });
+          } else {
+            // Fallback: use scrollIntoView with better options
+            questionElement.scrollIntoView({ 
+              behavior: 'smooth', 
+              block: 'nearest',
+              inline: 'nearest'
+            });
           }
-        }, 300); // Increased delay to ensure DOM is fully updated
-      }
+          
+          // Add highlight effect
+          questionElement.style.backgroundColor = '#fff3cd';
+          questionElement.style.border = '2px solid #ffc107';
+          questionElement.style.transition = 'all 0.3s ease';
+          
+          setTimeout(() => {
+            questionElement.style.backgroundColor = '';
+            questionElement.style.border = '';
+          }, 3000);
+        }
+      }, 300); // Increased delay to ensure DOM is fully updated
     }
-  }, [navigationState, questionnaires]);
+  }, [navigationState, finalQuestionnaires]);
 
-  const handleTabChange = (_event: React.SyntheticEvent, newValue: number) => {
-    setSelectedTab(newValue);
-  };
+  // Render response display based on the hook's getResponseDisplay function
+  const renderResponseDisplay = (question: Question) => {
+    const responseData = getResponseDisplay(question);
 
-  const handleGapCommentClick = (question: Question) => {
-    setSelectedQuestion(question);
-    setGapComment(question.gaps?.gaps || '');
-    setGapDialogOpen(true);
-    setSubmitError('');
-  };
-
-  const handleGapCommentSubmit = async () => {
-    if (!selectedQuestion || !gapComment.trim()) return;
-
-    try {
-      setIsSubmitting(true);
-      setSubmitError('');
-
-      const gapCommentData = {
-        questionId: selectedQuestion._id,
-        gapComment: gapComment,
-        clientComment: selectedQuestion.gaps?.clientComment || "",
-        status: selectedQuestion.gaps?.status || "Finding Open",
-        assessmentId: selectedQuestion._id,
-      };
-
-      await storeGapComment(axiosInstance, gapCommentData);
-
-      // Update local state to immediately reflect the gap comment
-      setQuestionsWithGaps(prev => new Set([...prev, selectedQuestion._id]));
-
-      setGapDialogOpen(false);
-      setGapComment('');
-      setSelectedQuestion(null);
-
-    } catch (error) {
-      console.error('Error submitting gap comment:', error);
-      setSubmitError('Failed to save gap comment');
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  const getResponseDisplay = (question: Question) => {
-    if (!question.userResponse) {
-      return <Chip label="No Response" color="default" size="small" />;
-    }
-
-    if (question.type === 'table_type') {
-      // Parse table data from userResponse JSON string
-      let tableData: Record<string, string | number | boolean>[] = [];
-      try {
-        tableData = JSON.parse(question.userResponse);
-      } catch (e) {
-        console.error('Error parsing table data:', e);
-        return <Chip label="Invalid Table Data" color="error" size="small" />;
-      }
-
-      if (!tableData || tableData.length === 0) {
+    switch (responseData.type) {
+      case 'no-response':
+        return <Chip label="No Response" color="default" size="small" />;
+      
+      case 'error':
+        return <Chip label={String(responseData.content)} color="error" size="small" />;
+      
+      case 'no-data':
         return <Chip label="No Table Data" color="default" size="small" />;
-      }
+      
+      case 'table': {
+        const { config, tableData } = responseData.content as { 
+          config: Question['tableConfig']; 
+          tableData: Record<string, string | number | boolean>[] 
+        };
+        
+        // Template mode display
+        if (config?.mode === 'template' && config.rows && config.rows.length > 0) {
+          return (
+            <TableContainer component={Paper} className={styles.tableContainer}>
+              <Table size="small" stickyHeader>
+                <TableHead>
+                  <TableRow>
+                    {config.columns.map((column) => (
+                      <TableCell key={column.id} className={styles.tableHeader}>
+                        {column.label}
+                      </TableCell>
+                    ))}
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {config.rows.map((row, rowIndex: number) => {
+                    const dataObject = tableData.length > 0 ? tableData[0] : {};
+                    
+                    return (
+                      <TableRow key={row.id}>
+                        {config.columns.map((column, colIndex: number) => {
+                          if (colIndex === 0) {
+                            return (
+                              <TableCell key={`${row.id}_label`} className={styles.tableRowLabel}>
+                                {row.label}
+                              </TableCell>
+                            );
+                          } else {
+                            const keysToTry = [
+                              `${row.id}_${column.id}`,
+                              column.id,
+                              `${column.id}_${row.id}`,
+                              `${rowIndex}_${column.id}`,
+                              `${column.id}_${rowIndex}`
+                            ];
+                            
+                            let cellValue: string | number | boolean = '';
+                            for (const key of keysToTry) {
+                              if (dataObject[key] !== undefined && dataObject[key] !== '') {
+                                cellValue = dataObject[key];
+                                break;
+                              }
+                            }
+                            
+                            return (
+                              <TableCell key={column.id}>
+                                {String(cellValue || '')}
+                              </TableCell>
+                            );
+                          }
+                        })}
+                      </TableRow>
+                    );
+                  })}
+                </TableBody>
+              </Table>
+            </TableContainer>
+          );
+        }
 
-      return (
-        <TableContainer component={Paper} sx={{ maxHeight: 300, overflow: 'auto' }}>
-          <Table size="small" stickyHeader>
-            <TableHead>
-              <TableRow>
-                {question.tableColumns?.map((column) => (
-                  <TableCell key={column.id} sx={{ fontWeight: 'bold', backgroundColor: '#f5f5f5' }}>
-                    {column.label}
-                  </TableCell>
-                ))}
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {tableData.map((row, rowIndex) => (
-                <TableRow key={rowIndex}>
-                  {question.tableColumns?.map((column) => (
-                    <TableCell key={column.id}>
-                      {String(row[column.id] || '')}
+        // Dynamic mode display
+        if (!config) {
+          return <Chip label="Invalid Table Configuration" color="error" size="small" />;
+        }
+        
+        return (
+          <TableContainer component={Paper} className={styles.tableContainerDynamic}>
+            <Table size="small" stickyHeader>
+              <TableHead>
+                <TableRow>
+                  {config.columns.map((column) => (
+                    <TableCell key={column.id} className={styles.tableHeaderDynamic}>
+                      {column.label}
                     </TableCell>
                   ))}
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </TableContainer>
-      );
+              </TableHead>
+              <TableBody>
+                {tableData.map((row, rowIndex: number) => (
+                  <TableRow key={rowIndex}>
+                    {config.columns.map((column) => (
+                      <TableCell key={column.id}>
+                        {String(row[column.id] || '')}
+                      </TableCell>
+                    ))}
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </TableContainer>
+        );
+      }
+      
+      case 'multiple-choice':
+        return (
+          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+            {(responseData.content as string[]).map((response: string, index: number) => (
+              <Chip
+                key={index}
+                label={response.trim()}
+                size="small"
+                sx={{ 
+                  backgroundColor: '#dc2626',
+                  color: 'white',
+                  '&:hover': { backgroundColor: '#b91c1c' }
+                }}
+              />
+            ))}
+          </Box>
+        );
+      
+      case 'single-choice':
+        return (
+          <Chip
+            label={String(responseData.content)}
+            size="small"
+            sx={{ 
+              backgroundColor: '#dc2626',
+              color: 'white',
+              '&:hover': { backgroundColor: '#b91c1c' }
+            }}
+          />
+        );
+      
+      case 'text':
+        return (
+          <Typography
+            variant="body2"
+            className={styles.textResponse}
+          >
+            {String(responseData.content)}
+          </Typography>
+        );
+      
+      default:
+        return <Chip label="Unknown Response Type" color="default" size="small" />;
     }
-
-    if (question.type === 'multiple_choice' && question.choices) {
-      const responseString = typeof question.userResponse === 'string' 
-        ? question.userResponse 
-        : String(question.userResponse);
-      const responses = responseString.split(', ');
-      return (
-        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-          {responses.map((response, index) => (
-            <Chip
-              key={index}
-              label={response.trim()}
-              sx={{ 
-                backgroundColor: '#dc2626',
-                color: 'white',
-                '&:hover': { backgroundColor: '#b91c1c' }
-              }}
-              size="small"
-            />
-          ))}
-        </Box>
-      );
-    }
-
-    if (question.type === 'single_choice' && question.choices) {
-      return (
-        <Chip
-          label={String(question.userResponse)}
-          sx={{ 
-            backgroundColor: '#dc2626',
-            color: 'white',
-            '&:hover': { backgroundColor: '#b91c1c' }
-          }}
-          size="small"
-        />
-      );
-    }
-
-    return (
-      <Typography
-        variant="body2"
-        sx={{
-          backgroundColor: '#fef2f2',
-          padding: 1.5,
-          borderRadius: 1,
-          maxHeight: 100,
-          overflow: 'auto',
-          whiteSpace: 'pre-wrap',
-          border: '1px solid #fecaca',
-        }}
-      >
-        {String(question.userResponse)}
-      </Typography>
-    );
   };
 
 
-  if (isLoading) {
+  if (finalIsLoading) {
     return (
-      <Box sx={{ p: 3, textAlign: 'center' }}>
+      <Box className={styles.loadingContainer}>
         <Typography>Loading questions...</Typography>
       </Box>
     );
   }
 
-  if (error) {
+  if (finalError) {
     return (
-      <Box sx={{ p: 3 }}>
-        <Typography color="error">{error}</Typography>
+      <Box className={styles.errorContainer}>
+        <Typography color="error">{finalError}</Typography>
       </Box>
     );
   }
 
-  if (!questionnaires || questionnaires.length === 0) {
+  if (!finalQuestionnaires || !Array.isArray(finalQuestionnaires) || finalQuestionnaires.length === 0) {
     return (
-      <Box sx={{ p: 3, textAlign: 'center' }}>
+      <Box className={styles.loadingContainer}>
         <Typography color="text.secondary">No questionnaires available</Typography>
       </Box>
     );
   }
 
-  const currentQuestionnaire = questionnaires[selectedTab];
+  const currentQuestionnaire = Array.isArray(finalQuestionnaires) ? finalQuestionnaires[selectedTab] : null;
 
   return (
-    <Box sx={{ 
-      backgroundColor: '#f8f9fa', 
-      height: '85vh', 
-      display: 'flex', 
-      flexDirection: 'column', 
-     mb: '1rem'
-    }}>
+    <Box className={styles.container}>
       {/* Fixed Tabs Section */}
-      <Box sx={{ 
-        backgroundColor: 'white', 
-        borderBottom: '2px solid #e5e7eb',
-        boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
-        flexShrink: 0,
-        mb: 2,
-      }}>
+      <Box className={styles.tabsContainer}>
         <Tabs
           value={selectedTab}
           onChange={handleTabChange}
           variant="scrollable"
           scrollButtons="auto"
+          className={styles.tabs}
           sx={{
-            px: 2,
             '& .MuiTab-root': {
               textTransform: 'none',
               fontWeight: 500,
@@ -380,11 +384,11 @@ const QuestionList: React.FC<QuestionListProps> = ({
             },
           }}
         >
-          {questionnaires.map((questionnaire, index) => (
+          {Array.isArray(finalQuestionnaires) && finalQuestionnaires.map((questionnaire, index) => (
             <Tab
               key={questionnaire.id || questionnaire._id || index}
               label={
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                <Box className={styles.tabLabel}>
                   <QuizIcon sx={{ fontSize: 20 }} />
                   <span>{questionnaire.title || `Questionnaire ${index + 1}`}</span>
                   <Chip
@@ -405,57 +409,46 @@ const QuestionList: React.FC<QuestionListProps> = ({
       </Box>
 
       {/* Fixed Header Section */}
-      <Box sx={{ 
-        p: 3, 
-        pb: 2, 
-        color: 'white',
-        background: 'linear-gradient(135deg, #dc2626 0%, #991b1b 100%)',
-        flexShrink: 0,
-        borderRadius: '10px 10px 0px 0px',
-      }}>
-        <Stack direction="row" spacing={2} alignItems="center" sx={{ mb: 1,borderRadius: '10px' }}>
+      <Box className={styles.headerContainer}>
+        <Stack direction="row" spacing={2} alignItems="center" className={styles.headerTitle}>
           <QuizIcon sx={{ fontSize: 32 }} />
           <Typography variant="h5" sx={{ flexGrow: 1, fontWeight: 600 }}>
-            {currentQuestionnaire.title || `Questionnaire ${selectedTab + 1}`}
+            {currentQuestionnaire?.title || `Questionnaire ${selectedTab + 1}`}
           </Typography>
         </Stack>
         
-        <Stack direction="row" spacing={1} sx={{ mb: 2 }}>
+        <Stack direction="row" spacing={1} className={styles.headerChips}>
           <Chip
-            label={currentQuestionnaire.phase || 'Unknown Phase'}
+            label={currentQuestionnaire?.phase || 'Unknown Phase'}
+            size="small"
             sx={{ 
               backgroundColor: 'rgba(255,255,255,0.2)',
               color: 'white',
               fontWeight: 500,
             }}
-            size="small"
           />
           <Chip
-            label={`${currentQuestionnaire.questions?.length || 0} Questions`}
+            label={`${currentQuestionnaire?.questions?.length || 0} Questions`}
+            size="small"
             sx={{ 
               backgroundColor: 'rgba(255,255,255,0.2)',
               color: 'white',
               fontWeight: 500,
             }}
-            size="small"
           />
         </Stack>
 
-        {currentQuestionnaire.description && (
-          <Typography variant="body2" sx={{ opacity: 0.9 }}>
+        {currentQuestionnaire?.description && (
+          <Typography variant="body2" className={styles.headerDescription}>
             {currentQuestionnaire.description}
           </Typography>
         )}
       </Box>
 
       {/* Scrollable Questions Section */}
-      <Box sx={{ 
-        flexGrow: 1, 
-        overflow: 'auto',
-        backgroundColor: 'white',
-      }}>
+      <Box className={styles.questionsContainer}>
         <Stack spacing={0}>
-          {currentQuestionnaire.questions?.map((question, questionIndex) => (
+          {currentQuestionnaire?.questions && Array.isArray(currentQuestionnaire.questions) && currentQuestionnaire.questions.map((question: Question, questionIndex: number) => (
             <Paper
               key={question._id}
               ref={(el) => {
@@ -464,38 +457,16 @@ const QuestionList: React.FC<QuestionListProps> = ({
                 }
               }}
               elevation={0}
-              sx={{
-                p: 3,
-                borderBottom: questionIndex < (currentQuestionnaire.questions?.length || 0) - 1 
-                  ? '1px solid #e0e0e0' 
-                  : 'none',
-                transition: 'all 0.2s',
-                '&:hover': {
-                  backgroundColor: '#fef2f2',
-                },
-              }}
+              className={`${styles.questionCard} ${questionIndex < (currentQuestionnaire.questions?.length || 0) - 1 ? styles.questionCardBorder : styles.questionCardNoBorder}`}
             >
               {/* Question Header */}
-              <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 2, mb: 2 }}>
-                <Box
-                  sx={{
-                    minWidth: 36,
-                    height: 36,
-                    borderRadius: '50%',
-                    backgroundColor: '#dc2626',
-                    color: 'white',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    fontWeight: 600,
-                    fontSize: '0.875rem',
-                  }}
-                >
+              <Box className={styles.questionHeader}>
+                <Box className={styles.questionNumber}>
                   {questionIndex + 1}
                 </Box>
                 
-                <Box sx={{ flexGrow: 1 }}>
-                  <Typography variant="body1" sx={{ fontWeight: 500, mb: 1 }}>
+                <Box className={styles.questionContent}>
+                  <Typography variant="body1" className={styles.questionTitle}>
                     {question.text}
                   </Typography>
                   
@@ -506,11 +477,11 @@ const QuestionList: React.FC<QuestionListProps> = ({
                         icon={<CheckCircleIcon sx={{ color: '#16a34a !important' }} />}
                         label="Answered"
                         size="small"
+                        variant="outlined"
                         sx={{
                           borderColor: '#16a34a',
                           color: '#16a34a',
                         }}
-                        variant="outlined"
                       />
                     )}
                   </Stack>
@@ -519,6 +490,7 @@ const QuestionList: React.FC<QuestionListProps> = ({
                 <IconButton
                   size="small"
                   onClick={() => handleGapCommentClick(question)}
+                  title={(question.gaps?.gaps || questionsWithGaps.has(question._id)) ? "Edit Gap Comment" : "Add Gap Comment"}
                   sx={{
                     color: (question.gaps?.gaps || questionsWithGaps.has(question._id)) ? "#dc2626" : "#6b7280",
                     backgroundColor: (question.gaps?.gaps || questionsWithGaps.has(question._id)) ? "rgba(220, 38, 38, 0.1)" : "transparent",
@@ -527,99 +499,37 @@ const QuestionList: React.FC<QuestionListProps> = ({
                       backgroundColor: (question.gaps?.gaps || questionsWithGaps.has(question._id)) ? "rgba(220, 38, 38, 0.2)" : "rgba(0, 0, 0, 0.04)"
                     }
                   }}
-                  title={(question.gaps?.gaps || questionsWithGaps.has(question._id)) ? "Edit Gap Comment" : "Add Gap Comment"}
                 >
                   <CommentIcon fontSize="small" />
                 </IconButton>
               </Box>
 
               {/* Response Section */}
-              <Box sx={{ ml: 7 }}>
+              <Box className={styles.responseSection}>
                 <Typography 
                   variant="caption" 
-                  sx={{ 
-                    fontWeight: 600, 
-                    color: 'text.secondary',
-                    textTransform: 'uppercase',
-                    letterSpacing: '0.5px',
-                    display: 'block',
-                    mb: 1,
-                  }}
+                  className={styles.responseLabel}
                 >
                   Response
                 </Typography>
-                {getResponseDisplay(question)}
+                {renderResponseDisplay(question)}
 
                 {/* Gap Comment Display */}
                 {(question.gaps?.gaps || questionsWithGaps.has(question._id)) && (
-                  <Box sx={{ mt: 2 }}>
+                  <Box className={styles.gapCommentSection}>
                     <Typography 
                       variant="caption" 
-                      sx={{ 
-                        fontWeight: 600, 
-                        color: '#dc2626',
-                        textTransform: 'uppercase',
-                        letterSpacing: '0.5px',
-                        display: 'block',
-                        mb: 1,
-                      }}
+                      className={styles.gapCommentLabel}
                     >
                       Gap Comment
                     </Typography>
                     <Paper
                       elevation={0}
-                      sx={{
-                        backgroundColor: '#fef2f2',
-                        padding: 2,
-                        borderRadius: 2,
-                        border: '1px solid #fecaca',
-                      }}
+                      className={styles.gapCommentCard}
                     >
-                      <Typography variant="body2" sx={{ color: '#991b1b' }}>
+                      <Typography variant="body2" className={styles.gapCommentText}>
                         {question.gaps?.gaps || gapComment}
                       </Typography>
-                      {/* {question.gaps?.clientComment && (
-                        <>
-                          <Typography 
-                            variant="caption" 
-                            sx={{ 
-                              fontWeight: 600, 
-                              color: '#dc2626',
-                              textTransform: 'uppercase',
-                              letterSpacing: '0.5px',
-                              display: 'block',
-                              mb: 1,
-                              mt: 2,
-                            }}
-                          >
-                            Client Comment
-                          </Typography>
-                          <Typography variant="body2" sx={{ color: '#991b1b' }}>
-                            {question.gaps.clientComment}
-                          </Typography>
-                        </>
-                      )} */}
-                      {/* {question.gaps?.status && (
-                        <>
-                          <Typography 
-                            variant="caption" 
-                            sx={{ 
-                              fontWeight: 600, 
-                              color: '#dc2626',
-                              textTransform: 'uppercase',
-                              letterSpacing: '0.5px',
-                              display: 'block',
-                              mb: 1,
-                              mt: 2,
-                            }}
-                          >
-                            Status
-                          </Typography>
-                          <Typography variant="body2" sx={{ color: '#991b1b', fontWeight: 500 }}>
-                            {question.gaps.status}
-                          </Typography>
-                        </>
-                      )} */}
                     </Paper>
                   </Box>
                 )}
@@ -636,54 +546,26 @@ const QuestionList: React.FC<QuestionListProps> = ({
         maxWidth="md" 
         fullWidth
         PaperProps={{
-          sx: {
-            borderRadius: 3,
-            boxShadow: '0 20px 60px rgba(0,0,0,0.3)',
-          }
+          className: styles.dialogPaper
         }}
       >
-        <DialogTitle 
-          sx={{ 
-            fontWeight: 600,
-            background: 'linear-gradient(135deg, #dc2626 0%, #991b1b 100%)',
-            color: 'white',
-            py: 2.5,
-            display: 'flex',
-            alignItems: 'center',
-            gap: 1.5,
-          }}
-        >
+        <DialogTitle className={styles.dialogTitle}>
           <CommentIcon />
           {selectedQuestion?.gaps?.gaps ? "Edit Gap Comment" : "Add Gap Comment"}
         </DialogTitle>
-        <DialogContent sx={{ pt: 3, pb: 2 }}>
+        <DialogContent className={styles.dialogContent}>
           {selectedQuestion && (
             <Paper
               elevation={0}
-              sx={{ 
-                mt: 3, 
-                mb: 3, 
-                p: 2.5,
-                backgroundColor: '#fef2f2',
-                border: '1px solid #fecaca',
-                borderRadius: 2,
-              }}
+              className={styles.questionCardDialog}
             >
               <Typography 
                 variant="caption" 
-                sx={{ 
-                  fontWeight: 600,
-                  color: '#dc2626',
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.5px',
-                  display: 'block',
-                  mb: 1,
-                 
-                }}
+                className={styles.questionLabel}
               >
                 Question
               </Typography>
-              <Typography variant="body1" sx={{ color: '#374151', lineHeight: 1.6 }}>
+              <Typography variant="body1" className={styles.questionText}>
                 {selectedQuestion.text}
               </Typography>
             </Paper>
@@ -692,10 +574,7 @@ const QuestionList: React.FC<QuestionListProps> = ({
           {submitError && (
             <Alert 
               severity="error" 
-              sx={{ 
-                mb: 2,
-                borderRadius: 2,
-              }}
+              className={styles.errorAlert}
             >
               {submitError}
             </Alert>
@@ -727,7 +606,13 @@ const QuestionList: React.FC<QuestionListProps> = ({
             }}
           />
         </DialogContent>
-        <DialogActions sx={{ p: 2.5, backgroundColor: '#f9fafb', gap: 1 }}>
+        <DialogActions 
+          sx={{ 
+            p: 2.5, 
+            backgroundColor: '#f9fafb', 
+            gap: 1 
+          }}
+        >
           <Button 
             onClick={() => setGapDialogOpen(false)}
             sx={{

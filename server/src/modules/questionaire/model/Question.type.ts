@@ -75,35 +75,46 @@ export class Question {
     status?: string;
   };
 
-  // Table-specific properties
+  // Unified table properties
   @Prop({ 
-    type: [{
-      id: { type: String, required: true },
-      label: { type: String, required: true },
-      type: { type: String, enum: ['text', 'number', 'date', 'select', 'checkbox'], required: true },
-      options: { type: [String], default: [] },
-      validation: {
-        min: { type: Number },
-        max: { type: Number },
-        pattern: { type: String }
-      }
-    }], 
+    type: {
+      mode: { type: String, enum: ['dynamic', 'template'], default: 'dynamic' },
+      rows: [{
+        id: { type: String, required: true },
+        label: { type: String, required: true }
+      }],
+      columns: [{
+        id: { type: String, required: true },
+        label: { type: String, required: true },
+        type: { type: String, enum: ['text', 'number', 'date', 'select', 'checkbox'], required: true },
+        options: { type: [String], default: [] },
+        validation: {
+          min: { type: Number },
+          max: { type: Number },
+          pattern: { type: String }
+        }
+      }]
+    },
     required: false 
   })
-  tableColumns?: Array<{ 
-    id: string; 
-    label: string; 
-    type: 'text' | 'number' | 'date' | 'select' | 'checkbox'; 
-    options?: string[]; 
-    validation?: { 
-      min?: number; 
-      max?: number; 
-      pattern?: string; 
-    }; 
-  }>;
-
-  @Prop({ type: Number, default: 3 })
-  tableRows?: number;
+  tableConfig?: {
+    mode: 'dynamic' | 'template';
+    rows?: Array<{
+      id: string;
+      label: string;
+    }>;
+    columns: Array<{
+      id: string;
+      label: string;
+      type: 'text' | 'number' | 'date' | 'select' | 'checkbox';
+      options?: string[];
+      validation?: {
+        min?: number;
+        max?: number;
+        pattern?: string;
+      };
+    }>;
+  };
 
   @Prop({ type: [Object], default: [] })
   tableData?: Record<string, any>[];

@@ -27,7 +27,7 @@ import {
   BranchingLogic,
   FormBranchingLogic,
   Question,
-  TableColumn,
+  TableConfig,
 } from "../../../redux/qstnrQuestion";
 import store, { AppDispatch, RootState } from "../../../redux/store";
 import useAxios from "../../../api/useAxios";
@@ -261,8 +261,10 @@ const useBuildQstnr = () => {
           questionnaireId: qstnrId || '',
           type: 'table_type',
           text: '',
-          tableColumns: [],
-          tableRows: 3,
+        tableConfig: cleanTableConfig({
+          mode: 'dynamic',
+          columns: []
+        }),
           tableData: [],
           requirements: null,
           subRequirements: null,
@@ -328,6 +330,28 @@ const validatePCIDSSMapping = () => {
   return true;
 };
 
+// Clean table configuration to remove unwanted _id fields
+const cleanTableConfig = (config: TableConfig): TableConfig => {
+  if (!config) return config;
+  
+  return {
+    ...config,
+    rows: config.rows?.map(row => ({
+      id: row.id,
+      label: row.label
+      // Remove any _id fields
+    })),
+    columns: config.columns?.map(column => ({
+      id: column.id,
+      label: column.label,
+      type: column.type,
+      options: column.options || [],
+      validation: column.validation
+      // Remove any _id fields
+    }))
+  };
+};
+
 const validateAndAddQuestion = async () => {
   if (question && qstnrId && questionType) {
     const newQuestion = {
@@ -350,8 +374,10 @@ const validateAndAddQuestion = async () => {
         testingProcedure: store.getState().qstnrQuestion.selectedTestingProcedure 
       }),
       ...(questionType === "table_type" && { 
-        tableColumns: store.getState().qstnrQuestion.selectedQuestion?.tableColumns || [],
-        tableRows: store.getState().qstnrQuestion.selectedQuestion?.tableRows || 3,
+        tableConfig: cleanTableConfig(store.getState().qstnrQuestion.selectedQuestion?.tableConfig || {
+          mode: 'dynamic',
+          columns: []
+        }),
         tableData: store.getState().qstnrQuestion.selectedQuestion?.tableData || []
       }),
     };
@@ -816,8 +842,10 @@ const addQuestionInList = async () => {
       })),
       // Preserve table configuration for table_type questions
       ...(selectedQuestion.type === "table_type" && {
-        tableColumns: selectedQuestion.tableColumns || [],
-        tableRows: selectedQuestion.tableRows || 3,
+        tableConfig: cleanTableConfig(selectedQuestion.tableConfig || {
+          mode: 'dynamic',
+          columns: []
+        }),
         tableData: selectedQuestion.tableData || []
       }),
     };
@@ -841,13 +869,16 @@ const addQuestionInList = async () => {
     }
   };
 
-  // Table configuration functions
-  const updateTableColumns = (columns: TableColumn[]) => {
-    console.log('Updating table columns:', columns);
+  // Unified table configuration function
+  const updateTableConfig = (config: TableConfig) => {
+    console.log('Updating table config:', config);
+    const cleanedConfig = cleanTableConfig(config);
+    console.log('Cleaned table config:', cleanedConfig);
+    
     if (selectedQuestion) {
       dispatch(updateQuestion({
         ...selectedQuestion,
-        tableColumns: columns
+        tableConfig: cleanedConfig
       }));
     } else {
       // If no selected question, create a temporary one for table configuration
@@ -856,20 +887,10 @@ const addQuestionInList = async () => {
         questionnaireId: qstnrId || '',
         type: 'table_type',
         text: question || '',
-        tableColumns: columns,
-        tableRows: 3,
+        tableConfig: cleanedConfig,
         tableData: []
       };
       dispatch(updateQuestion(tempQuestion));
-    }
-  };
-
-  const updateTableRows = (rows: number) => {
-    if (selectedQuestion) {
-      dispatch(updateQuestion({
-        ...selectedQuestion,
-        tableRows: rows
-      }));
     }
   };
 
@@ -937,8 +958,7 @@ const addQuestionInList = async () => {
     updateQuestionInList,
     editingRuleIndex,
     setEditingRuleIndex,
-    updateTableColumns,
-    updateTableRows,
+    updateTableConfig,
     updateTableData,
   };
 };

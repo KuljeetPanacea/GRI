@@ -56,6 +56,19 @@ export interface TableColumn {
   };
 }
 
+export interface TableRow {
+  id: string;
+  label: string;
+}
+
+export type TableMode = 'dynamic' | 'template';
+
+export interface TableConfig {
+  mode: TableMode;
+  rows?: TableRow[]; // For template mode - predefined rows
+  columns: TableColumn[];
+}
+
 export interface Question {
   _id?: string;
   questionnaireId: string;
@@ -77,9 +90,8 @@ export interface Question {
     clientComment?: string;
     status?: string;
   };
-  // Table-specific properties
-  tableColumns?: TableColumn[];
-  tableRows?: number;
+  // Unified table properties
+  tableConfig?: TableConfig;
   tableData?: Record<string, string | number | boolean>[];
   setting?: {
     characterLimit?: number;
@@ -116,9 +128,8 @@ interface UpdateQuestionPayload {
   selectedSubControl?: string;
   evidenceReference?: string;
   testingProcedure?: string;
-  // Table-specific properties
-  tableColumns?: TableColumn[];
-  tableRows?: number;
+  // Unified table properties
+  tableConfig?: TableConfig;
   tableData?: Record<string, string | number | boolean>[];
 }
 
@@ -208,16 +219,18 @@ export const createQuestionThunk = createAsyncThunk(
         testingProcedure: state.qstnrQuestion.selectedTestingProcedure,
         // Include table configuration if it's a table question
         ...((data as Question).type === 'table_type' && {
-          tableColumns: state.qstnrQuestion.selectedQuestion?.tableColumns || [],
-          tableRows: state.qstnrQuestion.selectedQuestion?.tableRows || 3,
-          tableData: state.qstnrQuestion.selectedQuestion?.tableData || []
+          tableConfig: (data as Question).tableConfig || state.qstnrQuestion.selectedQuestion?.tableConfig || {
+            mode: 'dynamic',
+            columns: [],
+            defaultRows: 3
+          },
+          tableData: (data as Question).tableData || state.qstnrQuestion.selectedQuestion?.tableData || []
         }),
       }
       
       console.log('Creating question with data:', newData);
       console.log('Table configuration:', {
-        tableColumns: newData.tableColumns,
-        tableRows: newData.tableRows,
+        tableConfig: newData.tableConfig,
         tableData: newData.tableData
       });
       const createdQuestion: Question = await createQstn(qstnrId, newData, axiosInstance); 
@@ -309,9 +322,8 @@ const QstnrQuestionSlice = createSlice({
           subControl: action.payload.selectedSubControl ?? state.questions[questionIndex].subControl,
           evidenceReference: action.payload.evidenceReference ?? state.questions[questionIndex].evidenceReference,
           testingProcedure: action.payload.testingProcedure ?? state.questions[questionIndex].testingProcedure,
-          // Table-specific properties
-          tableColumns: action.payload.tableColumns ?? state.questions[questionIndex].tableColumns,
-          tableRows: action.payload.tableRows ?? state.questions[questionIndex].tableRows,
+          // Unified table properties
+          tableConfig: action.payload.tableConfig ?? state.questions[questionIndex].tableConfig,
           tableData: action.payload.tableData ?? state.questions[questionIndex].tableData,
         };
         state.questions[questionIndex] = updatedQuestion;

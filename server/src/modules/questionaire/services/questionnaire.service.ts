@@ -185,8 +185,10 @@ if (Array.isArray(incoming.branchingLogic)) {
           testingProcedure: incoming.testingProcedure ?? updatedQuestions[index].testingProcedure,
           // Preserve table properties for table_type questions
           ...(incoming.type === 'table_type' && {
-            tableColumns: incoming.tableColumns || updatedQuestions[index].tableColumns || [],
-            tableRows: incoming.tableRows || updatedQuestions[index].tableRows || 3,
+            tableConfig: incoming.tableConfig || updatedQuestions[index].tableConfig || {
+              mode: 'dynamic',
+              columns: []
+            },
             tableData: incoming.tableData || updatedQuestions[index].tableData || []
           }),
         };
@@ -217,8 +219,10 @@ if (Array.isArray(incoming.branchingLogic)) {
           testingProcedure: incoming.testingProcedure ?? undefined,
           // Include table properties for table_type questions
           ...(incoming.type === 'table_type' && {
-            tableColumns: incoming.tableColumns || [],
-            tableRows: incoming.tableRows || 3,
+            tableConfig: incoming.tableConfig || {
+              mode: 'dynamic',
+              columns: []
+            },
             tableData: incoming.tableData || []
           }),
         });
@@ -340,13 +344,18 @@ if (Array.isArray(incoming.branchingLogic)) {
   private validateTableConfiguration(question: Partial<QuestionDto>): void {
     if (question.type !== 'table_type') return;
 
+    // Validate table configuration
+    if (!question.tableConfig) {
+      throw new BadRequestException('Table type questions must have table configuration');
+    }
+
     // Validate table columns
-    if (!question.tableColumns || question.tableColumns.length === 0) {
+    if (!question.tableConfig.columns || question.tableConfig.columns.length === 0) {
       throw new BadRequestException('Table type questions must have at least one column');
     }
 
     // Validate each column
-    for (const column of question.tableColumns) {
+    for (const column of question.tableConfig.columns) {
       if (!column.id || !column.label || !column.type) {
         throw new BadRequestException('Table columns must have id, label, and type');
       }
@@ -372,9 +381,18 @@ if (Array.isArray(incoming.branchingLogic)) {
       }
     }
 
-    // Validate table rows
-    if (question.tableRows !== undefined && (question.tableRows < 1 || question.tableRows > 100)) {
-      throw new BadRequestException('Table rows must be between 1 and 100');
+    // Validate table configuration
+    if (question.tableConfig !== undefined) {
+      // Validate columns
+      if (question.tableConfig.columns && question.tableConfig.columns.length === 0) {
+        throw new BadRequestException('Table must have at least one column');
+      }
+      
+      // Validate rows for template mode
+      if (question.tableConfig.mode === 'template' && 
+          (!question.tableConfig.rows || question.tableConfig.rows.length === 0)) {
+        throw new BadRequestException('Template table must have at least one predefined row');
+      }
     }
   }
 }

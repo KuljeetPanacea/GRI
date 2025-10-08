@@ -101,6 +101,18 @@ interface QuestionnaireGap {
   clientComment?: string;
   questionType?: string;
   choices?: Array<{ value: string }>;
+  tableConfig?: {
+    mode: 'dynamic' | 'template';
+    rows?: Array<{ id: string; label: string }>;
+    columns: Array<{
+      id: string;
+      label: string;
+      type: 'text' | 'number' | 'date' | 'select' | 'checkbox';
+      options?: string[];
+      validation?: { min?: number; max?: number; pattern?: string };
+    }>;
+    defaultRows?: number;
+  };
 }
 
 interface Question {
@@ -116,6 +128,18 @@ interface Question {
     gaps?: string;
     clientComment?: string;
     status?: string;
+  };
+  tableConfig?: {
+    mode: 'dynamic' | 'template';
+    rows?: Array<{ id: string; label: string }>;
+    columns: Array<{
+      id: string;
+      label: string;
+      type: 'text' | 'number' | 'date' | 'select' | 'checkbox';
+      options?: string[];
+      validation?: { min?: number; max?: number; pattern?: string };
+    }>;
+    defaultRows?: number;
   };
 }
 export const useGapAndRemediationView = () => {
@@ -187,6 +211,7 @@ useEffect(() => {
           clientComment: question.gaps?.clientComment || "", // AEPoc client comment
           questionType: question.type || "short_text", // Add question type
           choices: question.choices || [], // Add choices for single/multiple choice
+          tableConfig: question.tableConfig || undefined, // Add table configuration for table-type questions
         })
       );
 
@@ -472,11 +497,38 @@ const matchesAssessor =
       
       // Initialize response based on question type
       if (gap.questionType === 'multiple_choice') {
-        // For multiple choice, convert comma-separated string to array
-        const responseArray = gap.userResponse ? gap.userResponse.split(',').map(s => s.trim()) : [];
-        setPopupResponse(responseArray);
+        // For multiple choice, handle different data types
+        if (Array.isArray(gap.userResponse)) {
+          // Already an array
+          setPopupResponse(gap.userResponse);
+        } else if (typeof gap.userResponse === 'string') {
+          // Parse comma-separated string to array
+          const responseArray = gap.userResponse ? gap.userResponse.split(',').map(s => s.trim()) : [];
+          setPopupResponse(responseArray);
+        } else {
+          // Fallback to empty array
+          setPopupResponse([]);
+        }
+      } else if (gap.questionType === 'single_choice') {
+        // For single choice, use string directly
+        setPopupResponse(gap.userResponse || "");
+      } else if (gap.questionType === 'table_type') {
+        // For table type, parse JSON string to array
+        try {
+          if (Array.isArray(gap.userResponse)) {
+            setPopupResponse(gap.userResponse);
+          } else if (typeof gap.userResponse === 'string') {
+            const tableData = gap.userResponse ? JSON.parse(gap.userResponse) : [];
+            setPopupResponse(tableData);
+          } else {
+            setPopupResponse([]);
+          }
+        } catch (e) {
+          console.error('Error parsing table data:', e);
+          setPopupResponse([]);
+        }
       } else {
-        // For single choice and text, use string directly
+        // For text questions, use string directly
         setPopupResponse(gap.userResponse || "");
       }
       

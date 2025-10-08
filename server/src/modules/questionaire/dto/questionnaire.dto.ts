@@ -87,24 +87,27 @@ export class QuestionDto {
     status?: string;
   };
 
-  // Table-specific properties
+  // Unified table properties
   @IsOptional()
-  @IsArray()
-  tableColumns?: Array<{
-    id: string;
-    label: string;
-    type: 'text' | 'number' | 'date' | 'select' | 'checkbox';
-    options?: string[];
-    validation?: {
-      min?: number;
-      max?: number;
-      pattern?: string;
-    };
-  }>;
-
-  @IsOptional()
-  @IsString()
-  tableRows?: number;
+  @IsObject()
+  tableConfig?: {
+    mode: 'dynamic' | 'template';
+    rows?: Array<{
+      id: string;
+      label: string;
+    }>;
+    columns: Array<{
+      id: string;
+      label: string;
+      type: 'text' | 'number' | 'date' | 'select' | 'checkbox';
+      options?: string[];
+      validation?: {
+        min?: number;
+        max?: number;
+        pattern?: string;
+      };
+    }>;
+  };
 
   @IsOptional()
   @IsArray()

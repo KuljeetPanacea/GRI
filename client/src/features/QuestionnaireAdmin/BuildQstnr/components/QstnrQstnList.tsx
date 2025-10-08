@@ -17,6 +17,7 @@ const QstnrNoOfQstnList = () => {
 
   const effectHasRun = useRef(false);
 
+
   useEffect(() => {
     // Only run this effect once when questions are available
     if (!effectHasRun.current && questions.length > 0 && questions[0]._id) {
@@ -35,20 +36,48 @@ const QstnrNoOfQstnList = () => {
       style={{ boxShadow: "none" }}
     >
       <List>
-        {questions.map((question, index) => (
-          <ListItem
-            key={question._id}
-            className={styles.listItem }
-            onClick={() => question._id && selectQstn(question._id)}
-            style={
-              question._id === selectedQuestionId
-                ? { backgroundColor: "#e3f2fd" } // Light blue background for selected item
-                : {}
-            }
-          >
-            <ListItemText primary={`${index + 1}. ${question.text}`} />
+        {questions.length === 0 ? (
+          <ListItem>
+            <ListItemText 
+              primary="No questions found" 
+              secondary="Add a question to get started"
+            />
           </ListItem>
-        ))}
+        ) : (
+          questions.map((question, index) => {
+            const displayText = question.text?.trim() || 
+                               `Question ${index + 1} (${question.type?.replace('_', ' ') || 'Unknown Type'})`;
+            
+            return (
+              <ListItem
+                key={question._id}
+                className={styles.listItem}
+                onClick={() => question._id && selectQstn(question._id)}
+                style={
+                  question._id === selectedQuestionId
+                    ? { backgroundColor: "#e3f2fd" } // Light blue background for selected item
+                    : {}
+                }
+              >
+                <ListItemText 
+                  primary={`${index + 1}. ${displayText}`}
+                  secondary={
+                    question.type && (
+                      <span style={{ 
+                        fontSize: '0.75rem', 
+                        color: '#666',
+                        textTransform: 'uppercase',
+                        fontWeight: 'bold'
+                      }}>
+                        {question.type.replace('_', ' ')}
+                      </span>
+                    )
+                  }
+                />
+              </ListItem>
+            );
+          })
+        )}
       </List>
     </Card>
   );

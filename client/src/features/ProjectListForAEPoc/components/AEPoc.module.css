@@ -188,11 +188,15 @@ gap:3rem !important;
 
 
 /* styles.css */
-.questionnaireContainer{
-  display: flex;
- width: 100%;
+.questionnaireContainer{  
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+  gap: 3;
+  flex: 1 1 auto !important;
+  overflow: auto !important;
+  padding: 2 !important;
 }
- 
+
 .questionnaireCard {
   min-width: 400px !important;
   margin: 20px ;

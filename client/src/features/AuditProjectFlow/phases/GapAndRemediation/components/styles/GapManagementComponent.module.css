@@ -747,6 +747,13 @@
   animation: slideUp 0.3s ease-out forwards !important;
 }
 
+/* Full width popup for table-type questions */
+.popupContentFullWidth {
+  width: 95% !important;
+  max-width: 95vw !important;
+  max-height: 90vh !important;
+}
+
 /* Header */
 .popupHeader {
   display: flex !important;
