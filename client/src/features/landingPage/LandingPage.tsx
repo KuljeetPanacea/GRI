@@ -18,7 +18,6 @@ import AEPocQstnr from "../ProjectListForAEPoc/components/AEPocQstnr";
 import GapManagementComponent from "../AuditProjectFlow/phases/GapAndRemediation/components/GapManagementComponent";
 import DashboardRoute from "./DashboardRoute";
 import QuestionAttemptWrapper from "../ProjectListForAEPoc/components/QuestionAttemptWrapper";
-import AssessmentView from "../AuditProjectFlow/phases/Assessment/AssessmentView";
 
 const LandingPage: React.FC = () => {
   return (
@@ -44,8 +43,6 @@ const LandingPage: React.FC = () => {
               <Route path="/project-aepoc" element={<ProjectListForAEPoc/>} />
               <Route path= "/aepoc-qstnr" element={<AEPocQstnr/>} />
               <Route path="/gap-remediation" element={<GapManagementComponent />} />
-              
-              <Route path="/assessment" element={<AssessmentView />} />
           </Routes>
         </div>
       </div>

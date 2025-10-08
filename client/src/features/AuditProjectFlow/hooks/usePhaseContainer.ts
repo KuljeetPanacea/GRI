@@ -3,7 +3,6 @@ import { useDispatch, useSelector } from "react-redux";
 import SalesScopingView from "../phases/SalesScoping/SalesScopingView";
 import AssessmentView from "../phases/Assessment/AssessmentView";
 import GapAndRemediationView from "../phases/GapAndRemediation/GapAndRemediationView";
-import ComplianceReportView from "../phases/ComplianceReport/ComplianceReportView";
 import { RootState } from "../../../redux/store";
 import { setIsDetailsOpen } from "../../../redux/projectViewSlice";
 import GapManagementComponent from "../phases/GapAndRemediation/components/GapManagementComponent";
@@ -16,7 +15,6 @@ const usePhaseView = () => {
     // "deviceIdentification": DeviceIdentificationView, // Commented out - will be replaced with questionnaire functionality
     "assessment": AssessmentView, // Updated to include question responses functionality
     "gapandRemediation": GapAndRemediationView,
-    "complianceReport": ComplianceReportView,
     "assuranceReport": AssuranceReport,
     "GapManagementComponent": GapManagementComponent
   };

@@ -27,7 +27,6 @@ import assessmentReducer from "./assessmentSlice";
 import createNewProjectReducer from "./createNewProjectSlice";
 import gapRemedaitionReducer from "./GapsRemediationSlice";
 import { TypedUseSelectorHook, useDispatch, useSelector } from "react-redux";
-import complianceReportReducer from "./complianceReportSlice";
 import rocReducer from "./rocSlice";
 import forbiddenReducer from './forbiddenSlice';
 import storage from "redux-persist/lib/storage";
@@ -61,7 +60,6 @@ const rootReducer = combineReducers({
   projectView: projectViewReducer,
   phase: phaseReducer,
   scoping: scopingReducer,
-  complianceReport : complianceReportReducer,
   scopeDocument: scopeDocumentReducer,
   view: viewReducer,
   pl: plReducer,
