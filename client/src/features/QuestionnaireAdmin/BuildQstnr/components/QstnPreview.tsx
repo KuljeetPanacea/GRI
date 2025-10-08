@@ -164,6 +164,14 @@ const handlePrevious = () => {
             : styles.previewCard
         } 
         key={currentQuestion._id}
+        sx={{
+          ...(currentQuestion.type === "table_type" && {
+            minWidth: '600px',
+            width: '100%',
+            maxWidth: 'none',
+            padding: '20px'
+          })
+        }}
       >
         <Typography variant="h4" sx={{ mb: 2 }}>
           {currentQuestion.text}

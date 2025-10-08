@@ -96,27 +96,10 @@ const useBuildQstnr = () => {
       if (!qstnrId) return;
       // dispatch(clearQuestions());
       dispatch(fetchQstnrQuestionsThunk({ qstnrId, axiosInstance }));
-      const updatedArray = questionList
-        .filter((obj: Question) => obj.isDeleted === false)
-        .map((obj: Question, index: number) => ({
-          ...obj,
-          isSaved: true,
-          id: index,
-        }));
-      const uniqueQuestions = new Map();
-      updatedArray.forEach((obj: Question) => {
-        if (obj._id && !uniqueQuestions.has(obj._id)) {
-          uniqueQuestions.set(obj._id, obj);
-        }
-      });
-      const uniqueQuestionsArray = Array.from(uniqueQuestions.values());
-      uniqueQuestionsArray.forEach((question) => {
-        dispatch(addQuestion(question));
-      });
     } catch (error) {
       console.error("Error fetching questionnaire:", error);
     }
-  }, [qstnrId, dispatch, axiosInstance, questionList]);
+  }, [qstnrId, dispatch, axiosInstance]);
   useEffect(() => {
     if (qstnrId) {
       getQuestions();

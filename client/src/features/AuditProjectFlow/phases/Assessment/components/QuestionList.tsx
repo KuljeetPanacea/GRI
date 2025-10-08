@@ -15,6 +15,12 @@ import {
   Stack,
   Tabs,
   Tab,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
 } from '@mui/material';
 import CommentIcon from '@mui/icons-material/Comment';
 import QuizIcon from '@mui/icons-material/Quiz';
@@ -36,6 +42,20 @@ interface Question {
     clientComment?: string;
     status?: string;
   };
+  // Table-specific properties
+  tableColumns?: Array<{
+    id: string;
+    label: string;
+    type: 'text' | 'number' | 'date' | 'select' | 'checkbox';
+    options?: string[];
+    validation?: {
+      min?: number;
+      max?: number;
+      pattern?: string;
+    };
+  }>;
+  tableRows?: number;
+  tableData?: Record<string, string | number | boolean>[];
 }
 
 interface Questionnaire {
@@ -194,6 +214,48 @@ const QuestionList: React.FC<QuestionListProps> = ({
   const getResponseDisplay = (question: Question) => {
     if (!question.userResponse) {
       return <Chip label="No Response" color="default" size="small" />;
+    }
+
+    if (question.type === 'table_type') {
+      // Parse table data from userResponse JSON string
+      let tableData: Record<string, string | number | boolean>[] = [];
+      try {
+        tableData = JSON.parse(question.userResponse);
+      } catch (e) {
+        console.error('Error parsing table data:', e);
+        return <Chip label="Invalid Table Data" color="error" size="small" />;
+      }
+
+      if (!tableData || tableData.length === 0) {
+        return <Chip label="No Table Data" color="default" size="small" />;
+      }
+
+      return (
+        <TableContainer component={Paper} sx={{ maxHeight: 300, overflow: 'auto' }}>
+          <Table size="small" stickyHeader>
+            <TableHead>
+              <TableRow>
+                {question.tableColumns?.map((column) => (
+                  <TableCell key={column.id} sx={{ fontWeight: 'bold', backgroundColor: '#f5f5f5' }}>
+                    {column.label}
+                  </TableCell>
+                ))}
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {tableData.map((row, rowIndex) => (
+                <TableRow key={rowIndex}>
+                  {question.tableColumns?.map((column) => (
+                    <TableCell key={column.id}>
+                      {String(row[column.id] || '')}
+                    </TableCell>
+                  ))}
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </TableContainer>
+      );
     }
 
     if (question.type === 'multiple_choice' && question.choices) {
