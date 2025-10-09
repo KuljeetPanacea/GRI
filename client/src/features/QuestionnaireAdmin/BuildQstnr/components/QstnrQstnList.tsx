@@ -61,18 +61,7 @@ const QstnrNoOfQstnList = () => {
               >
                 <ListItemText 
                   primary={`${index + 1}. ${displayText}`}
-                  secondary={
-                    question.type && (
-                      <span style={{ 
-                        fontSize: '0.75rem', 
-                        color: '#666',
-                        textTransform: 'uppercase',
-                        fontWeight: 'bold'
-                      }}>
-                        {question.type.replace('_', ' ')}
-                      </span>
-                    )
-                  }
+
                 />
               </ListItem>
             );

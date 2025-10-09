@@ -51,10 +51,14 @@ const useDefineQstnForQstnr = () => {
   // Handle selected question changes
   useEffect(() => {
     if (selectedQuestion) {
-      setQuestion(selectedQuestion.text || "");
+      // Only update question text if we're not in new question mode
+      // This prevents clearing the question when table config updates
+      if (!newQuestion) {
+        setQuestion(selectedQuestion.text || "");
+      }
       setOptions(selectedQuestion.choices?.map((choice) => choice.value) || []);
     }
-  }, [selectedQuestion, setOptions, setQuestion]);
+  }, [selectedQuestion, setOptions, setQuestion, newQuestion]);
   
   // Handle error message display
   useEffect(() => {

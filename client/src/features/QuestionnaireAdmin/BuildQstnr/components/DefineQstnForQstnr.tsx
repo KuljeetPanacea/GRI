@@ -175,9 +175,12 @@ const DefineQstnForQstnr = () => {
           >
             Configure Table Columns
           </Typography>
-          <UnifiedTableConfig 
-            updateTableConfig={updateTableConfig}
-          />
+          
+          <div className={styles.tableConfigContainer}>
+            <UnifiedTableConfig 
+              updateTableConfig={updateTableConfig}
+            />
+          </div>
           
           {selectedQuestion?.type === "table_type" && 
            selectedQuestion.tableConfig?.mode === "template" &&
@@ -196,33 +199,34 @@ const DefineQstnForQstnr = () => {
             </Box>
           )}
           
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "space-between",
-              marginTop: "10px",
-            }}
-          >
-            <Button
-              onClick={handleCancel}
-              className={styles.cancelButton}
+          <div className={styles.tableButtonContainer}>
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+              }}
             >
-              Cancel
-            </Button>
-            <Button
-              onClick={handleSaveOrUpdate}
-              className={styles.addSaveUpdateButton}
-              disabled={
-                !question.trim() || 
-                (selectedQuestion?.type === "table_type" && 
-                 selectedQuestion.tableConfig?.mode === "template" &&
-                 (!selectedQuestion.tableConfig?.rows?.length || 
-                  !selectedQuestion.tableConfig?.columns?.length))
-              }
-            >
-              {newQuestion ? "Save" : "Update"}
-            </Button>
+              <Button
+                onClick={handleCancel}
+                className={styles.cancelButton}
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={handleSaveOrUpdate}
+                className={styles.addSaveUpdateButton}
+                disabled={
+                  !question.trim() || 
+                  (selectedQuestion?.type === "table_type" && 
+                   selectedQuestion.tableConfig?.mode === "template" &&
+                   (!selectedQuestion.tableConfig?.rows?.length || 
+                    !selectedQuestion.tableConfig?.columns?.length))
+                }
+              >
+                {newQuestion ? "Save" : "Update"}
+              </Button>
+            </div>
           </div>
         </Card>
       )}
@@ -513,69 +517,74 @@ const UnifiedTableConfig = ({ updateTableConfig }: UnifiedTableConfigProps) => {
         </Box>
 
         {config.columns.map((column, index) => (
-        <Card key={column.id} sx={{ mb: 2, p: 2 }}>
-          <Box sx={{ display: 'flex', gap: 2, alignItems: 'center', mb: 2, flexWrap: 'wrap' }}>
-            <TextField
-              label="Column Label"
-              value={column.label}
-              onChange={(e) => updateColumn(index, 'label', e.target.value)}
-              size="small"
-              sx={{ flex: '1 1 200px', minWidth: 200 }}
-            />
-            <FormControl size="small" sx={{ minWidth: 120, flex: '0 0 120px' }}>
-              <InputLabel>Type</InputLabel>
-              <Select
-                value={column.type}
-                onChange={(e) => updateColumn(index, 'type', e.target.value)}
-                label="Type"
+        <Card key={column.id} className={styles.columnCard} sx={{ mb: 2, p: 2 }}>
+          <Box className={styles.columnCardContent}>
+            <Box className={styles.columnHeader}>
+              <TextField
+                value={column.label}
+                onChange={(e) => updateColumn(index, 'label', e.target.value)}
+                size="small"
+                label="Column Label"
+                placeholder="Enter column label"
+              />
+              <FormControl size="small">
+                <InputLabel>Type</InputLabel>
+                <Select
+                  value={column.type}
+                  onChange={(e) => updateColumn(index, 'type', e.target.value)}
+                  label="Type"
+                >
+                  <MenuItem value="text">Text</MenuItem>
+                  <MenuItem value="number">Number</MenuItem>
+                  <MenuItem value="date">Date</MenuItem>
+                  <MenuItem value="select">Select</MenuItem>
+                  <MenuItem value="checkbox">Checkbox</MenuItem>
+                </Select>
+              </FormControl>
+              <IconButton
+                onClick={() => removeColumn(index)}
+                color="error"
+                size="small"
+                sx={{ flex: '0 0 auto' }}
               >
-                <MenuItem value="text">Text</MenuItem>
-                <MenuItem value="number">Number</MenuItem>
-                <MenuItem value="date">Date</MenuItem>
-                <MenuItem value="select">Select</MenuItem>
-                <MenuItem value="checkbox">Checkbox</MenuItem>
-              </Select>
-            </FormControl>
-            <IconButton
-              onClick={() => removeColumn(index)}
-              color="error"
-              size="small"
-              sx={{ flex: '0 0 auto' }}
-            >
-              <Remove />
-            </IconButton>
-          </Box>
+                <Remove />
+              </IconButton>
+            </Box>
 
           {column.type === 'select' && (
-            <Box>
-              <Typography variant="subtitle2" sx={{ mb: 1 }}>
-                Options:
+            <Box className={styles.optionsContainer}>
+              <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 'bold' }}>
+                Select Options:
               </Typography>
-              {column.options?.map((option, optionIndex) => (
-                <Box key={optionIndex} sx={{ display: 'flex', gap: 1, mb: 1 }}>
-                  <TextField
-                    value={option}
-                    onChange={(e) => {
-                      const newOptions = [...(column.options || [])];
-                      newOptions[optionIndex] = e.target.value;
-                      updateColumn(index, 'options', newOptions);
-                    }}
-                    size="small"
-                    sx={{ flex: 1 }}
-                  />
-                  <IconButton
-                    onClick={() => removeOption(index, optionIndex)}
-                    color="error"
-                    size="small"
-                  >
-                    <Remove />
-                  </IconButton>
-                </Box>
-              ))}
+              <Box className={styles.optionsList}>
+                {column.options?.map((option, optionIndex) => (
+                  <Box key={optionIndex} sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
+                    <TextField
+                      value={option}
+                      onChange={(e) => {
+                        const newOptions = [...(column.options || [])];
+                        newOptions[optionIndex] = e.target.value;
+                        updateColumn(index, 'options', newOptions);
+                      }}
+                      size="small"
+                      placeholder={`Option ${optionIndex + 1}`}
+                      sx={{ flex: 1 }}
+                    />
+                    <IconButton
+                      onClick={() => removeOption(index, optionIndex)}
+                      color="error"
+                      size="small"
+                    >
+                      <Remove />
+                    </IconButton>
+                  </Box>
+                ))}
+              </Box>
               <Button
                 size="small"
                 startIcon={<Add />}
                 onClick={() => addOption(index, '')}
+                variant="outlined"
               >
                 Add Option
               </Button>
@@ -583,56 +592,57 @@ const UnifiedTableConfig = ({ updateTableConfig }: UnifiedTableConfigProps) => {
           )}
 
           {column.type === 'number' && (
-            <Box sx={{ display: 'flex', gap: 2, alignItems: 'center', mt: 1 }}>
-              <Typography variant="body2" color="text.secondary" sx={{ minWidth: 80 }}>
-                Validation:
+            <Box className={styles.validationContainer}>
+              <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 'bold' }}>
+                Number Validation:
               </Typography>
               <TextField
                 label="Min Value"
                 type="number"
                 value={column.validation?.min || ''}
-                     onChange={(e) => {
-                       const newColumns = [...config.columns];
-                       newColumns[index] = {
-                         ...newColumns[index],
-                         validation: {
-                           ...(newColumns[index].validation || {}),
-                           min: e.target.value ? Number(e.target.value) : undefined
-                         }
-                       };
-                       const newConfig = {
-                         ...config,
-                         columns: newColumns
-                       };
-                       updateConfigAndStore(newConfig);
-                     }}
+                onChange={(e) => {
+                  const newColumns = [...config.columns];
+                  newColumns[index] = {
+                    ...newColumns[index],
+                    validation: {
+                      ...(newColumns[index].validation || {}),
+                      min: e.target.value ? Number(e.target.value) : undefined
+                    }
+                  };
+                  const newConfig = {
+                    ...config,
+                    columns: newColumns
+                  };
+                  updateConfigAndStore(newConfig);
+                }}
                 size="small"
-                sx={{ width: 120 }}
+                placeholder="Min value"
               />
               <TextField
                 label="Max Value"
                 type="number"
                 value={column.validation?.max || ''}
-                     onChange={(e) => {
-                       const newColumns = [...config.columns];
-                       newColumns[index] = {
-                         ...newColumns[index],
-                         validation: {
-                           ...(newColumns[index].validation || {}),
-                           max: e.target.value ? Number(e.target.value) : undefined
-                         }
-                       };
-                       const newConfig = {
-                         ...config,
-                         columns: newColumns
-                       };
-                       updateConfigAndStore(newConfig);
-                     }}
+                onChange={(e) => {
+                  const newColumns = [...config.columns];
+                  newColumns[index] = {
+                    ...newColumns[index],
+                    validation: {
+                      ...(newColumns[index].validation || {}),
+                      max: e.target.value ? Number(e.target.value) : undefined
+                    }
+                  };
+                  const newConfig = {
+                    ...config,
+                    columns: newColumns
+                  };
+                  updateConfigAndStore(newConfig);
+                }}
                 size="small"
-                sx={{ width: 120 }}
+                placeholder="Max value"
               />
             </Box>
           )}
+          </Box>
         </Card>
       ))}
 

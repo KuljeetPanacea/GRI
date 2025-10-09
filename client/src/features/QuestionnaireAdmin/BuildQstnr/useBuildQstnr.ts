@@ -878,6 +878,7 @@ const addQuestionInList = async () => {
     if (selectedQuestion) {
       dispatch(updateQuestion({
         ...selectedQuestion,
+        text: question || selectedQuestion.text, // Preserve current question text
         tableConfig: cleanedConfig
       }));
     } else {

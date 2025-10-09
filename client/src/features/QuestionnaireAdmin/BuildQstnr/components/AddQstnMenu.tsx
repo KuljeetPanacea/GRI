@@ -18,6 +18,7 @@ const AddQstnMenu = () => {
       <Button
         className={styles.AddQstnMenuaddButton}
         variant="contained"
+        fullWidth
         startIcon={<AddIcon />}
         onClick={handleMenuOpen}
       >
@@ -29,6 +30,19 @@ const AddQstnMenu = () => {
         anchorEl={anchorEl}
         open={Boolean(anchorEl)}
         onClose={handleMenuClose}
+        PaperProps={{
+          sx: {
+            '& .MuiMenuItem-root': {
+              display: 'flex',
+              alignItems: 'center',
+              gap: 1.5, // uniform spacing between icon and text
+            },
+          },
+          style: {
+            width: anchorEl ? anchorEl.offsetWidth : undefined,
+            
+          },
+        }}
       >
         <MenuItem onClick={() => addMenuValue("multiple_choice")}>
           <CheckBoxIcon className={styles.AddQstnMenumenuIcon} />
