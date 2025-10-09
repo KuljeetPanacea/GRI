@@ -1,7 +1,13 @@
 import { AxiosInstance } from "axios";
 import { NewProject } from "../redux/createNewProjectSlice";
 import { device } from "../redux/projectManagementSlice";
-import { EvidenceType } from "../features/AuditProjectFlow/phases/Assessment/components/useEvidenceUpload";
+
+export interface EvidenceType {
+  fileName: string;
+  fileType: string;
+  folderName: string;
+  s3Path: string;
+}
 
 export interface cdeDocument {
   fileName: string;

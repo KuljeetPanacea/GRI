@@ -64,6 +64,9 @@ export class QuestionnaireDao extends TenantDAO<Questionnaire, QuestionnaireDto>
         formBranchingLogic: q?.formBranchingLogic || null,
         evidenceReference: q?.evidenceReference || undefined,
         testingProcedure: q?.testingProcedure || undefined,
+        // Unified table properties
+        tableConfig: q?.tableConfig || undefined,
+        tableData: q?.tableData || undefined,
       }));
     }
   
@@ -127,6 +130,9 @@ export class QuestionnaireDao extends TenantDAO<Questionnaire, QuestionnaireDto>
           formBranchingLogic: q.formBranchingLogic ?? null,
           evidenceReference: q.evidenceReference ?? undefined,
           testingProcedure: q.testingProcedure ?? undefined,
+          // Unified table properties
+          tableConfig: q.tableConfig ?? undefined,
+          tableData: q.tableData ?? undefined,
         }));
     } else {
       modelObj.questions = [];

@@ -17,6 +17,7 @@
 
 .headerContent {
   display: flex;
+  gap: 16px;
   align-items: center;
   margin-bottom: 16px;
 }
@@ -185,7 +186,7 @@
 
 .actionsContainer {
   display: flex;
-  gap: 16px;
+  gap: 20px;
   align-items: center;
 }
 
@@ -237,7 +238,7 @@
   
   .headerContent {
     flex-direction: column;
-    align-items: flex-start;
+    /* align-items: flex-start; */
   }
   
   .backButton {

@@ -8,48 +8,27 @@ import {
   RadioGroup,
   TextField,
 } from "@mui/material";
+import TableInput from "./TableInput";
 import styles from "../BuildQstnr.module.css";
 import PrimaryButton from "../../../../common/ui/PrimaryButton";
-import {  useEffect, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { AppDispatch, RootState } from "../../../../redux/store";
-import axios, { AxiosError } from "axios";
-import useAxios from "../../../../api/useAxios";
-import { fetchQstnrQuestionsThunk } from "../../../../redux/qstnrQuestion";
-import { evaluateQstnrQuestionThunk } from "../../../../redux/defineQstnrSlice";
-import { Question } from "../../../../redux/qstnrQuestion";
+import useQstnPreview from "../hooks/useQstnPreview";
 
 const QstnPreview = () => {
-  const dispatch = useDispatch<AppDispatch>();
-  const questionList = useSelector(
-    (state: RootState) => state.qstnrQuestion.questions
-  );
-  const qstnrId = useSelector(
-    (state: RootState) => state.defineQstnr.qstnr?.questionnaireId
-  );
-  console.log("questionList", qstnrId);
-  const axiosInstance = useAxios();
-
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const [currentQuestion, setCurrentQuestion] = useState<Question | null>(null);
-  const [selectedValue, setSelectedValue] = useState("");
-  const [selectedValues, setSelectedValues] = useState<string[]>([]);
-  const [textValue, setTextValue] = useState("");
-
-  useEffect(() => {
-    if (qstnrId) {
-      dispatch(fetchQstnrQuestionsThunk({ qstnrId: qstnrId as string, axiosInstance }));
-    }
-  }, [qstnrId, dispatch, axiosInstance]);
-  
-  // Update currentQuestion when questionList changes
-  useEffect(() => {
-    console.log("Fetched questionList in preview:", questionList);
-    if (questionList && questionList.length > 0 && !currentQuestion) {
-      setCurrentQuestion(questionList[0]);
-      setCurrentIndex(0);
-    }
-  }, [questionList]); // Remove currentQuestion dependency to avoid infinite loop
+  const {
+    currentIndex,
+    currentQuestion,
+    selectedValue,
+    selectedValues,
+    textValue,
+    questionList,
+    handleSingleChoiceChange,
+    handleMultipleChoiceChange,
+    handleNext,
+    handlePrevious,
+    handleTableDataChange,
+    handleFileChange,
+    handleTextChange,
+  } = useQstnPreview();
 
   // Show loading state if no current question
   if (!currentQuestion) {
@@ -64,97 +43,24 @@ const QstnPreview = () => {
     );
   }
 
-  const handleSingleChoiceChange = (
-    event: React.ChangeEvent<HTMLInputElement>
-  ) => {
-    setSelectedValue(event.target.value);
-  };
-
-  const handleMultipleChoiceChange = (
-    event: React.ChangeEvent<HTMLInputElement>
-  ) => {
-    const value = event.target.value;
-    setSelectedValues((prev) =>
-      prev.includes(value) ? prev.filter((v) => v !== value) : [...prev, value]
-    );
-  };
-
-  const handleNext = async () => {
-    if (!currentQuestion) return;
-  
-    let selectedResponse: string | string[] = "";
-  
-    if (currentQuestion.type === "single_choice") {
-      selectedResponse = selectedValue;
-    } else if (currentQuestion.type === "multiple_choice") {
-      selectedResponse = selectedValues;
-    } else if (
-      currentQuestion.type === "short_text" ||
-      currentQuestion.type === "long_text"
-    ) {
-      selectedResponse = textValue;
-    }
-  
-    try {
-      const questionId = currentQuestion._id as string;
-      const payload = {
-        questionnaireId: qstnrId as string,
-        currentQuestionId: currentQuestion._id,
-        responses: { [questionId]: selectedResponse }
-      };
-  
-      const data = await dispatch(
-        evaluateQstnrQuestionThunk({
-          payload,
-          axiosInstance,
-        })
-      );
-  
-      let nextQuestion = null;
-      if (data.payload?.data) {
-        nextQuestion = data.payload.data;
-      }
-      if (!nextQuestion && currentQuestion.alwaysGoTo) {
-        nextQuestion = questionList.find((q) => q._id === currentQuestion.alwaysGoTo);
-      }
-  
-      if (nextQuestion) {
-        setCurrentQuestion(nextQuestion as Question);
-  
-        const newIndex = questionList.findIndex(
-          (q) => q._id === nextQuestion._id
-        );
-        setCurrentIndex(newIndex !== -1 ? newIndex : currentIndex + 1);
-  
-        setSelectedValue("");
-        setSelectedValues([]);
-        setTextValue("");
-      } else {
-        console.warn("No next question found.");
-      }
-    } catch (error: unknown) {
-      console.error("Error submitting response:", error);
-      if (axios.isAxiosError(error)) {
-        const axiosError = error as AxiosError;
-        console.error("Error response data:", axiosError.response?.data);
-      }
-    }
-  };
-
-const handlePrevious = () => {
-  console.log("Previous clicked, currentIndex:", currentIndex);
-  console.log("questionList", questionList);
-  if (currentIndex > 0) {
-    const newIndex = currentIndex - 1;
-    const newQuestion = questionList[newIndex];
-    setCurrentIndex(newIndex);
-    setCurrentQuestion(newQuestion);
-  }
-};
-
   return (
     <div className={styles.previewContainer}>
-      <Card className={styles.previewCard} key={currentQuestion._id}>
+      <Card 
+        className={
+          currentQuestion.type === "table_type"
+            ? styles.tablePreviewCard 
+            : styles.previewCard
+        } 
+        key={currentQuestion._id}
+        sx={{
+          ...(currentQuestion.type === "table_type" && {
+            minWidth: '600px',
+            width: '100%',
+            maxWidth: 'none',
+            padding: '20px'
+          })
+        }}
+      >
         <Typography variant="h4" sx={{ mb: 2 }}>
           {currentQuestion.text}
         </Typography>
@@ -191,13 +97,15 @@ const handlePrevious = () => {
         ) : currentQuestion.type === "file_type" ? (
           <input
             type="file"
-            onChange={(e) => {
-              const file = e.target.files ? e.target.files[0] : null;
-              if (file) {
-                console.log("Selected file:", file);
-              }
-            }}
+            onChange={handleFileChange}
             style={{ marginTop: "10px", marginBottom: "10px" }}
+          />
+        ) : currentQuestion.type === "table_type" ? (
+          <TableInput
+            config={currentQuestion.tableConfig || { mode: 'dynamic', columns: [] }}
+            data={currentQuestion.tableData || []}
+            onDataChange={handleTableDataChange}
+            readOnly={false}
           />
         ) : currentQuestion.type === "short_text" ||
           currentQuestion.type === "long_text" ? (
@@ -208,7 +116,7 @@ const handlePrevious = () => {
             variant="outlined"
             sx={{ mb: 2 }}
             value={textValue}
-            onChange={(e) => setTextValue(e.target.value)}
+            onChange={handleTextChange}
           />
         ) : null}
 

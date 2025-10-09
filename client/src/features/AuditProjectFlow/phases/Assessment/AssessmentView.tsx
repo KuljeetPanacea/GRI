@@ -1,6 +1,5 @@
 import { AppBar, Button, Box, Typography } from "@mui/material";
-
-import AssessmentQuestionList from "./components/AssessmentQuestionList";
+import QuestionList from "./components/QuestionList";
 import {  useDispatch } from "react-redux";
 
 import useAssessmentQuestionnaire from "./hooks/useAssessmentQuestionnaire";
@@ -66,7 +65,7 @@ const AssessmentView = () => {
           </Box>
         </Box>
       ) : (
-        <AssessmentQuestionList
+        <QuestionList
           questionnaires={questionnaires}
           isLoading={isLoading}
           error={error}

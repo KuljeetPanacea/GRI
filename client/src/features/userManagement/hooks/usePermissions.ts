@@ -8,9 +8,9 @@ export const usePermissions = () => {
   const canEditUser = (targetUser: User) => {
     if (!currentUser) return false;
     const isSameAdmin = currentUser.id === targetUser.id;
-    const isAdmin = currentUser.roles.includes("Admin");
+    const isAdmin = currentUser.roles.includes("ProjectManager");
     const isSuperAdmin = currentUser.roles.includes("SuperAdmin");
-    if (targetUser.roles.includes("Admin")) {
+    if (targetUser.roles.includes("ProjectManager")) {
       return isSuperAdmin || (isAdmin && isSameAdmin);
     }
     return true;
@@ -20,7 +20,7 @@ export const usePermissions = () => {
     if (!currentUser) return false;
     const isSuperAdmin = currentUser.roles.includes("SuperAdmin");
 
-    if (targetUser.roles.includes("Admin")) {
+    if (targetUser.roles.includes("ProjectManager")) {
       return isSuperAdmin ;
     }
     return true;

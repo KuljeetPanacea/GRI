@@ -199,6 +199,25 @@ async allAssesmentStakeholders(id: string) {
     const updatedQuestions: QuestionDto[] = questionnaire.questions.map(
       (question) => {
         if (question._id === questionId) {
+          // Handle table_type questions specially
+          if (question.type === "table_type") {
+            try {
+              const tableData = Array.isArray(choiceValue) ? JSON.parse(choiceValue[0]) : JSON.parse(choiceValue);
+              return {
+                ...question,
+                userResponse: JSON.stringify(tableData),
+                tableData: tableData
+              };
+            } catch (error) {
+              console.error('Error parsing table data:', error);
+              return {
+                ...question,
+                userResponse: question.userResponse,
+              };
+            }
+          }
+
+          // Handle other question types
           let response: string;
 
           if (Array.isArray(choiceValue)) {
@@ -337,7 +356,7 @@ async allAssesmentStakeholders(id: string) {
       assessment = (await this.AssessmentTaskDAO.findById(assesmentId))
         .questionnaire;
       questionnaire = assessment;
-    } else if (roles.includes("AEPoC")) {
+    } else if (roles.includes("ClientPoC")) {
       assessment = (await this.projectService.getProjectById(projectId))
         .scopingQSTRNRData;
       questionnaire = assessment.find((q) => q.id === questionnaireId);

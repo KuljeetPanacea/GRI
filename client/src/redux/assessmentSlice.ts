@@ -1,9 +1,26 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { RootState } from "./store";
-import { Control } from "../features/AuditProjectFlow/phases/Assessment/useAssessmentView";
-import { RocControlFindingDTO } from "../api/rocData";
-import { AssessmentQuestion } from "../features/AuditProjectFlow/phases/Assessment/useExpandPanel";
-import { EvidenceType } from "../features/AuditProjectFlow/phases/Assessment/components/useEvidenceUpload";
+// Define local interfaces to replace deleted imports
+interface Control {
+  id: string;
+  name: string;
+  title: string;
+  description?: string;
+}
+
+interface AssessmentQuestion {
+  id: string;
+  text: string;
+  type: string;
+  required?: boolean;
+}
+
+interface EvidenceType {
+  fileName: string;
+  fileType: string;
+  folderName: string;
+  s3Path: string;
+}
 
 interface Comment {
   Date: string;
@@ -53,7 +70,7 @@ interface AssessmentState {
   isExpandablePanelExpanded: boolean;
   selectedExpandableButton: string;
   assessmentId:string;
-  ControlFinding: RocControlFindingDTO;
+  ControlFinding: Control[];
   ControlQuestions: AssessmentQuestion[];
   selectedDeviceKey: string;
   evidences: EvidenceType[];
@@ -87,20 +104,7 @@ const initialState: AssessmentState = {
   isExpandablePanelExpanded: false,
   selectedExpandableButton: "Details",
   assessmentId: "",
-  ControlFinding:{
-    projectId: "",
-    assessmentId: "",
-    controlNo: "",
-    controlAssessmentFinding: "In Place",
-    detailed_finding: "",
-    evidences: [],
-    compensatingControl: false,
-    customizedApproach: false,
-    modeOfAssessment: {
-      mode: "Remote",
-      compensation: ""
-    }
-  },
+  ControlFinding:[],
   ControlQuestions:[],
   selectedDeviceKey: "",
   evidences:[],
@@ -180,9 +184,7 @@ const assessmentSlice = createSlice({
     setSelectedAssesmentId: (state, action: PayloadAction<string>) => {
       state.assessmentId = action.payload;
     },
-    setSelectedControlFinding: (state, action: PayloadAction<RocControlFindingDTO>) => {
-      state.ControlFinding = action.payload;
-    },
+   
     setSelectedControlQuestions: (state, action: PayloadAction<AssessmentQuestion[]>) => {
       state.ControlQuestions = action.payload;
     },
@@ -198,22 +200,7 @@ const assessmentSlice = createSlice({
     setSelectedNewEvidences: (state, action: PayloadAction<EvidenceType[]>) => {
       state.newEvidences = action.payload;
     },
-    resetControlFinding: (state) => {
-      state.ControlFinding = {
-        projectId: "",
-        assessmentId: "",
-        controlNo: "",
-        controlAssessmentFinding: "In Place",
-        detailed_finding: "",
-        evidences: [],
-        compensatingControl: false,
-        customizedApproach: false,
-        modeOfAssessment: {
-          mode: "Remote",
-          compensation: ""
-        }
-      };
-    },
+   
     setTableLoading: (state, action: PayloadAction<boolean>) => {
       state.tableLoading = action.payload;
     },
@@ -269,13 +256,11 @@ export const {
   toggleExpandablePanel,
   setSelectedExpandableButton,
   setSelectedAssesmentId,
-  setSelectedControlFinding,
   setSelectedControlQuestions,
   setSelectedDeviceKey,
   setSelectedEvidences,
   setSelectedOldEvidences,
   setSelectedNewEvidences,
-  resetControlFinding,
   setTableLoading,
   clearAllSubReqs,
   setSelectedSubReq,
@@ -300,7 +285,6 @@ export const selectSidebarOpen = (state: RootState) => state.assessment.sidebarO
 export const selectDrawerOpen = (state: RootState) => state.assessment.drawerOpen;
 export const selectPhaseType = (state: RootState) => state.assessment.phaseType;
 export const selectAssessmentId = (state: RootState) => state.assessment.assessmentId;
-export const selectControlFinding = (state: RootState) => state.assessment.ControlFinding;
 export const SelectedControlQuestions = (state: RootState) => state.assessment.ControlQuestions;
 export const selectedDeviceKey = (state: RootState) => state.assessment.selectedDeviceKey;
 export const selectedEvidences = (state: RootState) => state.assessment.evidences;

@@ -8,6 +8,7 @@ export enum QuestionType {
   LONG_TEXT = 'long_text',
   SINGLE_CHOICE = 'single_choice',
   FILE_TYPE = 'file_type',
+  TABLE_TYPE = 'table_type',
 }
 
 @Schema({ _id: false })
@@ -73,6 +74,50 @@ export class Question {
     clientComment?: string;
     status?: string;
   };
+
+  // Unified table properties
+  @Prop({ 
+    type: {
+      mode: { type: String, enum: ['dynamic', 'template'], default: 'dynamic' },
+      rows: [{
+        id: { type: String, required: true },
+        label: { type: String, required: true }
+      }],
+      columns: [{
+        id: { type: String, required: true },
+        label: { type: String, required: true },
+        type: { type: String, enum: ['text', 'number', 'date', 'select', 'checkbox'], required: true },
+        options: { type: [String], default: [] },
+        validation: {
+          min: { type: Number },
+          max: { type: Number },
+          pattern: { type: String }
+        }
+      }]
+    },
+    required: false 
+  })
+  tableConfig?: {
+    mode: 'dynamic' | 'template';
+    rows?: Array<{
+      id: string;
+      label: string;
+    }>;
+    columns: Array<{
+      id: string;
+      label: string;
+      type: 'text' | 'number' | 'date' | 'select' | 'checkbox';
+      options?: string[];
+      validation?: {
+        min?: number;
+        max?: number;
+        pattern?: string;
+      };
+    }>;
+  };
+
+  @Prop({ type: [Object], default: [] })
+  tableData?: Record<string, any>[];
 
 }
 

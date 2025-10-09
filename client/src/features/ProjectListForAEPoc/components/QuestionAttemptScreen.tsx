@@ -17,15 +17,15 @@ import {
   IconButton,
   Select,
   MenuItem,
-  InputLabel,
   Chip,
   Paper,
   Divider,
   Grid,
 } from '@mui/material';
-import { ArrowBack, ArrowForward, Save, CheckCircle, QuestionMark } from '@mui/icons-material';
+import { ArrowBack, Save, CheckCircle, QuestionMark } from '@mui/icons-material';
 import PrimaryButton from '../../../common/ui/PrimaryButton';
 import useQuestionAttempt from '../useQuestionAttempt';
+import TableInput from '../../../features/QuestionnaireAdmin/BuildQstnr/components/TableInput';
 import styles from './QuestionAttemptScreen.module.css';
 
 interface QuestionAttemptScreenProps {
@@ -79,8 +79,8 @@ const QuestionAttemptScreen: React.FC<QuestionAttemptScreenProps> = ({
   };
 
   const renderQuestionInput = useMemo(() => {
-    return (question: {_id: string; text: string; type: string; choices?: Array<{value: string}>; userResponse?: string | string[]}) => {
-      if (!question) return null;
+    return (question: {_id?: string; text: string; type: string; choices?: Array<{value: string}>; userResponse?: string | string[]; tableConfig?: {mode: 'dynamic' | 'template'; rows?: Array<{id: string; label: string}>; columns: Array<{id: string; label: string; type: 'text' | 'number' | 'date' | 'select' | 'checkbox'; options?: string[]; validation?: {min?: number; max?: number; pattern?: string;}}>; defaultRows?: number}; tableData?: Record<string, string | number | boolean>[]}) => {
+      if (!question || !question._id) return null;
 
       const currentResponse = localResponses[question._id] || '';
 
@@ -92,7 +92,7 @@ const QuestionAttemptScreen: React.FC<QuestionAttemptScreenProps> = ({
               multiline
               rows={4}
               value={currentResponse as string}
-              onChange={(e) => handleLocalResponseChange(question._id, e.target.value)}
+              onChange={(e) => question._id && handleLocalResponseChange(question._id, e.target.value)}
               placeholder="Enter your response..."
               variant="outlined"
             />
@@ -103,7 +103,11 @@ const QuestionAttemptScreen: React.FC<QuestionAttemptScreenProps> = ({
             <FormControl component="fieldset">
               <RadioGroup
                 value={currentResponse as string}
-                onChange={(e) => handleLocalResponseChange(question._id, e.target.value)}
+                onChange={(e) => {
+                  if (question._id) {
+                    handleLocalResponseChange(question._id, e.target.value);
+                  }
+                }}
               >
                 {question.choices?.map((choice: {value: string}, index: number) => (
                   <FormControlLabel
@@ -132,7 +136,9 @@ const QuestionAttemptScreen: React.FC<QuestionAttemptScreenProps> = ({
                           const newValues = e.target.checked
                             ? [...currentValues, choice.value]
                             : currentValues.filter(v => v !== choice.value);
-                          handleLocalResponseChange(question._id, newValues);
+                          if (question._id) {
+                            handleLocalResponseChange(question._id, newValues);
+                          }
                         }}
                       />
                     }
@@ -143,12 +149,60 @@ const QuestionAttemptScreen: React.FC<QuestionAttemptScreenProps> = ({
             </FormControl>
           );
 
+        case 'table_type': {
+          // Parse table data if it's a JSON string
+          let tableData = currentResponse as Record<string, string | number | boolean>[] || [];
+          
+          // Handle different response formats
+          if (typeof currentResponse === 'string') {
+            if (currentResponse.startsWith('[')) {
+              // JSON array format
+              try {
+                tableData = JSON.parse(currentResponse);
+              } catch (e) {
+                console.error('Error parsing table data:', e);
+                tableData = [];
+              }
+            } else if (currentResponse.trim() === '') {
+              // Empty response
+              tableData = [];
+            }
+          } else if (Array.isArray(currentResponse)) {
+            // Already an array - ensure it's the right type
+            tableData = currentResponse as Record<string, string | number | boolean>[];
+          }
+
+          // Use tableConfig if available, otherwise fallback to empty config
+          const config = question.tableConfig || {
+            mode: 'dynamic' as const,
+            columns: [],
+            defaultRows: 3
+          };
+
+         
+          
+          return (
+            <Box sx={{ width: '100%', overflowX: 'auto' }}>
+              <TableInput
+                config={config}
+                data={tableData}
+                onDataChange={(newData) => {
+                  if (question._id) {
+                    handleLocalResponseChange(question._id, newData);
+                  }
+                }}
+                readOnly={false}
+              />
+            </Box>
+          );
+        }
+
         default:
           return (
             <TextField
               fullWidth
               value={currentResponse as string}
-              onChange={(e) => handleLocalResponseChange(question._id, e.target.value)}
+              onChange={(e) => question._id && handleLocalResponseChange(question._id, e.target.value)}
               placeholder="Enter your response..."
               variant="outlined"
             />
@@ -203,6 +257,7 @@ const QuestionAttemptScreen: React.FC<QuestionAttemptScreenProps> = ({
             <Typography variant="h4" className={styles.titleText}>
               Assessment Questions
             </Typography>
+          </Box>
             <Box className={styles.chipContainer}>
               <Chip 
                 icon={<QuestionMark />}
@@ -222,16 +277,11 @@ const QuestionAttemptScreen: React.FC<QuestionAttemptScreenProps> = ({
                 variant="filled"
               />
             </Box>
-          </Box>
-        </Box>
-
         {/* Questions Per Page Dropdown */}
         <Box className={styles.controlsContainer}>
           <FormControl size="small" className={styles.selectControl}>
-            <InputLabel>Questions per page</InputLabel>
             <Select
               value={questionsPerPage}
-              label="Questions per page"
               onChange={(e) => handleQuestionsPerPageChange(Number(e.target.value))}
               className={styles.selectInput}
             >
@@ -252,6 +302,8 @@ const QuestionAttemptScreen: React.FC<QuestionAttemptScreenProps> = ({
             />
           )}
         </Box>
+        </Box>
+
 
         {/* Progress Bar */}
         <LinearProgress
@@ -334,7 +386,6 @@ const QuestionAttemptScreen: React.FC<QuestionAttemptScreenProps> = ({
             </Button>
 
             <PrimaryButton
-              endIcon={<ArrowForward />}
               onClick={handleNext}
             >
               {isLastPage ? 'Complete Assessment' : 'Next Page'}

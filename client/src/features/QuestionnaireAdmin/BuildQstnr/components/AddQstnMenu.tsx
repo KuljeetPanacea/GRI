@@ -4,6 +4,7 @@ import CheckBoxIcon from "@mui/icons-material/CheckBox";
 import RadioButtonCheckedIcon from "@mui/icons-material/RadioButtonChecked";
 import AttachFileIcon from "@mui/icons-material/AttachFile";
 import TextFieldsIcon from "@mui/icons-material/TextFields";
+import TableChartIcon from "@mui/icons-material/TableChart";
 import AddIcon from "@mui/icons-material/Add";
 import useBuildQstnr from "../useBuildQstnr";
 import styles from "../BuildQstnr.module.css";
@@ -17,6 +18,7 @@ const AddQstnMenu = () => {
       <Button
         className={styles.AddQstnMenuaddButton}
         variant="contained"
+        fullWidth
         startIcon={<AddIcon />}
         onClick={handleMenuOpen}
       >
@@ -28,6 +30,19 @@ const AddQstnMenu = () => {
         anchorEl={anchorEl}
         open={Boolean(anchorEl)}
         onClose={handleMenuClose}
+        PaperProps={{
+          sx: {
+            '& .MuiMenuItem-root': {
+              display: 'flex',
+              alignItems: 'center',
+              gap: 1.5, // uniform spacing between icon and text
+            },
+          },
+          style: {
+            width: anchorEl ? anchorEl.offsetWidth : undefined,
+            
+          },
+        }}
       >
         <MenuItem onClick={() => addMenuValue("multiple_choice")}>
           <CheckBoxIcon className={styles.AddQstnMenumenuIcon} />
@@ -48,6 +63,10 @@ const AddQstnMenu = () => {
         <MenuItem onClick={() => addMenuValue("file_type")}>
           <AttachFileIcon className={styles.AddQstnMenumenuIcon} />
           File Upload
+        </MenuItem>
+        <MenuItem onClick={() => addMenuValue("table_type")}>
+          <TableChartIcon className={styles.AddQstnMenumenuIcon} />
+          Table
         </MenuItem>
       </Menu>
     </div>

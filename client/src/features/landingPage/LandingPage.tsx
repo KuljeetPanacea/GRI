@@ -13,20 +13,9 @@ import PLQSA from "../ProjectListForQSA/PLQSA";
 import AuditProject from "../AuditProjectFlow/AuditProject";
 import ProjectManagement from "../projectManagement/ProjectManagement";
 import CreateNewProject from "../projectManagement/components/CreateNewProject";
-import DigitalAvatar from "../digitalAvatar/digitalAvatar";
-import AEInternalAssessorsList from "../AuditProjectFlow/components/AEInternalAssessorsList";
 import ProjectListForAEPoc from "../ProjectListForAEPoc/ProjectListForAEPoc";
 import AEPocQstnr from "../ProjectListForAEPoc/components/AEPocQstnr";
-import ProjectListForAssessor from "../ProjectLIstForAssessor/ProjectListForAssessor";
-import AssessorQstnr from "../ProjectLIstForAssessor/components/AssessorQstnr";
 import GapManagementComponent from "../AuditProjectFlow/phases/GapAndRemediation/components/GapManagementComponent";
-import AssessmentView from "../AuditProjectFlow/phases/Assessment/AssessmentView";
-import PendingEvidences from "../ProjectLIstForAssessor/components/PendingEvidences";
-import EvidencesGallery from "../ProjectLIstForAssessor/components/EvidencesGallery";
-import AssessorGaps from "../ProjectLIstForAssessor/components/AssessorGaps";
-import AsssessorRevise from "../ProjectLIstForAssessor/components/AsssessorRevise";
-import EvidenceResolutionContainer from "../ProjectLIstForAssessor/components/EvidenceResolutionContainer";
-import AssessmentEvidenceTracker from "../AuditProjectFlow/phases/Assessment/components/AssessmentEvidenceTracker";
 import DashboardRoute from "./DashboardRoute";
 import QuestionAttemptWrapper from "../ProjectListForAEPoc/components/QuestionAttemptWrapper";
 
@@ -47,25 +36,13 @@ const LandingPage: React.FC = () => {
               <Route path='/clients' element={<ClientManagement />} />
               <Route path='/projects' element={<PLQSA />} />
               <Route path='/ProjectView/*' element={<AuditProject />} />
-              <Route path='/aelist' element={<AEInternalAssessorsList />} />
               <Route path="/project-management" element={<ProjectManagement/>}/>
               <Route path="/dashboard" element={<DashboardRoute/>}/>
               <Route path="/createNewProject" element={<CreateNewProject/>} />
-              <Route path="/digital-avatar" element={<DigitalAvatar/>} />
               <Route path="/question-attempt" element={<QuestionAttemptWrapper />} />
               <Route path="/project-aepoc" element={<ProjectListForAEPoc/>} />
               <Route path= "/aepoc-qstnr" element={<AEPocQstnr/>} />
-              <Route path= "/assessor-qstnr" element={<AssessorQstnr/>} />
-              <Route path= "/assessor-gaps" element={<AssessorGaps/>} />
-              <Route path="/project-assessor" element={<ProjectListForAssessor />} />
               <Route path="/gap-remediation" element={<GapManagementComponent />} />
-              
-              <Route path="/assessment" element={<AssessmentView />} />
-              <Route path="/pending-evidences-assessor" element={<PendingEvidences />} />
-              <Route path="/evidence-gallery" element={<EvidencesGallery />} />
-              <Route path="/AsssessorRevise" element={<AsssessorRevise />} />
-              <Route path="/Asssessor-log-Revise" element={<EvidenceResolutionContainer />} />
-              <Route path="/AssessmentEvidencetracker" element={<AssessmentEvidenceTracker />} />
           </Routes>
         </div>
       </div>

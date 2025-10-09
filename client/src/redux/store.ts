@@ -25,10 +25,8 @@ import projectmodalReducer from "./DeleteProjectModalSlice";
 import projectManagementReducer from "./projectManagementSlice";
 import assessmentReducer from "./assessmentSlice";
 import createNewProjectReducer from "./createNewProjectSlice";
-import digitalAvatarReducer from "./DigitalAvatarSlice";
 import gapRemedaitionReducer from "./GapsRemediationSlice";
 import { TypedUseSelectorHook, useDispatch, useSelector } from "react-redux";
-import complianceReportReducer from "./complianceReportSlice";
 import rocReducer from "./rocSlice";
 import forbiddenReducer from './forbiddenSlice';
 import storage from "redux-persist/lib/storage";
@@ -62,7 +60,6 @@ const rootReducer = combineReducers({
   projectView: projectViewReducer,
   phase: phaseReducer,
   scoping: scopingReducer,
-  complianceReport : complianceReportReducer,
   scopeDocument: scopeDocumentReducer,
   view: viewReducer,
   pl: plReducer,
@@ -70,7 +67,6 @@ const rootReducer = combineReducers({
   projectDeleteModal: projectmodalReducer,
   projectManagement: projectManagementReducer,
   createNewProject: createNewProjectReducer,
-  digitalAvatar: digitalAvatarReducer,
   gapsRemediation: gapRemedaitionReducer,
   roc: rocReducer,
   forbidden: forbiddenReducer

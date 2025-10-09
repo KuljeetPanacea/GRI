@@ -4,7 +4,6 @@ import { NavLink } from "react-router-dom";
 import ProgressStepper from "./CreateNewProjectForm/ProgressStepper";
 import ProjectDetails from "./CreateNewProjectForm/ProjectDetails";
 import ClientDetails from "./CreateNewProjectForm/ClientDetails";
-import AssessedEntityDetails from "./CreateNewProjectForm/AssessedEntityDetails";
 import AuditTeamDetails from "./CreateNewProjectForm/AuditTeamDetails";
 import ScopingQuestionnaire from "./CreateNewProjectForm/ScopingQuestionnaire";
 import PrimaryButton from "../../../common/ui/PrimaryButton";
@@ -24,13 +23,9 @@ import { RootState, useAppSelector } from "../../../redux/store";
 const sections = [
   { id: 0, title: "1. Project Description", component: ProjectDetails },
   { id: 1, title: "2. Client Details", component: ClientDetails },
-  {
-    id: 2,
-    title: "3. Assessed Entity Details",
-    component: AssessedEntityDetails,
-  },
-  { id: 3, title: "4. Audit Team Details", component: AuditTeamDetails },
-  { id: 4, title: "5. Scoping Questionnaire", component: ScopingQuestionnaire },
+
+  { id: 2, title: "3. Audit Team Details", component: AuditTeamDetails },
+  { id: 3, title: "4. Scoping Questionnaire", component: ScopingQuestionnaire },
 ];
 
 const CreateNewProject: React.FC = () => {

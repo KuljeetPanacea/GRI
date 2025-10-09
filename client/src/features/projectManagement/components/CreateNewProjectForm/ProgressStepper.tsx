@@ -12,7 +12,6 @@ import { useAppDispatch } from '../../../../redux/store';
 const steps = [
   'Project description',
   'Client details',
-  'Assessed entity details',
   'Audit team details',
   'Scoping questionnaire'
 ];

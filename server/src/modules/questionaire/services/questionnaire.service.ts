@@ -144,6 +144,11 @@ export class QuestionnaireService extends BaseService {
       const index = updatedQuestions.findIndex(q => q._id === incoming._id);
       let formBranchingLogic: BranchingLogic[] = [];
 
+      // Validate table configuration for table_type questions
+      if (incoming.type === 'table_type') {
+        this.validateTableConfiguration(incoming);
+      }
+
 if (Array.isArray(incoming.branchingLogic)) {
   for (const group of incoming.branchingLogic) {
     const builder = new LogicBuilder(group.next ?? null);
@@ -178,6 +183,14 @@ if (Array.isArray(incoming.branchingLogic)) {
           formBranchingLogic,
           evidenceReference: incoming.evidenceReference ?? updatedQuestions[index].evidenceReference,
           testingProcedure: incoming.testingProcedure ?? updatedQuestions[index].testingProcedure,
+          // Preserve table properties for table_type questions
+          ...(incoming.type === 'table_type' && {
+            tableConfig: incoming.tableConfig || updatedQuestions[index].tableConfig || {
+              mode: 'dynamic',
+              columns: []
+            },
+            tableData: incoming.tableData || updatedQuestions[index].tableData || []
+          }),
         };
       } else {
         updatedQuestions.push({
@@ -204,6 +217,14 @@ if (Array.isArray(incoming.branchingLogic)) {
           formBranchingLogic,
           evidenceReference: incoming.evidenceReference ?? undefined,
           testingProcedure: incoming.testingProcedure ?? undefined,
+          // Include table properties for table_type questions
+          ...(incoming.type === 'table_type' && {
+            tableConfig: incoming.tableConfig || {
+              mode: 'dynamic',
+              columns: []
+            },
+            tableData: incoming.tableData || []
+          }),
         });
       }
     }
@@ -320,5 +341,58 @@ if (Array.isArray(incoming.branchingLogic)) {
     });
   }
 
+  private validateTableConfiguration(question: Partial<QuestionDto>): void {
+    if (question.type !== 'table_type') return;
 
+    // Validate table configuration
+    if (!question.tableConfig) {
+      throw new BadRequestException('Table type questions must have table configuration');
+    }
+
+    // Validate table columns
+    if (!question.tableConfig.columns || question.tableConfig.columns.length === 0) {
+      throw new BadRequestException('Table type questions must have at least one column');
+    }
+
+    // Validate each column
+    for (const column of question.tableConfig.columns) {
+      if (!column.id || !column.label || !column.type) {
+        throw new BadRequestException('Table columns must have id, label, and type');
+      }
+
+      // Validate column type
+      const validTypes = ['text', 'number', 'date', 'select', 'checkbox'];
+      if (!validTypes.includes(column.type)) {
+        throw new BadRequestException(`Invalid column type: ${column.type}. Must be one of: ${validTypes.join(', ')}`);
+      }
+
+      // Validate select/checkbox columns have options
+      if ((column.type === 'select' || column.type === 'checkbox') && (!column.options || column.options.length === 0)) {
+        throw new BadRequestException(`${column.type} columns must have options`);
+      }
+
+      // Validate number column constraints
+      if (column.type === 'number' && column.validation) {
+        if (column.validation.min !== undefined && column.validation.max !== undefined) {
+          if (column.validation.min > column.validation.max) {
+            throw new BadRequestException('Minimum value cannot be greater than maximum value');
+          }
+        }
+      }
+    }
+
+    // Validate table configuration
+    if (question.tableConfig !== undefined) {
+      // Validate columns
+      if (question.tableConfig.columns && question.tableConfig.columns.length === 0) {
+        throw new BadRequestException('Table must have at least one column');
+      }
+      
+      // Validate rows for template mode
+      if (question.tableConfig.mode === 'template' && 
+          (!question.tableConfig.rows || question.tableConfig.rows.length === 0)) {
+        throw new BadRequestException('Template table must have at least one predefined row');
+      }
+    }
+  }
 }

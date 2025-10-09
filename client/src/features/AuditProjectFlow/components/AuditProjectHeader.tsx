@@ -1,11 +1,9 @@
 import React, { useEffect } from "react";
 import usePVHeader from "../hooks/useAuditProjectHeader";
 import styles from "../styles/PV360.module.css";
-import PrimaryButton from "../../../common/ui/PrimaryButton";
 import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import AuditProjectPhases from "./AuditProjectPhases";
-import AddNewAEInternalAssesssors from "./AddNewAEInternalAssesssors";
 import FeedbackSnackbar from "../../../common/ui/FeedbackSnackbar";
 import store, { AppDispatch, RootState } from "../../../redux/store";
 import {
@@ -37,14 +35,11 @@ const AuditProjectHeader: React.FC = () => {
     project,
     isDetailsVisible,
     toggleDetails,
-    showAEInternalAssesssorsModal,
-    closeAEInternalAssesssorsModal,
     snackbar,
     handleSnackbarClose,
     AEListView,
     AssessmentEvidencetracker,
     navigate,
-    handlePublish
   } = usePVHeader();
   const { isGapremediation } = useSelector(
     (state: RootState) => state.gapsRemediation
@@ -112,9 +107,7 @@ const AuditProjectHeader: React.FC = () => {
           </div>
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-          {selectedPhase === "complianceReport" && (
-            <PrimaryButton children={"Publish"} onClick={handlePublish} />
-          )}
+         
           <FormControl variant="outlined" sx={{ minWidth: 100 }}>
             <Select
               value={selectedPhase}
@@ -186,12 +179,7 @@ const AuditProjectHeader: React.FC = () => {
       
         </div>
 
-        {showAEInternalAssesssorsModal && (
-          <AddNewAEInternalAssesssors
-            open={showAEInternalAssesssorsModal}
-            onClose={closeAEInternalAssesssorsModal}
-          />
-        )}
+        
       </div>
       {store.getState().projectView.isDetailsOpen && <AuditProjectPhases />}
 

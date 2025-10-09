@@ -7,7 +7,7 @@ import {
   getProjects,
 } from "../api/project";
 import { User } from "./userManagementSlice";
-import { NextQuestion } from "./DigitalAvatarSlice";
+import { Question } from "./qstnrQuestion";
 
 export interface auditEntity {
   pocEmail?: string;
@@ -56,13 +56,18 @@ export interface scopingQSTRNR {
   updateDtTime?: string;
   complianceType?: string;
   status?: string;
-  questions?: NextQuestion[];
+  questions?: Question[];
   createdByName?: string;
   phase?:string; // Added phase field
   currentQuestionTracker?: string;
   hasAllUserResponses?: boolean;
   isCompletedAllQuestions?: boolean;
-  gaps?: string;
+  gaps?: 
+    {
+      gaps?: string;
+      clientComment?: string;
+      status?: string;
+    };
 }
 
 interface taskEvidence {
@@ -149,7 +154,7 @@ interface ProjectFilter {
   draftStatus?: "" | "started" | "inprogress";
   ScopeDocument?: object; 
   selectedTask?: device; 
-  readOnlyViewQuestion?: NextQuestion[]
+  readOnlyViewQuestion?: Question[]
 
 
 }
@@ -308,7 +313,7 @@ const projectManagementSlice = createSlice({
       state.selectedTask = action.payload;
     },
     
-   setReadOnlyViewQuestion: (state, action: PayloadAction<NextQuestion[]>) => {
+   setReadOnlyViewQuestion: (state, action: PayloadAction<Question[]>) => {
         state.readOnlyViewQuestion = action.payload;
       },
     clearSelectedQSTNR: (state) => {
@@ -515,7 +520,7 @@ export const selectFilteredProjects = (state: {
       projectStage === "All" || project.currentAuditStage === projectStage;
     const matchesQsa =
       qsa === "All" ||
-      project.assignedTo?.find((entity) => entity.role === "QSA")?.id === qsa;
+      project.assignedTo?.find((entity) => entity.role === "Auditor")?.id === qsa;
     
     // Filter by compliance type
     const matchesComplianceType = complianceType

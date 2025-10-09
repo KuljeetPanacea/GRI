@@ -1,11 +1,11 @@
 export enum UserRole {
     SuperAdmin = "SuperAdmin",
-    AEPOC= "AEPoC",
+    ClientPOC= "ClientPoC",
     TENANT_ADMIN = "TENANT_ADMIN",
     PRODUCT_ADMIN = "PRODUCT_ADMIN",
     AEStakeholder = "AEStakeholder",
-    Admin = "Admin",
-    QSA = "QSA"
+    ProjectManager = "ProjectManager",
+    Auditor = "Auditor"
   }
 
   export enum UserStatus {

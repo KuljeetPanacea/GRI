@@ -27,6 +27,7 @@ import {
   BranchingLogic,
   FormBranchingLogic,
   Question,
+  TableConfig,
 } from "../../../redux/qstnrQuestion";
 import store, { AppDispatch, RootState } from "../../../redux/store";
 import useAxios from "../../../api/useAxios";
@@ -95,27 +96,10 @@ const useBuildQstnr = () => {
       if (!qstnrId) return;
       // dispatch(clearQuestions());
       dispatch(fetchQstnrQuestionsThunk({ qstnrId, axiosInstance }));
-      const updatedArray = questionList
-        .filter((obj: Question) => obj.isDeleted === false)
-        .map((obj: Question, index: number) => ({
-          ...obj,
-          isSaved: true,
-          id: index,
-        }));
-      const uniqueQuestions = new Map();
-      updatedArray.forEach((obj: Question) => {
-        if (obj._id && !uniqueQuestions.has(obj._id)) {
-          uniqueQuestions.set(obj._id, obj);
-        }
-      });
-      const uniqueQuestionsArray = Array.from(uniqueQuestions.values());
-      uniqueQuestionsArray.forEach((question) => {
-        dispatch(addQuestion(question));
-      });
     } catch (error) {
       console.error("Error fetching questionnaire:", error);
     }
-  }, [qstnrId, dispatch]);
+  }, [qstnrId, dispatch, axiosInstance]);
   useEffect(() => {
     if (qstnrId) {
       getQuestions();
@@ -269,6 +253,38 @@ const useBuildQstnr = () => {
     dispatch(questionTypeValue(questionType));
     dispatch(setNewQuestion(true));
     dispatch(setDisableReq(true));
+    
+      // For table_type questions, initialize with empty table configuration
+      if (questionType === 'table_type') {
+        const tempQuestion: Question = {
+          _id: `temp_${Date.now()}`,
+          questionnaireId: qstnrId || '',
+          type: 'table_type',
+          text: '',
+        tableConfig: cleanTableConfig({
+          mode: 'dynamic',
+          columns: []
+        }),
+          tableData: [],
+          requirements: null,
+          subRequirements: null,
+          subControl: null,
+          isEditing: false,
+          isDeleted: false,
+          alwaysGoTo: null,
+          setting: {},
+          choices: [],
+          branchingLogic: [],
+          formBranchingLogic: [],
+          evidenceReference: undefined,
+          testingProcedure: undefined,
+          userResponse: '',
+          gaps: undefined
+        };
+        dispatch(addQuestion(tempQuestion));
+        dispatch(selectQuestion(tempQuestion._id || null));
+      }
+    
     setAnchorEl(null);
   };
 
@@ -314,6 +330,28 @@ const validatePCIDSSMapping = () => {
   return true;
 };
 
+// Clean table configuration to remove unwanted _id fields
+const cleanTableConfig = (config: TableConfig): TableConfig => {
+  if (!config) return config;
+  
+  return {
+    ...config,
+    rows: config.rows?.map(row => ({
+      id: row.id,
+      label: row.label
+      // Remove any _id fields
+    })),
+    columns: config.columns?.map(column => ({
+      id: column.id,
+      label: column.label,
+      type: column.type,
+      options: column.options || [],
+      validation: column.validation
+      // Remove any _id fields
+    }))
+  };
+};
+
 const validateAndAddQuestion = async () => {
   if (question && qstnrId && questionType) {
     const newQuestion = {
@@ -334,6 +372,13 @@ const validateAndAddQuestion = async () => {
       ...(questionType === "file_type" && { 
         evidenceReference: store.getState().qstnrQuestion.selectedEvidenceReference,
         testingProcedure: store.getState().qstnrQuestion.selectedTestingProcedure 
+      }),
+      ...(questionType === "table_type" && { 
+        tableConfig: cleanTableConfig(store.getState().qstnrQuestion.selectedQuestion?.tableConfig || {
+          mode: 'dynamic',
+          columns: []
+        }),
+        tableData: store.getState().qstnrQuestion.selectedQuestion?.tableData || []
       }),
     };
     
@@ -795,6 +840,14 @@ const addQuestionInList = async () => {
           Date.now().toString() + index,
         value: option,
       })),
+      // Preserve table configuration for table_type questions
+      ...(selectedQuestion.type === "table_type" && {
+        tableConfig: cleanTableConfig(selectedQuestion.tableConfig || {
+          mode: 'dynamic',
+          columns: []
+        }),
+        tableData: selectedQuestion.tableData || []
+      }),
     };
 
     dispatch(updateQuestion(newQuestion));
@@ -813,6 +866,41 @@ const addQuestionInList = async () => {
       );
     } catch (error) {
       console.error("Error while updating question:", error);
+    }
+  };
+
+  // Unified table configuration function
+  const updateTableConfig = (config: TableConfig) => {
+    console.log('Updating table config:', config);
+    const cleanedConfig = cleanTableConfig(config);
+    console.log('Cleaned table config:', cleanedConfig);
+    
+    if (selectedQuestion) {
+      dispatch(updateQuestion({
+        ...selectedQuestion,
+        text: question || selectedQuestion.text, // Preserve current question text
+        tableConfig: cleanedConfig
+      }));
+    } else {
+      // If no selected question, create a temporary one for table configuration
+      const tempQuestion = {
+        _id: `temp_${Date.now()}`,
+        questionnaireId: qstnrId || '',
+        type: 'table_type',
+        text: question || '',
+        tableConfig: cleanedConfig,
+        tableData: []
+      };
+      dispatch(updateQuestion(tempQuestion));
+    }
+  };
+
+  const updateTableData = (data: Record<string, string | number | boolean>[]) => {
+    if (selectedQuestion) {
+      dispatch(updateQuestion({
+        ...selectedQuestion,
+        tableData: data
+      }));
     }
   };
 
@@ -871,6 +959,8 @@ const addQuestionInList = async () => {
     updateQuestionInList,
     editingRuleIndex,
     setEditingRuleIndex,
+    updateTableConfig,
+    updateTableData,
   };
 };
 

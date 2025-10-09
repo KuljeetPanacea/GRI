@@ -40,9 +40,11 @@ const useAEPoc = () => {
     return qstnr.questions?.some(question => {
       if (!question.gaps) return false;
       
-      // Handle different types of gaps
-      if (typeof question.gaps === 'string') {
-        return question.gaps.trim() !== '';
+      // Handle gaps object structure
+      if (question.gaps && typeof question.gaps === 'object' && 'gaps' in question.gaps) {
+        return question.gaps.gaps ? question.gaps.gaps.trim() !== '' : false;
+      } else if (typeof question.gaps === 'string') {
+        return (question.gaps as string).trim() !== '';
       } else if (Array.isArray(question.gaps)) {
         return (question.gaps as unknown[]).length > 0;
       } else {
@@ -88,9 +90,11 @@ const useAEPoc = () => {
     const questionsWithGaps = qstnr.questions?.filter(question => {
       if (!question.gaps) return false;
       
-      // Handle different types of gaps
-      if (typeof question.gaps === 'string') {
-        return question.gaps.trim() !== '';
+      // Handle gaps object structure
+      if (question.gaps && typeof question.gaps === 'object' && 'gaps' in question.gaps) {
+        return question.gaps.gaps ? question.gaps.gaps.trim() !== '' : false;
+      } else if (typeof question.gaps === 'string') {
+        return (question.gaps as string).trim() !== '';
       } else if (Array.isArray(question.gaps)) {
         return (question.gaps as unknown[]).length > 0;
       } else {

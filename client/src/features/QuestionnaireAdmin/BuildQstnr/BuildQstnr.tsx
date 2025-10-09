@@ -2,7 +2,6 @@ import QstnrHeader from "./components/QstnrHeader";
 import styles from "./BuildQstnr.module.css"; // Import external CSS
 import AddQstnMenu from "./components/AddQstnMenu";
 import QstnrNoOfQstnList from "./components/QstnrQstnList";
-import QuestionSettings from "./components/QuestionSettings";
 import { useLocation } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { addQstnrId } from "../../../redux/defineQstnrSlice";
@@ -29,7 +28,6 @@ const BuildQstnr = () => {
       <div className={styles.buildQstnrContent}>
         <QstnrHeader />
       </div>
-      <QuestionSettings />
     </div>
   );
 };

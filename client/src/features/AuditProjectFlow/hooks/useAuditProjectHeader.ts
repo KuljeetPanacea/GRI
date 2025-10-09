@@ -4,9 +4,6 @@ import { useDispatch } from "react-redux";
 import { closeSnackbar, showSnackbar } from "../../../redux/phaseSlice";
 import { useNavigate } from "react-router-dom";
 import { setIsDetailsOpen } from "../../../redux/projectViewSlice";
-import { downloadRoc } from "../../../api/rocData";
-import useAxios from "../../../api/useAxios";
-
 // You can still define the type here for convenience
 type SnackbarSeverity = "success" | "error" | "info" | "warning";
 
@@ -54,31 +51,7 @@ const usePVHeader = () => {
       console.log("Snackbar message:", message);
     };
 
-    const axios = useAxios();
-
-    const handlePublish = async () => {
-    try {
-      if (project && typeof project._id === "string" && project._id) {
-        const response = await downloadRoc(axios, project._id);
-
-        // If it's a file, handle download
-        const blob = new Blob([response.data]);
-        const url = window.URL.createObjectURL(blob);
-        const link = document.createElement("a");
-        link.href = url;
-        link.setAttribute("download", `roc-${project.projectName}.docx`); 
-        document.body.appendChild(link);
-        link.click();
-        link.remove();
-        window.URL.revokeObjectURL(url);
-      } else {
-        showSnackbarMessage("Project ID is missing or invalid.", "error");
-      }
-    } catch (error) {
-      console.error("Failed to download ROC:", error);
-      showSnackbarMessage("Failed to download ROC.", "error");
-    }
-  };
+ 
 
   return {
     project,
@@ -94,7 +67,6 @@ const usePVHeader = () => {
     AEListView,
     AssessmentEvidencetracker,
     navigate,
-    handlePublish
   };
 };
 

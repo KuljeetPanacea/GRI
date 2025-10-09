@@ -86,6 +86,32 @@ export class QuestionDto {
     clientComment?: string;
     status?: string;
   };
+
+  // Unified table properties
+  @IsOptional()
+  @IsObject()
+  tableConfig?: {
+    mode: 'dynamic' | 'template';
+    rows?: Array<{
+      id: string;
+      label: string;
+    }>;
+    columns: Array<{
+      id: string;
+      label: string;
+      type: 'text' | 'number' | 'date' | 'select' | 'checkbox';
+      options?: string[];
+      validation?: {
+        min?: number;
+        max?: number;
+        pattern?: string;
+      };
+    }>;
+  };
+
+  @IsOptional()
+  @IsArray()
+  tableData?: Record<string, any>[];
 }
 
 export class QuestionnaireDto extends BaseDTO {
